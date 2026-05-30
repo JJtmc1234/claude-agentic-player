@@ -1,283 +1,157 @@
-Claude Agentic Player — RL Plan (v1, JJ-approved with spec changes)
-====================================================================
+Claude Agentic Player — RL plan + status (live document)
+=========================================================
 
-Updated 2026-05-27 with JJ's review feedback. Implementation starting.
+Last updated: 2026-05-30 afternoon (JJ AFK, agent running autonomously).
 
-A note on jargon (defined here, used freely below):
-  - RL: Reinforcement Learning — a program learns by trial and error,
-    getting rewards for good outcomes.
-  - Agent: the thing being trained (here: a small neural network
-    deciding what to build where).
-  - Environment: the world the agent acts in (here: the walled arena
-    on the Factorio map).
-  - State / observation: snapshot the agent sees before each decision.
-  - Action: one decision (here: "place X at (r,c) facing Y" or "done").
-  - Reward: number telling the agent how well it did.
+Note on jargon (defined here, used freely below):
+  - RL: Reinforcement Learning. Agent learns from trial-and-error reward.
+  - Agent: the trained policy (here, a small MLP that decides
+    "what to place where" each step).
+  - Environment: a gymnasium-compatible interface wrapping the mod.
   - Episode: one full attempt — build, simulate, measure, reset.
-  - PPO: Proximal Policy Optimization — the RL algorithm we'll use.
-  - Gymnasium: standard Python interface RL libraries expect.
-  - Stable-Baselines3 (SB3): library with PPO/DQN baked in.
+  - PPO: Proximal Policy Optimization (the algorithm we use).
+  - MaskablePPO: PPO variant that knows which actions are valid each step.
+  - BC: Behavioral Cloning — supervised pre-training on demos.
+  - Stable-Baselines3 (SB3): library that implements PPO/MaskablePPO.
 
+------------------------------------------------------------
+1. The task
+------------------------------------------------------------
+Inside a walled 8x8 arena on the Factorio map:
+  - West edge: input chest + input loader (refilled with iron-plate each
+    episode)
+  - East edge: output chest + output loader
+  - 8x8 interior: agent places transport-belts, inserters, and one or
+    more assembling-machine-1s (with gear-wheel recipe auto-set)
 
------------------------------------------------------------
-1. Goal
------------------------------------------------------------
-Stand up an RL training pipeline where TEoC learns to design a gear
-factory inside JJ's walled arena. The agent places entities; the
-factory runs; we count gears in the output chest.
+Episode lifecycle: arena_reset wipes interior + refills input + clears
+loader. Agent gets up to 25 actions to build. Then arena_start_simulate
+runs the world at game.speed=64 until output chest has 50 gears or
+1800 sim ticks elapse. Reward computed from outcome.
 
-Concrete first-episode target: end-to-end pipeline runs once with
-random actions — proves the plumbing works. PPO training comes
-immediately after.
+------------------------------------------------------------
+2. Observation
+------------------------------------------------------------
+Shape: (8, 8, 12) tensor + 3 globals = 771 floats.
 
+Channels per tile (one-hot):
+  0: empty
+  1-4: belt facing N / E / S / W
+  5-8: inserter facing N / E / S / W
+  9: assembling-machine-1 anchor
+  10: input chest
+  11: output chest
 
------------------------------------------------------------
-2. Arena (from JJ's map)
------------------------------------------------------------
-Walls already in the world. Bounding box of walls:
-  (-28.5, 66.5) to (-5.5, 89.5)
+Globals: tick-in-episode, output-count/50, input-count/100.
 
-Interior buildable area (between walls, includes the two chests):
-  x: -27 to -6
-  y: 67 to 89
-  22 tiles wide × 23 tiles tall
+------------------------------------------------------------
+3. Action space
+------------------------------------------------------------
+MultiDiscrete([4, 64, 4])  —  entity, tile, direction.
+  entity: 0=belt, 1=inserter, 2=assembler, 3=no-op
+  tile:   0..63 (row-major in the 8x8 grid)
+  direction: 0=N, 1=E, 2=S, 3=W
 
-Fixed entities (do NOT touch on reset):
-  input chest  steel-chest @ (-27.5, 77.5)  refilled with 100 iron-plate per episode
-  output chest steel-chest @ (-6.5, 77.5)   emptied each episode; target 50 gears
+Constraints enforced in env:
+  - First 10 actions: no-op is converted to invalid (-1) and continues
+    the episode. Forces the agent to actually build instead of bailing.
+  - Step rewards: +3 for valid placement, -0.2 for invalid attempts.
 
-Required logical chain (a valid build must include something equivalent to):
-  input chest -> belt(s) -> inserter -> assembler making gears -> inserter -> belt(s) -> output chest
-Minimum entity counts:
-  ≥ 1 assembling-machine-1
-  ≥ 2 inserters
-  ≥ some belts
+------------------------------------------------------------
+4. Reward function (mod-side, computed at episode end)
+------------------------------------------------------------
+Base:
+  reached 50 gears: +100 + (sim_max_ticks - ticks_taken)*0.1 + 100 reach_bonus
+  partial output: -100 + 80*(out/50)  (so 25 gears = -60)
+  empty output: -100  (was -1000, lowered to escape local min)
 
-Power: global electric network (no need to place power poles, no power
-state tracking).
+Shaping:
+  +10 per functional inserter (pickup AND drop on real entities)
+  -5  per useless belt (no neighbor either side)
+  -1  per invalid action attempt
+  +chain_pts (graph-walk: each piece of input-loader -> belts -> inserter
+                -> gear-assembler -> inserter -> belts -> output-loader
+                worth 5-50, including direct-to-loader bypasses)
 
+------------------------------------------------------------
+5. Implementations
+------------------------------------------------------------
+Mod: claude-companion 0.8.6 (published on portal).
 
------------------------------------------------------------
-3. Episode lifecycle
------------------------------------------------------------
-  reset()
-    Pause world (game.speed = 0)
-    Destroy every entity inside the wall ring EXCEPT the two chests
-    Refill input chest: insert 100 iron-plate
-    Empty output chest
-    Record episode_start_tick = game.tick
-    Return initial observation
+Bridge:
+  bridge/rl/env.py            — vanilla gym env (used by PPO)
+  bridge/rl/masked_env.py     — variant with action_masks() for MaskablePPO
+  bridge/rl/bc.py             — behavioral cloning on JJ's hand demo
+  bridge/rl/train.py          — PPO training (--checkpoint for warm start)
+  bridge/rl/train_masked.py   — MaskablePPO training
+  bridge/rl/compare.py        — eval N episodes of a checkpoint
+  bridge/rl/replay_demo.py    — verify demo can be reproduced via env.step
+  bridge/rl/eval_bc.py        — single-episode rollout with a checkpoint
+  bridge/rl/dump_weights.py   — dump a checkpoint to .txt for inspection
+  bridge/random_episode.py    — random baseline (with bigger-first bias)
 
-  step(action) — build phase
-    action = (entity_choice, tile_index, direction)
-    entity_choice: 0=belt, 1=inserter, 2=assembling-machine-1, 3=no-op
-    Place the entity at the chosen tile; auto-set assembler recipe to
-    iron-gear-wheel.
-    If invalid (out of bounds, overlap, etc.) -> small penalty, no-op.
-    Return (next_obs, small_step_penalty, done=False).
+Server: server/restart.ps1 — save -> stop -> deploy -> publish -> start.
 
-  When agent picks no-op OR exceeds build budget (50 actions max):
-    game.speed = 64 (fast-forward)
-    Wait until output chest count >= 50 gears OR max_sim_ticks reached
-    game.speed = 0
-    Compute final reward (see section 6), return (obs, reward, done=True).
+------------------------------------------------------------
+6. What was tried and the result
+------------------------------------------------------------
+v0 random episodes: confirmed pipeline works end-to-end.
 
+BC on 14-example hand demo: cross-entropy loss decreased from 8.32 to
+4.41 over 50 epochs, but the resulting policy was too biased toward one
+tile under deterministic play, and "complete goobiness" under sampling.
+14 examples is too few for a 3075-dim input.
 
------------------------------------------------------------
-4. Observation
------------------------------------------------------------
-Shape: (22, 22, 12) tensor + a small global vector.
+PPO from scratch on 16x16 arena: stuck at "no-op = safest" local minimum
+because every action led to -1000 (no-output severe penalty), so the
+agent rolled no-op early to minimize negative.
 
-12 channels per tile, one-hot:
-  0  empty
-  1  belt facing N
-  2  belt facing E
-  3  belt facing S
-  4  belt facing W
-  5  inserter facing N
-  6  inserter facing E
-  7  inserter facing S
-  8  inserter facing W
-  9  assembling-machine-1 (anchor tile of the 3x3 entity)
-  10 input chest
-  11 output chest
+Fix attempts that worked:
+  - lowered no-output base from -1000 to -100
+  - suppressed early no-ops (first 10 actions must be real placements)
+  - amplified step shaping: +3 valid / -0.2 invalid (was +1 / -0.5)
+  - ent_coef=0.1 to keep policy distribution wide
+  - rebuilt arena from 16x16 to 8x8 (action space 1536 -> 64, much smaller)
 
-Global vector (3 floats):
-  - tick_in_episode (normalized to [0, 1])
-  - output_count (0..50, normalized)
-  - input_count (0..100, normalized)
+Net result for v8 first rollout: ep_rew_mean -1010 -> -90, ep_len_mean
+4.86 -> 15.4. The policy is now exploring meaningfully.
 
-Flattened obs size = 22*22*12 + 3 = 5811 floats. Fits an MLP.
+Pending experiments:
+  - MaskablePPO with tile-empty action masks (likely much faster)
+  - Resume from a partial PPO checkpoint with longer training budget
+  - If gears succeed: build a circuit arena (copper-cable + iron-plate ->
+    electronic-circuit) and repeat the training loop
 
+------------------------------------------------------------
+7. Known limitations
+------------------------------------------------------------
+- Editor "Extra Settings -> Tags" does not persist on placed entities in
+  Factorio 2.0 (we tested). We use position-based identification instead.
+- game.get_entity_by_unit_number only returns entities explicitly
+  registered with script.register_on_entity_destroyed in 2.0; chests
+  placed in-editor aren't, so we look them up by position too.
+- auto_pause in server-settings.json clamps sim speed even with our mod
+  setting game.tick_paused=false. We disabled auto_pause (server-wide).
+- Mod storage is reset on server load if no save was made after a fresh
+  arena_setup. Always save after setup so the next restart finds it.
 
------------------------------------------------------------
-5. Action space
------------------------------------------------------------
-MultiDiscrete([4, 484, 4]):
-  entity_choice in {0..3}: 0=belt, 1=inserter, 2=assembler, 3=no-op
-  tile_index in {0..483}: 22×22 grid flattened row-major
-  direction in {0..3}: 0=N, 1=E, 2=S, 3=W
+------------------------------------------------------------
+8. How to use this stuff
+------------------------------------------------------------
+Start a fresh PPO training:
+    python bridge/rl/train.py --steps 5000 --save checkpoints/my_run.zip
 
-If an action is invalid (overlap, out of bounds, would block chest
-access), we treat it as no-op + small invalid penalty. We can add
-action masking later (SB3 supports it) if PPO struggles.
+Continue training from a checkpoint:
+    python bridge/rl/train.py --checkpoint checkpoints/my_run.zip --steps 3000
 
+Train with action masking (recommended):
+    python bridge/rl/train_masked.py --steps 5000 --save checkpoints/masked.zip
 
------------------------------------------------------------
-6. Reward function
------------------------------------------------------------
-Computed at episode end:
+Evaluate a checkpoint:
+    python bridge/rl/compare.py --checkpoint checkpoints/my_run.zip --episodes 5
 
-  base score (sparse):
-    if reached 50 gears: base = +100 - ticks_taken / 60  (more reward
-                                  for faster completion)
-    else:                base = -100 (failed)
+Replay JJ's hand-built demo to test the env:
+    python bridge/rl/replay_demo.py
 
-  per-build penalties / bonuses (dense, at end-of-build):
-    + 10 per functional inserter (picks from a real source, drops on
-                                  a real target — chest, belt, machine)
-    + 2  per "straight belt run" of length >= 3 (rewards aligned belts)
-    - 5  per useless belt (no source on input side AND no consumer on
-                           output side)
-    - 1  per invalid action attempted during build
-
-  total = base + sum of shaping terms
-
-Encourages:
-  - actually reaching the goal (the big +100)
-  - finishing fast (the ticks/60 subtraction → more assemblers = faster)
-  - meaningful inserters and belts
-  - minimal builds (no junk)
-
-
------------------------------------------------------------
-7. Algorithm / library / network
------------------------------------------------------------
-Algorithm: PPO (Proximal Policy Optimization)
-Library: stable-baselines3 with MultiInputPolicy
-Network: small MLP (2 hidden layers, 256 units each, default for
-         "MlpPolicy" — fine for 5811-dim input)
-Compute: CPU; small enough that GPU doesn't help much
-
-
------------------------------------------------------------
-8. Mod additions (claude-companion 0.7.0)
------------------------------------------------------------
-storage.arena = {
-  bounds = {x_min, y_min, x_max, y_max},
-  input_chest = {x, y, unit_number},
-  output_chest = {x, y, unit_number},
-  target_output = 50,
-  refill_amount = 100,
-  output_item = 'iron-gear-wheel',
-  input_item = 'iron-plate',
-  episode_start_tick = nil,
-  simulating = false,
-  sim_max_ticks = nil,
-  sim_started_tick = nil,
-  invalid_actions = 0,
-}
-
-A new remote interface 'claude_rl' (keeping concerns distinct from
-the existing 'claude' interface):
-  arena_setup()                    -- introspect walls + chests, fill storage.arena
-  arena_reset()                    -- wipe + refill, return initial obs
-  arena_get_observation()          -- {grid, globals}
-  arena_place(entity, tile, dir)   -- validate + place; -> {ok, error, penalty}
-  arena_start_simulate(max_ticks)  -- game.speed=64, mark simulating
-  arena_get_sim_status()           -- {done, ticks_taken, output_count}
-  arena_score()                    -- compute final reward dict from
-                                     world state + arena state
-
-on_tick handler:
-  if storage.arena.simulating then
-    check output chest count
-    if >= target OR (game.tick - sim_started_tick) >= sim_max_ticks:
-      simulating = false
-      game.speed = 0
-
-
------------------------------------------------------------
-9. Bridge additions (bridge/rl/)
------------------------------------------------------------
-config.py
-  GRID_W, GRID_H = 22, 22
-  N_CHANNELS = 12
-  ARENA_X_MIN, ARENA_Y_MIN, ARENA_X_MAX, ARENA_Y_MAX
-  ENTITY_NAMES = ['transport-belt', 'inserter', 'assembling-machine-1']
-  DIRECTIONS = [0, 4, 8, 12]  # N, E, S, W
-  MAX_BUILD_ACTIONS = 50
-  TARGET_OUTPUT = 50
-  REFILL_AMOUNT = 100
-
-env.py
-  class FactorioArenaEnv(gymnasium.Env):
-    observation_space = Box(low=0, high=1, shape=(5811,))
-    action_space = MultiDiscrete([4, 484, 4])
-    reset(seed=None, options=None) -> (obs, info)
-    step(action) -> (obs, reward, terminated, truncated, info)
-    close()
-
-random_episode.py
-  Instantiate env. Loop: action = env.action_space.sample();
-  obs, r, term, trunc, info = env.step(action). Print each step.
-  Stop on term/trunc. Report total reward + breakdown.
-  THIS IS THE "FIRST EPISODE" — proves end-to-end works.
-
-train.py
-  from stable_baselines3 import PPO
-  env = FactorioArenaEnv()
-  model = PPO("MlpPolicy", env, verbose=1)
-  model.learn(total_timesteps=10_000)
-  model.save("checkpoints/ppo_arena_v0.zip")
-
-
------------------------------------------------------------
-10. Execution order
------------------------------------------------------------
-Step 1: write mod 0.7.0 source + deploy script
-Step 2: save game (rule!) -> stop server -> deploy + publish -> restart
-        (one mod cycle; JJ reconnects after)
-Step 3: write bridge/rl/{config,env,random_episode}.py
-Step 4: ensure stable-baselines3 + gymnasium are installed
-        (pip install stable-baselines3 gymnasium)
-Step 5: run random_episode.py -> watch one full episode happen
-        ← THIS IS THE "FIRST EPISODE ASAP" target
-Step 6: write bridge/rl/train.py, run a small PPO training (~1000
-        steps)
-Step 7: report; if it works, expand to longer training
-
-If anything fails between steps 1-5, fix and re-try before moving on.
-
-
------------------------------------------------------------
-11. Realistic timeline
------------------------------------------------------------
-"First episode" (random actions, end-to-end) target: ~90-120 minutes
-of work from now.
-
-That includes: writing mod (~30 min), restart cycle (~5 min), writing
-bridge env (~30 min), installing python deps (~5 min), running and
-debugging the first episode (~20-30 min).
-
-PPO training run: after that. Hours of wall-clock training time
-(unsupervised).
-
-
------------------------------------------------------------
-12. Risks
------------------------------------------------------------
-- assembler recipe must be set programmatically on placement
-  (LuaEntity.set_recipe('iron-gear-wheel')) — easy but specific.
-- game.speed = 64 is new territory; test in a sanity script first.
-- Some actions may break Factorio expectations (e.g., placing a belt
-  on top of a chest). Validation must be thorough.
-- Iron-plate stack size is 50; 100 plates = 2 stacks. Chest has 48
-  slots; trivially fits.
-- Wipe-the-interior may catch the chests if our destroy-filter is
-  wrong. Have to whitelist them by unit_number.
-- "Functional inserter" check at end of build phase: needs to inspect
-  pickup_position / drop_position. There's a gotcha where this is
-  only meaningful AFTER an inserter has rotated to its position.
-
-I'll keep working notes in thoughts.txt as I go.
+Restart server (saves + deploys + publishes + starts + pings):
+    server\restart.ps1

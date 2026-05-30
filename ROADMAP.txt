@@ -11,6 +11,21 @@ Phase 0 — Dedicated server (current focus)
 - Get RCON working and confirm I can issue server commands remotely.
 - Confirm I can connect to it from my normal Factorio client and play.
 
+Phase RL — Reinforcement Learning pipeline  [IN PROGRESS 2026-05-30]
+------------------------------------------------------------------
+- claude-companion mod 0.8.6: walled arena (8x8), input/output loaders +
+  chests + valve corner markers, episode reset/observe/place/simulate/score,
+  graph-walk chain reward, severe penalty for empty output.
+- bridge/rl/: gymnasium env (env.py + masked_env.py), behavioral cloning
+  on a hand-built demo (bc.py), PPO training (train.py), MaskablePPO
+  fallback (train_masked.py), eval / compare / dump-weights tools.
+- Status: vanilla PPO escaping the "no-op safest" local minimum after
+  enabling no-op suppression for first 10 actions + amplified per-step
+  shaping (+3 valid / -0.2 invalid) + ent_coef=0.1. ep_rew_mean went
+  from -1010 to -90 in the first rollout under the new config.
+- See PLAN_RL.txt + thoughts.txt for detailed notes.
+
+
 Phase 1 — Read-only perception  [DONE 2026-05-23]
 ------------------------------
 - [done] Bridge process: Python, talks to server via RCON. See bridge/.
