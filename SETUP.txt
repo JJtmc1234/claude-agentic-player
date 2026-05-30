@@ -1,0 +1,111 @@
+Claude Agentic Player — Setup
+==============================
+
+This file tells you how to get the bridge talking to the Factorio server.
+
+------------------------------------------------------------------
+Step 1 — Enable RCON on the dedicated server
+------------------------------------------------------------------
+
+RCON (Remote Console) is the channel the bridge uses to send commands
+into the running server. The server needs to be told to listen for RCON
+connections; by default it doesn't.
+
+1. Stop the running Factorio server.
+   - The server window will autosave on its own according to the
+     autosave_interval in server-settings.json, but to be safe you can
+     also run /server-save from inside the game (as admin) before stopping.
+   - Then close the server window (or Ctrl+C in its console).
+
+2. Open C:\FactorioServer\start-server.bat in a text editor.
+   The current contents look like:
+
+       @echo off
+       set "FACTORIO=C:\Program Files (x86)\Steam\steamapps\common\Factorio\bin\x64\factorio.exe"
+
+       "%FACTORIO%" ^
+         --start-server "C:\FactorioServer\saves\server.zip" ^
+         --server-settings "C:\FactorioServer\server-settings.json" ^
+         --port 34197
+
+       pause
+
+   Add two extra lines so the file becomes:
+
+       @echo off
+       set "FACTORIO=C:\Program Files (x86)\Steam\steamapps\common\Factorio\bin\x64\factorio.exe"
+
+       "%FACTORIO%" ^
+         --start-server "C:\FactorioServer\saves\server.zip" ^
+         --server-settings "C:\FactorioServer\server-settings.json" ^
+         --port 34197 ^
+         --rcon-bind 127.0.0.1:27015 ^
+         --rcon-password "PUT_YOUR_RCON_PASSWORD_HERE"
+
+       pause
+
+   - 27015 is just a port number; any unused port works. 27015 is a
+     common default for RCON.
+   - --rcon-bind 127.0.0.1 means "only accept RCON connections from
+     this same computer." This is important — without this, anyone on
+     your network or the internet who can reach the machine could try
+     to log in.
+   - Replace PUT_YOUR_RCON_PASSWORD_HERE with a real password (any
+     string you like, but make it long and random — it's a master key
+     to the server). DO NOT commit this file or the password to git.
+
+3. Start the server again by double-clicking start-server.bat.
+
+   You should see a log line like:
+       Info RemoteCommandProcessor.cpp:131: Starting RCON interface at IP ADDR:({127.0.0.1:27015})
+   in the server window. That means RCON is live.
+
+------------------------------------------------------------------
+Step 2 — Run the bridge probe
+------------------------------------------------------------------
+
+The probe is a tiny Python script that connects, authenticates, asks the
+server "what's the current game tick?" and prints the result. If this
+works, the whole pipe (Python -> RCON -> server -> Lua -> game state) is
+proven to work end-to-end.
+
+Prerequisites: Python 3.10+ already on PATH (you have 3.13 already).
+
+1. Open a PowerShell window in this repo's directory (the same folder
+   that contains GOAL.txt).
+
+2. Set the RCON password as an environment variable (so the password
+   isn't baked into the script). In PowerShell:
+
+       $env:FACTORIO_RCON_PASSWORD = "the same password you used in the .bat"
+
+   This setting lives only in that PowerShell window. Close the window
+   and it's gone.
+
+3. Run the probe:
+
+       python bridge\probe.py
+
+   Expected output is something like:
+       [bridge] connected to 127.0.0.1:27015
+       [bridge] authenticated
+       [bridge] server says: tick=12345
+       [bridge] done
+
+   If you see that, we are GOOD.
+
+------------------------------------------------------------------
+Troubleshooting
+------------------------------------------------------------------
+
+- "ConnectionRefusedError": server isn't listening on the RCON port.
+  Did the .bat get the new flags? Was the server restarted? Is the
+  port number the same in the .bat and in the probe?
+
+- "Auth failed (-1)": password mismatch between the .bat and the
+  environment variable.
+
+- The server log says "Starting RCON interface" but the probe still
+  can't connect: Windows Defender Firewall might be blocking it. Since
+  we're binding to 127.0.0.1 the firewall usually allows it, but if
+  not, allow factorio.exe through.

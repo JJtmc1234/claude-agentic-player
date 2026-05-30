@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Local config / secrets — never commit these
+.env
+*.env
+.env.*
+!.env.example
+bridge/local_config.json
+
+# Claude Code local settings (user-specific permissions)
+.claude/settings.local.json
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# OS junk
+Thumbs.db
+.DS_Store
+
+# Logs and temp
+*.log
+tmp/
+temp/
+
+# Claude's deep-thought scratchpad (not a deliverable)
+thoughts.txt
+
+# Factorio artifacts that might leak in by accident
+*.zip
+server-settings.json
+start-server.bat

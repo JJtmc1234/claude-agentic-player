@@ -1,0 +1,73 @@
+Claude Agentic Player — Roadmap
+================================
+
+A rough phased plan. Steps inside a phase don't have to be strictly ordered.
+
+Phase 0 — Dedicated server (current focus)
+------------------------------------------
+- Stand up a Factorio headless dedicated server on a machine I control.
+- Pick the base game version and which mods (Space Age first, plain vanilla
+  is fine for early experiments).
+- Get RCON working and confirm I can issue server commands remotely.
+- Confirm I can connect to it from my normal Factorio client and play.
+
+Phase 1 — Read-only perception  [DONE 2026-05-23]
+------------------------------
+- [done] Bridge process: Python, talks to server via RCON. See bridge/.
+- [done] Dump game state: tick, surfaces, players (position, health, inventory,
+  constructions on their force within 500 tiles), research (current, queue,
+  done/total), alerts. See bridge/look.py.
+- [done] Two-way chat: bridge/say.py writes to chat (colored "[Claude] ..."),
+  bridge/chat.py reads from the server's --console-log file.
+- [partial] Live chat streaming: blocked by a Cygwin-bash fork issue in the
+  Claude Code environment (Monitor can't run). On-demand reads via
+  `python bridge/chat.py --tail N` work fine. Revisit if/when streaming
+  becomes a hard requirement.
+
+Phase 2 — Basic actions
+-----------------------
+- Move a controlled character (walk to coordinates, follow a path).
+- Mine, place a single entity, pick up items.
+- Open/close inventory transfers with chests.
+- Decide: are we controlling an actual logged-in player, or a "ghost"
+  character driven by the companion mod? (This decision shapes everything
+  downstream.)
+
+Phase 3 — Tool layer for Claude
+-------------------------------
+- Expose the bridge as a small set of tools Claude can call: get_state,
+  move_to, mine, place, craft, set_recipe, transfer, fight, etc.
+- Tools should be safe-by-default (no mass deconstruct, no nuke launch,
+  etc., without explicit confirmation).
+- Add a chat channel: I can talk to Claude in-game and it can talk back.
+
+Phase 4 — Useful co-op behaviors
+--------------------------------
+- "Go mine N iron from that patch."
+- "Build me a row of M assemblers making green circuits, fed from this
+  belt."
+- "Walk a blueprint" — place a blueprint by hand instead of bots when bots
+  aren't available yet.
+- "Defend this position" — basic combat against biters.
+
+Phase 5 — Long-horizon planning
+-------------------------------
+- Goal decomposition: "we need red science by tonight" → subgoals.
+- Persistent memory of what's been built, what's broken, what's planned.
+- Awareness of which planet/surface we're on (Space Age), basic logistics
+  across surfaces.
+
+Phase 6 — Mod compatibility pass
+--------------------------------
+- Validate everything still works under Krastorio 2.
+- Validate under Space Exploration.
+- Anywhere we hardcoded base-game recipe/entity names, replace with dynamic
+  lookups from the live data.raw / prototypes.
+
+Open questions to resolve along the way
+---------------------------------------
+- Player vs. character vs. mod-controlled entity — what does Claude
+  actually drive?
+- Where does the bridge live? (Same machine as server? Separate?)
+- How do we keep the action rate reasonable without lagging the server?
+- How do we test changes without burning my real save?

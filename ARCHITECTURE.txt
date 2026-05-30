@@ -1,0 +1,112 @@
+Claude Agentic Player — How this is going to work
+==================================================
+
+The core problem
+----------------
+Factorio is built so that humans connect to a multiplayer server using the
+Factorio game client (the program with graphics, mouse, keyboard). There is
+NO "headless" client — i.e. no way to log Claude in as a normal player the
+way another human would join. So the question "how does Claude join the
+server?" needs a different answer.
+
+The trick
+---------
+Instead of pretending to be a player connecting from outside, we make
+things happen FROM INSIDE the running game itself. Factorio's server can
+execute Lua code (Lua is the scripting language Factorio is built on top
+of — like the "programming language inside the game"). If we can run Lua
+on the server, we can:
+  - read the state of the world (where things are, what's in inventories,
+    research progress, etc.),
+  - and change the state of the world (move a character, place an entity,
+    set a recipe, etc.).
+
+So our real question becomes: how do we send Lua commands to a running
+Factorio server from outside?
+
+The answer is RCON.
+
+What is RCON?
+-------------
+RCON stands for "Remote Console." It's an old, simple network protocol
+(originally from Valve / Source engine games) that game servers use to
+accept commands from a trusted outside program. You connect to a TCP port
+on the server, send a password to authenticate, then send strings that the
+server runs as console commands. The server sends back whatever the
+command printed.
+
+Factorio supports RCON natively. If we start the server with the right
+command-line flags, it will listen on a local port for RCON connections.
+Then a small program we write can connect, log in, and start sending Lua.
+
+Our pipe, end to end
+--------------------
+    [Claude (in this chat)]
+            |
+            | (Claude tells the bridge what to do, via tools)
+            v
+    [Bridge process — Python, runs on your machine]
+            |
+            | (Source RCON protocol — TCP, password-auth)
+            v
+    [Factorio dedicated server (factorio.exe with --rcon flags)]
+            |
+            | (server executes Lua against the live game state)
+            v
+    [The game world — character, entities, items]
+
+Bridge = a small program that sits between Claude and the server. It speaks
+RCON to the server and exposes a clean set of "tools" (functions) for
+Claude to call. We'll start with one or two probe commands and grow it as
+we learn what we need.
+
+What does "Claude the player" actually look like in-game?
+---------------------------------------------------------
+There's no headless client, so Claude is not a normal player slot. The
+plan is:
+  - Spawn a character entity inside the game, owned by the bridge.
+  - Drive that character's actions through Lua (walk, mine, build, etc.).
+  - You and Claude share the same surface (planet) and can see each other
+    on the map.
+
+Open question we'll answer once we're inside: does that character need to
+be tied to a fake/admin player, or can it be a free-standing character?
+Both have tradeoffs. We'll figure it out empirically.
+
+Why start with raw RCON, not a custom mod?
+------------------------------------------
+A "mod" in Factorio is a Lua add-on the server loads at startup. We'll
+probably want a small companion mod eventually — it lets us register
+clean Lua functions that the bridge can call by name, instead of sending
+big blobs of Lua text every time. But writing a mod first means writing
+code blind, before we know what shape we need. So the plan is:
+
+  MVP: bridge sends raw Lua commands over RCON ("/silent-command ...").
+  Later: write a small companion mod once we know what tools we want.
+
+What's safe to commit, what isn't
+---------------------------------
+Some files live OUTSIDE this git repo on purpose:
+  - C:\FactorioServer\server-settings.json — contains your Factorio.com
+    login. Never copy this into the repo.
+  - C:\FactorioServer\start-server.bat — your real launch script with the
+    real RCON password baked in. Lives outside the repo.
+The repo holds: documentation, example/template launch scripts (with
+placeholders, not real passwords), the Python bridge, and eventually the
+companion mod.
+
+Immediate next steps (Phase 1)
+------------------------------
+1. Enable RCON on the server. Stop the server, swap to a new launch
+   script that adds --rcon-bind 127.0.0.1:27015 and --rcon-password ...,
+   then restart. (--rcon-bind 127.0.0.1 means "only accept RCON
+   connections from this same computer, not from the internet" — safer.)
+2. Run the bridge probe (bridge/probe.py). It will connect, authenticate,
+   ask the server "what's the current game tick?", and print the answer.
+   (A "tick" is one game-time step — Factorio runs at 60 ticks per second
+   normally.) If that works, the entire pipe is alive.
+3. Add more probes: where is player 1, what's in inventory, what entities
+   are near a given coordinate. Still read-only.
+4. First action: spawn or take control of a character and walk one tile.
+
+See SETUP.txt for how to actually run any of this.
