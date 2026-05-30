@@ -28,19 +28,21 @@ def lua_repr(v: object) -> str:
     raise TypeError(f"lua_repr: unsupported {type(v).__name__}")
 
 
-def call_mod(r, fn: str, *args) -> dict:
-    """Call remote.call('claude', fn, *args) via RCON; parse JSON response."""
+def call_mod(r, fn: str, *args, interface: str = "claude") -> dict:
+    """Call remote.call(interface, fn, *args) via RCON; parse JSON response.
+    Default interface is 'claude'; pass interface='claude_rl' for arena_* fns.
+    """
     arg_str = ",".join(lua_repr(a) for a in args)
     sep = "," if arg_str else ""
     cmd = (
         f"/silent-command rcon.print(helpers.table_to_json("
-        f"remote.call('claude','{fn}'{sep}{arg_str})))"
+        f"remote.call('{interface}','{fn}'{sep}{arg_str})))"
     )
     out = r.command(cmd).strip()
     if not out:
-        raise RuntimeError(f"empty response from mod call {fn}")
+        raise RuntimeError(f"empty response from mod call {interface}.{fn}")
     if out.startswith("Cannot execute"):
-        raise RuntimeError(f"mod call {fn} failed: {out}")
+        raise RuntimeError(f"mod call {interface}.{fn} failed: {out}")
     return json.loads(out)
 
 

@@ -309,6 +309,20 @@ local function process_craft_jobs()
   end
 end
 
+-- Forward-needed helper (the full RL arena section is later in the file,
+-- but process_arena_sim runs every tick and must see arena_find_chest in
+-- scope. Lua locals are not forward-visible.)
+local function _arena_find_chest_early(a, which_key)
+  local s = a.surface_name and game.surfaces[a.surface_name]
+  if not s then return nil end
+  local c = a[which_key]
+  if not c then return nil end
+  local ents = s.find_entities_filtered{
+    position = { c.x, c.y }, type = 'container', radius = 0.6,
+  }
+  return ents[1]
+end
+
 -- Arena (RL) simulation tick handler. When storage.arena.simulating is
 -- true, we count the output chest's gear count every tick. When it hits
 -- target_output OR sim_max_ticks elapsed, we stop the simulation and
@@ -316,16 +330,34 @@ end
 local function process_arena_sim()
   local a = storage.arena
   if not a or not a.simulating then return end
-  if not a.output_chest or not a.output_chest.unit_number then
-    a.simulating = false; return
+  a.sim_calls_count = (a.sim_calls_count or 0) + 1
+  a.last_tick_processed = game.tick
+  -- Re-assert speed/pause every tick. auto_pause in server-settings keeps
+  -- trying to bring the world back to speed=1 (and possibly pause it) when
+  -- no players are connected; we override every tick during simulation.
+  if game.tick_paused then game.tick_paused = false end
+  if game.speed < 8 then game.speed = 64 end
+  if not a.output_chest then
+    a.simulating = false
+    a.sim_error = 'no output_chest in storage'
+    return
   end
-  local out = game.get_entity_by_unit_number(a.output_chest.unit_number)
+  local out = _arena_find_chest_early(a, 'output_chest')
   if not out or not out.valid then
-    a.simulating = false; a.sim_error = 'output chest gone'; return
+    a.simulating = false
+    a.sim_error = 'output chest entity gone at (' .. a.output_chest.x .. ',' .. a.output_chest.y .. ')'
+    return
   end
   local inv = out.get_inventory(defines.inventory.chest)
-  local count = inv and inv.get_item_count(a.output_item) or 0
+  if not inv then
+    a.simulating = false
+    a.sim_error = 'output chest has no inventory'
+    return
+  end
+  local count = inv.get_item_count(a.output_item)
   local elapsed = game.tick - (a.sim_started_tick or game.tick)
+  a.last_count_seen = count
+  a.last_elapsed_seen = elapsed
   if count >= a.target_output then
     a.simulating = false
     a.sim_ticks_taken = elapsed
@@ -359,7 +391,7 @@ local function ping()
   init_all()
   return {
     ok = true,
-    pong = "from claude-companion 0.7.0",
+    pong = "from claude-companion 0.8.6",
     tick = game.tick,
     chat_buffer_size = #storage.chat_log,
     mining_jobs = count_kv(storage.mining_jobs),
@@ -1047,4 +1079,640 @@ remote.add_interface("claude", {
   analyze_ghosts = analyze_ghosts,
   find_chests_with_item = find_chests_with_item,
   get_character_inventory = get_character_inventory,
+})
+
+
+-- ============================================================
+-- RL ARENA (0.7.0)
+-- ============================================================
+-- Separate remote interface 'claude_rl' so RL concerns are isolated.
+-- An "arena" is a walled rectangle on a surface containing two chests
+-- (input and output). The agent (PPO etc.) places entities inside
+-- the arena, the world runs forward, we score the result.
+--
+-- Coordinate convention used here:
+--   bounds = { x_min, y_min, x_max, y_max }  -- inclusive, tile-CENTERS
+--   tile_idx = (row * width) + col, where col = x - x_min, row = y - y_min
+-- Entity ids (for arena_place):
+--   0 = transport-belt   (direction matters)
+--   1 = inserter         (direction matters: direction the arm RECEIVES from)
+--   2 = assembling-machine-1 (3x3, recipe auto-set to iron-gear-wheel)
+--   3 = no-op (ends build phase)
+-- Direction ids:
+--   0 = north (=defines.direction.north = 0)
+--   1 = east  (=4)
+--   2 = south (=8)
+--   3 = west  (=12)
+
+local ENTITY_NAMES = {
+  [0] = 'transport-belt',
+  [1] = 'inserter',
+  [2] = 'assembling-machine-1',
+  -- 3 = no-op (handled specially)
+}
+local DIR_VALUES = { [0] = 0, [1] = 4, [2] = 8, [3] = 12 }
+
+local function arena_chest_unums(a)
+  return a.input_chest and a.input_chest.unit_number,
+         a.output_chest and a.output_chest.unit_number
+end
+
+-- Look up a chest by its STORED POSITION (not unit_number).
+-- Factorio 2.0's game.get_entity_by_unit_number only works on entities
+-- explicitly registered via script.register_on_entity_destroyed; chests
+-- that pre-existed in the save (like JJ's hand-placed arena chests)
+-- aren't registered, so get_entity_by_unit_number returns nil for them.
+-- find_entities_filtered by position works regardless.
+local function arena_find_chest(a, which_key)
+  local s = game.surfaces[a.surface_name]
+  if not s then return nil end
+  local c = a[which_key]
+  if not c then return nil end
+  local ents = s.find_entities_filtered{
+    position = { c.x, c.y }, type = 'container', radius = 0.6,
+  }
+  return ents[1]
+end
+
+local function arena_width(a)  return a.bounds.x_max - a.bounds.x_min + 1 end
+local function arena_height(a) return a.bounds.y_max - a.bounds.y_min + 1 end
+
+local function tile_to_position(a, tile_idx)
+  local w = arena_width(a)
+  local col = tile_idx % w
+  local row = math.floor(tile_idx / w)
+  return a.bounds.x_min + col, a.bounds.y_min + row
+end
+
+-- New arena_setup for 0.8.0: uses two "top-up-valve" entities to mark the
+-- grid corners, two "loader" entities for input/output flow, and two
+-- containers for plate input + gear output.
+--
+-- JJ's editor placement convention:
+--   2 valves (any type 'valve', any prototype like 'top-up-valve') at the
+--     top-left and bottom-right corners of the buildable grid
+--   2 loaders just OUTSIDE the grid (one west, one east)
+--   2 containers next to the loaders (left = input/iron-plate, right = output/gears)
+local function arena_setup(player_name)
+  init_arena()
+  local p = game.players[player_name]
+  if not p then return { ok = false, error = 'no such player ' .. tostring(player_name) } end
+  local s = p.surface
+  local valves = s.find_entities_filtered{ type = 'valve' }
+  if #valves < 2 then
+    return { ok = false, error = 'expected 2 valves marking grid corners, found ' .. #valves }
+  end
+  -- Bounds = bounding box of the valves (inclusive of valve tiles).
+  local vminx, vminy = math.huge, math.huge
+  local vmaxx, vmaxy = -math.huge, -math.huge
+  for _, v in ipairs(valves) do
+    if v.position.x < vminx then vminx = v.position.x end
+    if v.position.x > vmaxx then vmaxx = v.position.x end
+    if v.position.y < vminy then vminy = v.position.y end
+    if v.position.y > vmaxy then vmaxy = v.position.y end
+  end
+  local bounds = {
+    x_min = math.floor(vminx),
+    y_min = math.floor(vminy),
+    x_max = math.floor(vmaxx),
+    y_max = math.floor(vmaxy),
+  }
+  -- Loaders (entry/exit). Look anywhere near the grid.
+  local loaders = s.find_entities_filtered{
+    type = { 'loader', 'loader-1x1' },
+    area = {{ bounds.x_min - 4, bounds.y_min - 4 }, { bounds.x_max + 4, bounds.y_max + 4 }},
+  }
+  if #loaders < 2 then
+    return { ok = false, error = 'expected 2 loaders near grid, found ' .. #loaders }
+  end
+  table.sort(loaders, function(a, b) return a.position.x < b.position.x end)
+  local in_loader, out_loader = loaders[1], loaders[#loaders]
+  -- Chests adjacent to the loaders.
+  local chests = s.find_entities_filtered{
+    type = 'container',
+    area = {{ bounds.x_min - 5, bounds.y_min - 5 }, { bounds.x_max + 5, bounds.y_max + 5 }},
+  }
+  if #chests < 2 then
+    return { ok = false, error = 'expected 2 chests near grid, found ' .. #chests }
+  end
+  table.sort(chests, function(a, b) return a.position.x < b.position.x end)
+  local in_c, out_c = chests[1], chests[#chests]
+  storage.arena = {
+    surface_name = s.name,
+    bounds = bounds,
+    input_chest = { x = in_c.position.x, y = in_c.position.y, unit_number = in_c.unit_number },
+    output_chest = { x = out_c.position.x, y = out_c.position.y, unit_number = out_c.unit_number },
+    input_loader = { x = in_loader.position.x, y = in_loader.position.y },
+    output_loader = { x = out_loader.position.x, y = out_loader.position.y },
+    valves = { { x = vminx, y = vminy }, { x = vmaxx, y = vmaxy } },
+    target_output = 50,
+    refill_amount = 100,
+    output_item = 'iron-gear-wheel',
+    input_item = 'iron-plate',
+    sim_max_ticks = 7200,
+    simulating = false,
+    invalid_actions = 0,
+    episode_start_tick = nil,
+  }
+  return {
+    ok = true,
+    bounds = bounds,
+    width = arena_width(storage.arena),
+    height = arena_height(storage.arena),
+    input_chest = storage.arena.input_chest,
+    output_chest = storage.arena.output_chest,
+    input_loader = storage.arena.input_loader,
+    output_loader = storage.arena.output_loader,
+    valves = storage.arena.valves,
+    surface = s.name,
+  }
+end
+
+local function arena_get_constants()
+  init_arena()
+  if not storage.arena.bounds then return { ok = false, error = 'arena not set up' } end
+  return {
+    ok = true,
+    width = arena_width(storage.arena),
+    height = arena_height(storage.arena),
+    bounds = storage.arena.bounds,
+    n_entities = 4,             -- 0..2 + no-op
+    n_directions = 4,           -- N/E/S/W
+    target_output = storage.arena.target_output,
+    refill_amount = storage.arena.refill_amount,
+    input_item = storage.arena.input_item,
+    output_item = storage.arena.output_item,
+    sim_max_ticks = storage.arena.sim_max_ticks,
+  }
+end
+
+-- Wipe everything inside bounds except the two chests; refill input;
+-- empty output. Returns a tiny status struct.
+local function arena_reset()
+  init_arena()
+  local a = storage.arena
+  if not a.bounds then return { ok = false, error = 'arena not set up' } end
+  local s = game.surfaces[a.surface_name]
+  if not s then return { ok = false, error = 'arena surface gone' } end
+  local in_un, out_un = arena_chest_unums(a)
+  -- Skip pausing the world during reset — game.speed = 0 is illegal
+  -- (minimum 0.01) and reset is a one-tick atomic op anyway.
+  a.simulating = false
+  a.sim_started_tick = nil
+  a.sim_ticks_taken = nil
+  a.sim_final_output = nil
+  a.sim_timed_out = nil
+  a.invalid_actions = 0
+  local removed = 0
+  -- Tighter reset area: only entities WHOSE POSITION is strictly inside
+  -- the bounds, so we don't destroy walls/valves/loaders at the boundary.
+  local ents = s.find_entities_filtered{
+    area = {{ a.bounds.x_min, a.bounds.y_min },
+            { a.bounds.x_max + 1, a.bounds.y_max + 1 }},
+  }
+  -- Build a skip-set of fixed entity types we never destroy.
+  local SKIP_TYPES = {
+    ['wall'] = true, ['valve'] = true, ['loader'] = true,
+    ['loader-1x1'] = true, ['container'] = true,
+    ['logistic-container'] = true, ['character'] = true,
+    ['electric-energy-interface'] = true, ['electric-pole'] = true,
+    ['pipe'] = true, ['pipe-to-ground'] = true,
+  }
+  for _, e in ipairs(ents) do
+    if e.valid
+       and e.unit_number ~= in_un and e.unit_number ~= out_un
+       and not SKIP_TYPES[e.type] then
+      e.destroy{}
+      removed = removed + 1
+    end
+  end
+  -- Refill input chest, empty output chest.
+  local in_c = arena_find_chest(a, 'input_chest')
+  local out_c = arena_find_chest(a, 'output_chest')
+  if in_c and in_c.valid then
+    local inv = in_c.get_inventory(defines.inventory.chest)
+    if inv then inv.clear(); inv.insert{ name = a.input_item, count = a.refill_amount } end
+  end
+  if out_c and out_c.valid then
+    local inv = out_c.get_inventory(defines.inventory.chest)
+    if inv then inv.clear() end
+  end
+  -- Clear items sitting on the input loader (so each episode starts fresh).
+  if a.input_loader then
+    local loaders = s.find_entities_filtered{
+      position = { a.input_loader.x, a.input_loader.y },
+      type = { 'loader', 'loader-1x1' }, radius = 1.0,
+    }
+    for _, ld in ipairs(loaders) do
+      if ld.valid and ld.get_max_transport_line_index then
+        local n = ld.get_max_transport_line_index()
+        for i = 1, n do
+          local tl = ld.get_transport_line(i)
+          if tl then tl.clear() end
+        end
+      end
+    end
+  end
+  a.episode_start_tick = game.tick
+  return { ok = true, removed = removed, episode_start_tick = a.episode_start_tick }
+end
+
+-- Build the (height, width, 12) observation as a flat array (row-major),
+-- plus a small globals vector. Returns serializable JSON.
+local function arena_get_observation()
+  init_arena()
+  local a = storage.arena
+  if not a.bounds then return { ok = false, error = 'arena not set up' } end
+  local s = game.surfaces[a.surface_name]
+  local w, h = arena_width(a), arena_height(a)
+  local n_channels = 12
+  -- Initialize grid: empty=1 everywhere, all other channels 0.
+  local grid = {}
+  for i = 1, w * h * n_channels do grid[i] = 0 end
+  local function idx(col, row, ch) return ((row * w) + col) * n_channels + ch + 1 end
+  for col = 0, w - 1 do
+    for row = 0, h - 1 do
+      grid[idx(col, row, 0)] = 1
+    end
+  end
+  local ents = s.find_entities_filtered{
+    area = {{ a.bounds.x_min - 0.5, a.bounds.y_min - 0.5 },
+            { a.bounds.x_max + 0.5, a.bounds.y_max + 0.5 }},
+  }
+  local in_un, out_un = arena_chest_unums(a)
+  local function set_channel(col, row, ch)
+    if col < 0 or col >= w or row < 0 or row >= h then return end
+    grid[idx(col, row, 0)] = 0
+    grid[idx(col, row, ch)] = 1
+  end
+  for _, e in ipairs(ents) do
+    if e.valid then
+      local col = math.floor(e.position.x - a.bounds.x_min + 0.0)
+      local row = math.floor(e.position.y - a.bounds.y_min + 0.0)
+      if e.unit_number == in_un then
+        set_channel(col, row, 10)
+      elseif e.unit_number == out_un then
+        set_channel(col, row, 11)
+      elseif e.name == 'transport-belt' then
+        local d = e.direction or 0
+        local ch = ({ [0] = 1, [4] = 2, [8] = 3, [12] = 4 })[d] or 1
+        set_channel(col, row, ch)
+      elseif e.name == 'inserter' then
+        local d = e.direction or 0
+        local ch = ({ [0] = 5, [4] = 6, [8] = 7, [12] = 8 })[d] or 5
+        set_channel(col, row, ch)
+      elseif e.name == 'assembling-machine-1' then
+        -- mark only the anchor (entity position is the center for 3x3)
+        local acol = math.floor(e.position.x - a.bounds.x_min - 1 + 0.0)
+        local arow = math.floor(e.position.y - a.bounds.y_min - 1 + 0.0)
+        set_channel(acol, arow, 9)
+      end
+    end
+  end
+  -- Globals
+  local elapsed = a.episode_start_tick and (game.tick - a.episode_start_tick) or 0
+  local in_c = game.get_entity_by_unit_number(in_un)
+  local out_c = game.get_entity_by_unit_number(out_un)
+  local in_count = (in_c and in_c.valid) and in_c.get_inventory(defines.inventory.chest).get_item_count(a.input_item) or 0
+  local out_count = (out_c and out_c.valid) and out_c.get_inventory(defines.inventory.chest).get_item_count(a.output_item) or 0
+  return {
+    ok = true,
+    grid = grid,
+    width = w, height = h, channels = n_channels,
+    globals = {
+      tick_in_episode = math.min(1.0, elapsed / (a.sim_max_ticks * 2)),
+      output_count = out_count,
+      input_count = in_count,
+    },
+  }
+end
+
+-- Place an entity. Returns {ok, error, noop, penalty, placed_name}.
+local function arena_place(entity_idx, tile_idx, dir_idx)
+  init_arena()
+  local a = storage.arena
+  if not a.bounds then return { ok = false, error = 'arena not set up' } end
+  if entity_idx == 3 then return { ok = true, noop = true } end
+  local name = ENTITY_NAMES[entity_idx]
+  if not name then
+    a.invalid_actions = a.invalid_actions + 1
+    return { ok = false, error = 'bad entity_idx ' .. tostring(entity_idx), penalty = 1 }
+  end
+  local direction = DIR_VALUES[dir_idx] or 0
+  local x, y = tile_to_position(a, tile_idx)
+  -- For assembler (3x3), the position must offset by +1, +1 from anchor
+  -- so the 3x3 is fully inside bounds. We do bounds check accordingly.
+  if name == 'assembling-machine-1' then
+    if x < a.bounds.x_min + 1 or x > a.bounds.x_max - 1 or
+       y < a.bounds.y_min + 1 or y > a.bounds.y_max - 1 then
+      a.invalid_actions = a.invalid_actions + 1
+      return { ok = false, error = 'assembler would extend outside arena', penalty = 1 }
+    end
+  end
+  local s = game.surfaces[a.surface_name]
+  local position = { x + 0.5, y + 0.5 }  -- tile-centered
+  if not s.can_place_entity{ name = name, position = position, force = 'player', direction = direction } then
+    a.invalid_actions = a.invalid_actions + 1
+    return { ok = false, error = 'cannot place ' .. name .. ' at (' .. position[1] .. ',' .. position[2] .. ')', penalty = 1 }
+  end
+  local e = s.create_entity{
+    name = name, position = position, force = 'player', direction = direction, raise_built = true,
+  }
+  if not e then
+    a.invalid_actions = a.invalid_actions + 1
+    return { ok = false, error = 'create_entity returned nil', penalty = 1 }
+  end
+  if name == 'assembling-machine-1' then
+    e.set_recipe('iron-gear-wheel')
+  end
+  return { ok = true, placed_name = e.name, position = { x = e.position.x, y = e.position.y } }
+end
+
+local function arena_start_simulate(max_ticks)
+  init_arena()
+  local a = storage.arena
+  if not a.bounds then return { ok = false, error = 'arena not set up' } end
+  a.sim_max_ticks = max_ticks or a.sim_max_ticks
+  a.sim_started_tick = game.tick
+  a.simulating = true
+  -- Defensive: clear input-loader items so each simulate starts fresh
+  -- (in case the caller didn't go through arena_reset first).
+  if a.input_loader then
+    local s2 = game.surfaces[a.surface_name]
+    if s2 then
+      local loaders = s2.find_entities_filtered{
+        position = { a.input_loader.x, a.input_loader.y },
+        type = { 'loader', 'loader-1x1' }, radius = 1.0,
+      }
+      for _, ld in ipairs(loaders) do
+        if ld.valid and ld.get_max_transport_line_index then
+          local n = ld.get_max_transport_line_index()
+          for i = 1, n do
+            local tl = ld.get_transport_line(i)
+            if tl then tl.clear() end
+          end
+        end
+      end
+    end
+  end
+  a.sim_ticks_taken = nil
+  a.sim_final_output = nil
+  a.sim_timed_out = nil
+  a.sim_error = nil
+  a.sim_calls_count = 0
+  a.last_tick_processed = nil
+  a.last_count_seen = nil
+  a.last_elapsed_seen = nil
+  -- Force the world unpaused. auto_pause:true in server-settings keeps
+  -- the world paused when no players are connected — that breaks RL
+  -- training where we want headless episodes. Override here.
+  game.tick_paused = false
+  game.speed = 64
+  return { ok = true, max_ticks = a.sim_max_ticks, tick_paused = game.tick_paused }
+end
+
+local function arena_get_sim_status()
+  init_arena()
+  local a = storage.arena
+  if not a.bounds then return { ok = false, error = 'arena not set up' } end
+  return {
+    ok = true,
+    simulating = a.simulating or false,
+    ticks_taken = a.sim_ticks_taken,
+    final_output = a.sim_final_output,
+    timed_out = a.sim_timed_out or false,
+    sim_error = a.sim_error,
+    sim_calls_count = a.sim_calls_count,
+    last_tick_processed = a.last_tick_processed,
+    last_count_seen = a.last_count_seen,
+    last_elapsed_seen = a.last_elapsed_seen,
+    current_tick = game.tick,
+    game_speed = game.speed,
+    sim_started_tick = a.sim_started_tick,
+    output_now = (function()
+      local out_c = arena_find_chest(a, 'output_chest')
+      if not out_c or not out_c.valid then return -1 end
+      local inv = out_c.get_inventory(defines.inventory.chest)
+      return inv and inv.get_item_count(a.output_item) or 0
+    end)(),
+  }
+end
+
+-- Compute the final reward based on world state after simulate. The
+-- bridge calls this once at episode end.
+local function arena_score()
+  init_arena()
+  local a = storage.arena
+  if not a.bounds then return { ok = false, error = 'arena not set up' } end
+  local s = game.surfaces[a.surface_name]
+  local out_c = arena_find_chest(a, 'output_chest')
+  local out_count = (out_c and out_c.valid) and out_c.get_inventory(defines.inventory.chest).get_item_count(a.output_item) or 0
+  local reached = out_count >= a.target_output
+  local ticks_taken = a.sim_ticks_taken or a.sim_max_ticks
+  local components = {}
+  local total = 0
+  if reached then
+    -- Speed-amplified reward: every tick saved is +0.1 reward.
+    -- Best case (sub-second sim): ~710. JJ's hand design (~6900 ticks): ~30.
+    -- Just barely reaching at max: ~0.
+    local base = (a.sim_max_ticks - ticks_taken) * 0.1
+    components.base = base
+    total = total + base
+    components.reached_bonus = 100
+    total = total + 100
+  elseif out_count == 0 then
+    -- Moderate penalty for empty output (was -1000, but that crushed the
+    -- gradient too hard and the agent collapsed to no-op).
+    components.base = -100
+    total = total - 100
+  else
+    -- Partial credit for some output, scaled by how close to target.
+    local frac = out_count / a.target_output
+    components.base = -100 + math.floor(80 * frac)  -- e.g. 25 gears -> -60
+    components.partial_output = out_count
+    total = total + components.base
+  end
+  -- Count functional inserters and useless belts inside arena.
+  local ents = s.find_entities_filtered{
+    area = {{ a.bounds.x_min - 0.5, a.bounds.y_min - 0.5 },
+            { a.bounds.x_max + 0.5, a.bounds.y_max + 0.5 }},
+  }
+  local functional_inserters = 0
+  local useless_belts = 0
+  local belt_positions = {}
+  for _, e in ipairs(ents) do
+    if e.valid then
+      if e.name == 'inserter' then
+        local src = s.find_entity('transport-belt', e.pickup_position) or
+                    s.find_entity('iron-chest', e.pickup_position) or
+                    s.find_entity('steel-chest', e.pickup_position) or
+                    s.find_entity('assembling-machine-1', e.pickup_position)
+        local dst = s.find_entity('transport-belt', e.drop_position) or
+                    s.find_entity('iron-chest', e.drop_position) or
+                    s.find_entity('steel-chest', e.drop_position) or
+                    s.find_entity('assembling-machine-1', e.drop_position)
+        if src and dst then functional_inserters = functional_inserters + 1 end
+      elseif e.name == 'transport-belt' then
+        belt_positions[#belt_positions + 1] = { x = e.position.x, y = e.position.y, dir = e.direction }
+      end
+    end
+  end
+  -- Useless belt: no neighbor in either pickup or drop direction.
+  for _, b in ipairs(belt_positions) do
+    local has_neighbor = false
+    for _, b2 in ipairs(belt_positions) do
+      if b ~= b2 then
+        local dx = math.abs(b.x - b2.x); local dy = math.abs(b.y - b2.y)
+        if (dx <= 1 and dy < 0.1) or (dy <= 1 and dx < 0.1) then has_neighbor = true; break end
+      end
+    end
+    if not has_neighbor then useless_belts = useless_belts + 1 end
+  end
+  components.functional_inserters = functional_inserters
+  components.functional_inserter_bonus = 10 * functional_inserters
+  total = total + 10 * functional_inserters
+  components.useless_belts = useless_belts
+  components.useless_belt_penalty = -5 * useless_belts
+  total = total - 5 * useless_belts
+  components.invalid_actions = a.invalid_actions
+  components.invalid_action_penalty = -1 * a.invalid_actions
+  total = total - a.invalid_actions
+
+  -- Graph-walk chain reward: trace from input loader east through belts ->
+  -- inserter -> gear assembler -> inserter -> belts -> output loader. Each
+  -- link found = points. Encourages partial chains too (so the agent gets
+  -- gradient even before reaching full connectivity).
+  local chain_pts = 0
+  local chain = {}
+  if a.input_loader and a.output_loader then
+    -- Step 1: follow belt chain east from input loader.
+    local cur_x = a.input_loader.x + 1
+    local cur_y = a.input_loader.y
+    local in_belts = 0
+    while in_belts < 30 do
+      local b = s.find_entities_filtered{
+        position = { cur_x, cur_y }, name = 'transport-belt', radius = 0.4,
+      }[1]
+      if not b then break end
+      if b.direction ~= 4 then break end  -- east-flowing only
+      in_belts = in_belts + 1
+      cur_x = cur_x + 1
+    end
+    chain.input_belts = in_belts
+    chain_pts = chain_pts + 5 * in_belts
+    -- The "source tile" for the input inserter to pick from is either the
+    -- last belt in the chain OR the input loader itself (direct insert).
+    local source_x = (in_belts > 0) and (cur_x - 1) or a.input_loader.x
+    local source_y = a.input_loader.y
+
+    -- Step 2: inserter whose pickup is on the source tile.
+    local input_inserter = nil
+    for _, ins in ipairs(s.find_entities_filtered{
+      name = 'inserter',
+      area = {{source_x - 2, source_y - 2}, {source_x + 2, source_y + 2}},
+    }) do
+      if math.abs(ins.pickup_position.x - source_x) < 0.5
+         and math.abs(ins.pickup_position.y - source_y) < 0.5 then
+        input_inserter = ins; break
+      end
+    end
+    if input_inserter then
+      chain.input_inserter = true
+      chain_pts = chain_pts + 20
+
+      -- Step 3: drop position should be an assembler with gear recipe.
+      local d = input_inserter.drop_position
+      local asm = s.find_entities_filtered{
+        position = { d.x, d.y }, name = 'assembling-machine-1', radius = 1.5,
+      }[1]
+      if asm then
+        local rec = asm.get_recipe()
+        if rec and rec.name == 'iron-gear-wheel' then
+          chain.gear_assembler = true
+          chain_pts = chain_pts + 30
+
+          -- Step 4: output inserter near assembler, NOT the input one.
+          local output_inserter = nil
+          for _, ins2 in ipairs(s.find_entities_filtered{
+            name = 'inserter',
+            area = {
+              { asm.position.x - 2.5, asm.position.y - 2.5 },
+              { asm.position.x + 2.5, asm.position.y + 2.5 },
+            },
+          }) do
+            if ins2.unit_number ~= input_inserter.unit_number then
+              local px = ins2.pickup_position.x
+              local py = ins2.pickup_position.y
+              if math.abs(px - asm.position.x) <= 1.5
+                 and math.abs(py - asm.position.y) <= 1.5 then
+                output_inserter = ins2; break
+              end
+            end
+          end
+          if output_inserter then
+            chain.output_inserter = true
+            chain_pts = chain_pts + 20
+
+            local d2 = output_inserter.drop_position
+            -- Step 5a: drop directly onto output loader -> full chain.
+            if math.abs(d2.x - a.output_loader.x) < 1.5
+               and math.abs(d2.y - a.output_loader.y) < 1.5 then
+              chain.direct_output_loader = true
+              chain_pts = chain_pts + 60
+            else
+              -- Step 5b: drop on a belt, follow belt chain east to loader.
+              local out_belt = s.find_entities_filtered{
+                position = { d2.x, d2.y }, name = 'transport-belt', radius = 0.4,
+              }[1]
+              if out_belt then
+                chain.output_belt_start = true
+                chain_pts = chain_pts + 10
+                local out_belts = 1
+                local px = out_belt.position.x + 1
+                local py = out_belt.position.y
+                while out_belts < 30 do
+                  local nb = s.find_entities_filtered{
+                    position = { px, py }, name = 'transport-belt', radius = 0.4,
+                  }[1]
+                  if not nb then break end
+                  out_belts = out_belts + 1
+                  px = px + 1
+                end
+                chain.output_belts = out_belts
+                chain_pts = chain_pts + 5 * out_belts
+                if math.abs(px - a.output_loader.x) < 1.5
+                   and math.abs(py - a.output_loader.y) < 1.5 then
+                  chain.reached_output_loader = true
+                  chain_pts = chain_pts + 50
+                end
+              end
+            end
+          end
+        end
+      end
+    end
+  end
+  components.chain = chain
+  components.chain_points = chain_pts
+  total = total + chain_pts
+
+  return {
+    ok = true,
+    total = total,
+    reached = reached,
+    ticks_taken = ticks_taken,
+    output_count = out_count,
+    components = components,
+  }
+end
+
+remote.add_interface("claude_rl", {
+  arena_setup = arena_setup,
+  arena_get_constants = arena_get_constants,
+  arena_reset = arena_reset,
+  arena_get_observation = arena_get_observation,
+  arena_place = arena_place,
+  arena_start_simulate = arena_start_simulate,
+  arena_get_sim_status = arena_get_sim_status,
+  arena_score = arena_score,
 })
