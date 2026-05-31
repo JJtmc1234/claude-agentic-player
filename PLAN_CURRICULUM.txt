@@ -1,0 +1,142 @@
+Claude Agentic Player — RL Curriculum Plan
+============================================
+
+Four-stage progression, each warm-started from the previous stage's
+final checkpoint. Each stage is meant to be a small jump in difficulty.
+
+Drafted 2026-05-31 while stage 1 (gears) is mid-training. Code skeletons
+exist for stages 2–4; mod changes are drafted in
+mod/claude-companion/circuit_changes.lua (not deployed yet).
+
+Note: this doc supersedes PLAN_CIRCUITS.txt (which only covered stage 3).
+
+------------------------------------------------------------
+STAGE 1: gears  (CURRENT)
+------------------------------------------------------------
+Task: produce iron-gear-wheel in the output chest.
+Recipe: 2 iron-plate -> 1 gear, 0.5s.
+Input: 100 iron-plate, refilled each episode.
+Output goal: 50 gears OR 10 (depending on training config).
+
+Agent needs to learn: assembler in middle, inserters on each side, belts
+connecting loaders. Single ingredient -> simplest possible chain.
+
+Status: MaskablePPO training in progress. Latest run uses 0.8.8 rewards
+(activity + per-gear-anywhere). See thoughts.txt for live status.
+
+------------------------------------------------------------
+STAGE 2: cables
+------------------------------------------------------------
+Task: produce copper-cable in the output chest.
+Recipe: 1 copper-plate -> 2 copper-cable, 0.5s.
+Input: 100 copper-plate.
+Output goal: 100 cables (since recipe yields 2 per input).
+
+Why this stage exists: similar to gears (single ingredient, hand-craftable)
+but DIFFERENT recipe and DIFFERENT yield ratio. Tests whether the agent
+can adapt the same chain template to a new product without re-learning
+spatial structure.
+
+Knowledge transfer: warm-start from gear-trained MaskablePPO. The policy
+already knows "place assembler middle, inserters either side, belts to
+loaders." It just needs to associate the new recipe with the same chain.
+
+Action: change storage.arena.recipe_name to 'copper-cable', refill chest
+with copper-plate. No structural arena changes.
+
+Code: bridge/rl/demonstration_cables.py + train_cables.py (drafts below).
+
+------------------------------------------------------------
+STAGE 3: circuits
+------------------------------------------------------------
+Task: produce electronic-circuit in the output chest.
+Recipe: 1 iron-plate + 3 copper-cable -> 1 circuit, 0.5s.
+Input: 100 iron-plate + 100 copper-cable (mixed in chest).
+Output goal: 10 circuits.
+
+NEW wrinkle: TWO-ingredient recipe. Inserter doesn't filter — it grabs
+whatever it picks up from the belt. Both items end up in the assembler's
+input slot, and the recipe consumes both. The agent doesn't have to do
+anything different STRUCTURALLY; the mod just refills the chest with
+both items.
+
+Knowledge transfer: warm-start from cable-trained MaskablePPO. Same
+chain template, slightly different reward magnitudes.
+
+Code: bridge/rl/demonstration_circuits.py + train_circuits.py (already
+drafted, will work once mod 0.9.0 is deployed).
+
+------------------------------------------------------------
+STAGE 4: cables + circuits (production chain)
+------------------------------------------------------------
+Task: build a two-step production chain. Output: electronic-circuit.
+Inputs: copper-plate (raw) + iron-plate (raw).
+Internal: agent must place ONE assembler crafting cables from
+copper-plates, and ANOTHER assembler crafting circuits from iron-plate +
+the cables produced by the first assembler.
+
+This is the HARDEST stage. Requires:
+- 2 assemblers in the 8x8 grid (each 3x3 -> tight fit, doable along the
+  loader row)
+- Internal routing: cables produced by assembler A must reach assembler B's
+  input slot via belts + inserters
+- Reward shaping rewards INTERMEDIATE circuit production (which we already
+  have: per_gear_reward generalized to "per output_item anywhere in arena")
+
+Layout sketch (assemblers stacked vertically, hard to fit in 8x8 though):
+  row 0-2: assembler A (cable) anchor at (col 3, row 1)
+  row 3:   belts + inserter routing cables from A to B
+  row 4-6: assembler B (circuit) anchor at (col 3, row 5)
+
+OR horizontal: assemblers side-by-side at row 3-5 (the middle band).
+  cols 1-3: cable assembler (anchor at col 2, row 4)
+  cols 5-7: circuit assembler (anchor at col 6, row 4)
+  But then the cable assembler's output and circuit assembler's input
+  need to be routed via row 3 or row 5, with 2 more inserters.
+
+Knowledge transfer: warm-start from circuit-trained MaskablePPO.
+Policy already knows "make circuits when both ingredients are present" —
+now it has to ALSO make one of the ingredients itself.
+
+NEW reward shaping needed:
+- per intermediate cable produced (anywhere): small positive
+- per circuit produced: same as stage 3
+- DOUBLE assembler bonus if BOTH are active
+
+Code: bridge/rl/demonstration_chain.py + train_chain.py (drafts below).
+Mod 0.10.0 will need to support multiple intermediate_outputs in arena
+config so reward can credit cables AND circuits.
+
+------------------------------------------------------------
+EXECUTION ORDER
+------------------------------------------------------------
+1. [DONE] Stage 1 setup. Training in progress.
+2. Once stage 1 plateaus or reaches positive ep_rew_mean:
+   - Save best gear checkpoint as `checkpoints/gears_final.zip`
+   - Apply mod 0.9.0 changes (per circuit_changes.lua) to control.lua
+   - Restart server
+   - Run train_cables.py (stage 2)
+3. After stage 2:
+   - Save as `cables_final.zip`
+   - Run train_circuits.py (stage 3)
+4. After stage 3:
+   - Save as `circuits_final.zip`
+   - Apply mod 0.10.0 changes (intermediate output rewards)
+   - Run train_chain.py (stage 4)
+
+Each stage's checkpoint becomes the warm-start for the next. The expected
+convergence is FASTER each time, since the previous policy already knows
+chain placement.
+
+------------------------------------------------------------
+OPEN QUESTIONS
+------------------------------------------------------------
+A. Same 8x8 arena for all four stages, or build a bigger one for stage 4?
+   8x8 probably works for stage 4 with a tight horizontal layout.
+B. Keep target_output uniform (e.g. 10) or scale per task? Lower target
+   means faster episodes, faster training.
+C. Should the agent be tested on the CIRCUITS task DIRECTLY after gear
+   training (skipping cables) to measure how much transfer learning
+   actually helps? Useful experiment but slows the curriculum.
+D. After stage 4, what next? Steel plates (need furnaces, not assembler)?
+   Or scale to a bigger arena and combine multiple intermediates?
