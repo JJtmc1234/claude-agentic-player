@@ -164,19 +164,27 @@ class FactorioArenaEnv(gym.Env):
             info["budget_exceeded"] = self._build_action_count >= MAX_BUILD_ACTIONS
             return obs, reward, True, False, info
 
-        # Per-step shaping with DIMINISHING RETURNS per type. A novel entity
-        # type gets the full reward; the 2nd of the same type a fraction;
-        # the 5th very little. Stops "spam 25 belts" from being a winning
-        # strategy and forces the agent to diversify its placements.
+        # Per-step shaping with HARD CAPS per type. A typical working chain
+        # is ~3 assemblers, ~4 inserters, ~10 belts. Beyond those counts,
+        # additional placements of the same type are NEGATIVE — preventing
+        # the agent from gaming the placement reward by spamming one thing.
         # Base rewards (first of type): belt=+5, inserter=+5, assembler=+12.
+        # Curve shape: full reward up to soft start (1st-3rd), diminishing
+        # to the cap, then -1 per excess placement.
+        TYPE_CAPS = {0: 10, 1: 4, 2: 3}    # belt, inserter, assembler
+        BASE_REWARDS = {0: 5.0, 1: 5.0, 2: 12.0}
         res = call_rl(self._rcon, "arena_place", entity_choice, tile_index, direction)
         if res.get("ok") and not res.get("noop"):
-            base = 12.0 if entity_choice == 2 else 5.0
             n_already = self._placements_by_type[entity_choice]
-            # Multiplier: 1.0 for first, 0.6 for second, 0.4 for third, ...
-            # Eventually flat-line at 0.2 so further placements aren't NEGATIVE.
-            multiplier = max(0.2, 1.0 / (1 + 0.7 * n_already))
-            step_reward = base * multiplier
+            cap = TYPE_CAPS.get(entity_choice, 5)
+            base = BASE_REWARDS.get(entity_choice, 5.0)
+            if n_already < cap:
+                # Diminishing within the useful range: 1.0, 0.7, 0.5, ...
+                multiplier = max(0.3, 1.0 / (1 + 0.5 * n_already))
+                step_reward = base * multiplier
+            else:
+                # Over the cap: actively discourage.
+                step_reward = -1.0
             self._placements_by_type[entity_choice] += 1
         else:
             step_reward = -0.2
