@@ -28,22 +28,39 @@ def lua_repr(v: object) -> str:
     raise TypeError(f"lua_repr: unsupported {type(v).__name__}")
 
 
-def call_mod(r, fn: str, *args, interface: str = "claude") -> dict:
+def call_mod(r, fn: str, *args, interface: str = "claude", retries: int = 2) -> dict:
     """Call remote.call(interface, fn, *args) via RCON; parse JSON response.
     Default interface is 'claude'; pass interface='claude_rl' for arena_* fns.
+
+    Retries on empty responses (which Factorio returns when an internal Lua
+    function errors silently — usually a transient race during heavy load).
     """
+    import time as _time
     arg_str = ",".join(lua_repr(a) for a in args)
     sep = "," if arg_str else ""
     cmd = (
         f"/silent-command rcon.print(helpers.table_to_json("
         f"remote.call('{interface}','{fn}'{sep}{arg_str})))"
     )
-    out = r.command(cmd).strip()
-    if not out:
-        raise RuntimeError(f"empty response from mod call {interface}.{fn}")
-    if out.startswith("Cannot execute"):
-        raise RuntimeError(f"mod call {interface}.{fn} failed: {out}")
-    return json.loads(out)
+    last_err = None
+    for attempt in range(retries + 1):
+        try:
+            out = r.command(cmd).strip()
+        except Exception as e:
+            last_err = f"RCON exception: {e}"
+            if attempt < retries:
+                _time.sleep(0.5 * (attempt + 1))
+                continue
+            raise RuntimeError(f"mod call {interface}.{fn} {last_err}")
+        if out.startswith("Cannot execute"):
+            raise RuntimeError(f"mod call {interface}.{fn} failed: {out}")
+        if not out:
+            last_err = "empty response"
+            if attempt < retries:
+                _time.sleep(0.5 * (attempt + 1))
+                continue
+            raise RuntimeError(f"empty response from mod call {interface}.{fn} after {retries+1} attempts")
+        return json.loads(out)
 
 
 def get_inventory_count(r, item_name: str) -> int:
