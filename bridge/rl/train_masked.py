@@ -59,6 +59,7 @@ def main() -> int:
         print(f"[train_masked] loading checkpoint {args.checkpoint}")
         model = MaskablePPO.load(args.checkpoint, env=env)
         model.learning_rate = args.learning_rate
+        model.ent_coef = args.ent_coef
     else:
         print("[train_masked] creating fresh MaskablePPO ...")
         model = MaskablePPO(
