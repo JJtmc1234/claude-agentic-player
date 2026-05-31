@@ -171,7 +171,7 @@ class FactorioArenaEnv(gym.Env):
         # Base rewards (first of type): belt=+5, inserter=+5, assembler=+12.
         # Curve shape: full reward up to soft start (1st-3rd), diminishing
         # to the cap, then -1 per excess placement.
-        TYPE_CAPS = {0: 6, 1: 4, 2: 3}    # belt, inserter, assembler (sized to demo+slack)
+        TYPE_CAPS = {0: 9, 1: 4, 2: 3}    # belt, inserter, assembler (demo uses 6 belts; +slack for variations)
         BASE_REWARDS = {0: 5.0, 1: 5.0, 2: 12.0}
         res = call_rl(self._rcon, "arena_place", entity_choice, tile_index, direction)
         if res.get("ok") and not res.get("noop"):
