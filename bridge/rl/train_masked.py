@@ -39,8 +39,9 @@ def main() -> int:
     p.add_argument("--n-steps", type=int, default=128)
     p.add_argument("--batch-size", type=int, default=64)
     p.add_argument("--learning-rate", type=float, default=3e-4)
-    p.add_argument("--ent-coef", type=float, default=0.05,
-                   help="entropy coefficient (lower needed with masking — less exploration noise)")
+    p.add_argument("--ent-coef", type=float, default=0.15,
+                   help="entropy coefficient — kept higher (0.15) for curiosity so "
+                        "the policy doesn't collapse to a single strategy")
     p.add_argument("--checkpoint", default=None,
                    help="resume from a saved MaskablePPO checkpoint")
     args = p.parse_args()

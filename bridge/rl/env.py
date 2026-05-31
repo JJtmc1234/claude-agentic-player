@@ -83,6 +83,10 @@ class FactorioArenaEnv(gym.Env):
             [self.n_entities, n_tiles, self.n_directions]
         )
         self._build_action_count = 0
+        # Track placements per entity type for diminishing-returns shaping.
+        # Curiosity-by-shaping: rewarding novelty over repetition prevents
+        # the agent from collapsing to "spam belts" as a degenerate strategy.
+        self._placements_by_type = [0, 0, 0, 0]  # [belt, inserter, assembler, no-op]
 
     def _read_observation(self) -> np.ndarray:
         ob = call_rl(self._rcon, "arena_get_observation")
@@ -114,6 +118,7 @@ class FactorioArenaEnv(gym.Env):
         if not res.get("ok"):
             raise RuntimeError(f"arena_reset failed: {res.get('error')}")
         self._build_action_count = 0
+        self._placements_by_type = [0, 0, 0, 0]
         obs = self._read_observation()
         return obs, {"reset": res}
 
@@ -159,13 +164,20 @@ class FactorioArenaEnv(gym.Env):
             info["budget_exceeded"] = self._build_action_count >= MAX_BUILD_ACTIONS
             return obs, reward, True, False, info
 
-        # Per-step shaping: big reward for valid placements, small penalty
-        # for invalid. Pulls gradient strongly toward "keep building."
-        # Extra bonus for ASSEMBLER (entity 2) since it's structurally key:
-        # without it, no gears get made. Encourage the agent to plant one.
+        # Per-step shaping with DIMINISHING RETURNS per type. A novel entity
+        # type gets the full reward; the 2nd of the same type a fraction;
+        # the 5th very little. Stops "spam 25 belts" from being a winning
+        # strategy and forces the agent to diversify its placements.
+        # Base rewards (first of type): belt=+5, inserter=+5, assembler=+12.
         res = call_rl(self._rcon, "arena_place", entity_choice, tile_index, direction)
         if res.get("ok") and not res.get("noop"):
-            step_reward = +10.0 if entity_choice == 2 else +3.0
+            base = 12.0 if entity_choice == 2 else 5.0
+            n_already = self._placements_by_type[entity_choice]
+            # Multiplier: 1.0 for first, 0.6 for second, 0.4 for third, ...
+            # Eventually flat-line at 0.2 so further placements aren't NEGATIVE.
+            multiplier = max(0.2, 1.0 / (1 + 0.7 * n_already))
+            step_reward = base * multiplier
+            self._placements_by_type[entity_choice] += 1
         else:
             step_reward = -0.2
         obs = self._read_observation()
