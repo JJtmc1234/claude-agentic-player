@@ -161,9 +161,11 @@ class FactorioArenaEnv(gym.Env):
 
         # Per-step shaping: big reward for valid placements, small penalty
         # for invalid. Pulls gradient strongly toward "keep building."
+        # Extra bonus for ASSEMBLER (entity 2) since it's structurally key:
+        # without it, no gears get made. Encourage the agent to plant one.
         res = call_rl(self._rcon, "arena_place", entity_choice, tile_index, direction)
         if res.get("ok") and not res.get("noop"):
-            step_reward = +3.0
+            step_reward = +10.0 if entity_choice == 2 else +3.0
         else:
             step_reward = -0.2
         obs = self._read_observation()
