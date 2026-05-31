@@ -391,7 +391,7 @@ local function ping()
   init_all()
   return {
     ok = true,
-    pong = "from claude-companion 0.8.6",
+    pong = "from claude-companion 0.8.8",
     tick = game.tick,
     chat_buffer_size = #storage.chat_log,
     mining_jobs = count_kv(storage.mining_jobs),
@@ -1511,26 +1511,63 @@ local function arena_score()
   local ticks_taken = a.sim_ticks_taken or a.sim_max_ticks
   local components = {}
   local total = 0
+  -- BIG: per-gear reward dominates. Counts gears ANYWHERE in the arena
+  -- (chest + on belts + in inserter hands), so even partial progress
+  -- ("first gear ever made") gets immediate signal.
+  local gears_total = out_count
+  local gears_belts = 0
+  local gears_inserters = 0
+  for _, b in ipairs(s.find_entities_filtered{
+    area = {{ a.bounds.x_min, a.bounds.y_min },
+            { a.bounds.x_max + 1, a.bounds.y_max + 1 }},
+    name = 'transport-belt',
+  }) do
+    if b.valid then
+      for i = 1, b.get_max_transport_line_index() do
+        local tl = b.get_transport_line(i)
+        if tl then
+          for _, st in ipairs(tl.get_contents()) do
+            if st.name == a.output_item then
+              gears_belts = gears_belts + st.count
+            end
+          end
+        end
+      end
+    end
+  end
+  for _, ins in ipairs(s.find_entities_filtered{
+    area = {{ a.bounds.x_min, a.bounds.y_min },
+            { a.bounds.x_max + 1, a.bounds.y_max + 1 }},
+    name = 'inserter',
+  }) do
+    if ins.valid and ins.held_stack and ins.held_stack.valid_for_read
+       and ins.held_stack.name == a.output_item then
+      gears_inserters = gears_inserters + ins.held_stack.count
+    end
+  end
+  gears_total = gears_total + gears_belts + gears_inserters
+  components.gears_in_chest = out_count
+  components.gears_on_belts = gears_belts
+  components.gears_in_inserters = gears_inserters
+  components.gears_total = gears_total
+  components.per_gear_reward = gears_total * 5
+  total = total + components.per_gear_reward
+
   if reached then
-    -- Speed-amplified reward: every tick saved is +0.1 reward.
-    -- Best case (sub-second sim): ~710. JJ's hand design (~6900 ticks): ~30.
-    -- Just barely reaching at max: ~0.
+    -- Speed bonus: every tick saved is +0.1 reward.
     local base = (a.sim_max_ticks - ticks_taken) * 0.1
-    components.base = base
+    components.speed_bonus = base
     total = total + base
-    components.reached_bonus = 100
-    total = total + 100
+    -- Big reached bonus (was +100, now +200) so achieving the goal is huge.
+    components.reached_bonus = 200
+    total = total + 200
   elseif out_count == 0 then
-    -- Moderate penalty for empty output (was -1000, but that crushed the
-    -- gradient too hard and the agent collapsed to no-op).
+    -- Moderate penalty for empty output.
     components.base = -100
     total = total - 100
   else
-    -- Partial credit for some output, scaled by how close to target.
-    local frac = out_count / a.target_output
-    components.base = -100 + math.floor(80 * frac)  -- e.g. 25 gears -> -60
+    -- No flat partial penalty anymore — per_gear_reward IS the gradient.
     components.partial_output = out_count
-    total = total + components.base
   end
   -- Count functional inserters and useless belts inside arena.
   local ents = s.find_entities_filtered{
@@ -1577,6 +1614,62 @@ local function arena_score()
   components.invalid_actions = a.invalid_actions
   components.invalid_action_penalty = -1 * a.invalid_actions
   total = total - a.invalid_actions
+
+  -- ============================================================
+  -- ACTIVITY REWARD (0.8.7): rewards what's ACTUALLY WORKING after
+  -- the simulate phase, not just structural placement. Weighted so
+  -- the agent can't farm reward by spamming belts:
+  --   assembler crafting/producing: +30  (the heart of the chain)
+  --   inserter holding an item:     +5
+  --   belt carrying any item:       +0.5  (small — many belts != smart)
+  -- ============================================================
+  local active_belts = 0
+  local active_inserters = 0
+  local active_assemblers = 0
+  local belt_ents = s.find_entities_filtered{
+    area = {{ a.bounds.x_min, a.bounds.y_min },
+            { a.bounds.x_max + 1, a.bounds.y_max + 1 }},
+    name = 'transport-belt',
+  }
+  for _, b in ipairs(belt_ents) do
+    if b.valid then
+      local has_item = false
+      for i = 1, b.get_max_transport_line_index() do
+        local tl = b.get_transport_line(i)
+        if tl and #tl > 0 then has_item = true; break end
+      end
+      if has_item then active_belts = active_belts + 1 end
+    end
+  end
+  local inserter_ents = s.find_entities_filtered{
+    area = {{ a.bounds.x_min, a.bounds.y_min },
+            { a.bounds.x_max + 1, a.bounds.y_max + 1 }},
+    name = 'inserter',
+  }
+  for _, ins in ipairs(inserter_ents) do
+    if ins.valid and ins.held_stack and ins.held_stack.valid_for_read
+       and ins.held_stack.count > 0 then
+      active_inserters = active_inserters + 1
+    end
+  end
+  local asm_ents = s.find_entities_filtered{
+    area = {{ a.bounds.x_min, a.bounds.y_min },
+            { a.bounds.x_max + 1, a.bounds.y_max + 1 }},
+    name = 'assembling-machine-1',
+  }
+  for _, asm in ipairs(asm_ents) do
+    if asm.valid then
+      if (asm.crafting_progress and asm.crafting_progress > 0)
+         or (asm.products_finished and asm.products_finished > 0) then
+        active_assemblers = active_assemblers + 1
+      end
+    end
+  end
+  components.active_belts = active_belts
+  components.active_inserters = active_inserters
+  components.active_assemblers = active_assemblers
+  components.activity_reward = active_belts * 0.5 + active_inserters * 5 + active_assemblers * 30
+  total = total + components.activity_reward
 
   -- Graph-walk chain reward: trace from input loader east through belts ->
   -- inserter -> gear assembler -> inserter -> belts -> output loader. Each
