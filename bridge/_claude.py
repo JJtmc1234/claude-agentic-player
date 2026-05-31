@@ -60,7 +60,19 @@ def call_mod(r, fn: str, *args, interface: str = "claude", retries: int = 2) -> 
                 _time.sleep(0.5 * (attempt + 1))
                 continue
             raise RuntimeError(f"empty response from mod call {interface}.{fn} after {retries+1} attempts")
-        return json.loads(out)
+        # Handle "Extra data" case: under heavy load + retry, two JSON objects
+        # can come back concatenated. Parse first one, ignore the rest.
+        try:
+            return json.loads(out)
+        except json.JSONDecodeError:
+            try:
+                decoder = json.JSONDecoder()
+                obj, _end = decoder.raw_decode(out)
+                return obj
+            except Exception:
+                raise RuntimeError(
+                    f"mod call {interface}.{fn} returned unparseable response: {out[:200]!r}"
+                )
 
 
 def get_inventory_count(r, item_name: str) -> int:
