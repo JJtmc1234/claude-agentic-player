@@ -25,6 +25,13 @@ def lua_repr(v: object) -> str:
         return "'" + v.replace("\\", "\\\\").replace("'", "\\'") + "'"
     if v is None:
         return "nil"
+    if isinstance(v, dict):
+        parts = []
+        for k, vv in v.items():
+            parts.append(f"[{lua_repr(str(k))}]={lua_repr(vv)}")
+        return "{" + ",".join(parts) + "}"
+    if isinstance(v, (list, tuple)):
+        return "{" + ",".join(lua_repr(x) for x in v) + "}"
     raise TypeError(f"lua_repr: unsupported {type(v).__name__}")
 
 

@@ -114,17 +114,28 @@ class RconClient:
             finally:
                 self.sock = None
 
-    def command(self, cmd: str, drain_timeout: float = 1.0) -> str:
+    def command(self, cmd: str, drain_timeout: float = 0.1) -> str:
         """Send one command and return concatenated output.
 
-        Factorio may split a long response across multiple RESPONSE_VALUE
-        packets. There is no protocol-level "end of response" marker, so we
-        read until no new packet arrives within drain_timeout seconds.
-        For short responses this means each call costs ~drain_timeout of
-        wall clock. Good enough for now.
+        Sentinel-packet tricks (mirror RESPONSE_VALUE, or "/silent-command
+        return") both turn out to race with the original command's rcon.print
+        output — Factorio sends EXECCOMMAND responses immediately but
+        rcon.print output is queued separately, so the sentinel's reply
+        sometimes arrives BEFORE the real command's rcon.print, and we
+        break the read loop too early.
+
+        Simple drain_timeout (no sentinel) avoids the race entirely. Each
+        call costs ~drain_timeout wall time but is reliable.
         """
         if self.sock is None:
             raise RuntimeError("not connected")
+        # Drain any stale packets from prior commands first.
+        self.sock.settimeout(0)
+        try:
+            while True:
+                _read_packet(self.sock)
+        except (BlockingIOError, socket.timeout):
+            pass
         self.sock.sendall(_pack(self._next_id, SERVERDATA_EXECCOMMAND, cmd))
         self._next_id += 1
         self.sock.settimeout(drain_timeout)

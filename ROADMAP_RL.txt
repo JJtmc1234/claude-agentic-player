@@ -1,0 +1,152 @@
+# RL Curriculum Roadmap
+
+End goal: a single policy (or family of policies sharing a backbone) that
+can assemble a complete vanilla Factorio rocket from raw resources.
+
+Progression is roughly the vanilla tech-tree order. Each row is a
+training stage. Stages share the same arena infrastructure — only the
+recipe / input_items / target_output change via `arena_set_task` (mod
+0.9.x). New entity types unlock as we hit recipes that need them.
+
+**Input policy (per JJ):** for MOST stages the agent gets crafted plates
+(iron-plate, copper-plate, etc.) directly in the input chest. The
+smelting-focused stages (Phase E) are the ones where the agent gets raw
+ores and has to smelt them first. The "compose from raw" capstone is
+Phase H (stage 100).
+
+**Factorio 2.0 note:** filter-inserter no longer exists in vanilla 2.0
+(2.0.76 in this project). Any stage that would have used it is replaced
+with the regular inserter or a different entity.
+
+Column legend:
+  STAGE   = ordinal in the curriculum
+  PRODUCT = what the arena's assembler/furnace must deliver to the output chest
+  INPUTS  = ingredients placed in input chest(s) by arena_reset
+  NOTES   = arena requirements / new entity unlocks / tweaks
+
+## Phase A — single-recipe basics (1-15)
+ Already proven: gears with 2 demo layouts (BC v5b, +1660 reward, 9/10 reached).
+
+  1  iron-gear-wheel         iron-plate                 1-belt arena, 1 asm (DONE — bc_v5b)
+  2  copper-cable            copper-plate               1-belt arena (cables = circuit's missing precursor)
+  3  electronic-circuit      iron-plate + copper-cable  2-belt arena (CURRENT)
+  4  transport-belt          iron-gear-wheel + iron-plate  2-belt arena, +red-sci precursor (JJ: "belts again with gears")
+  5  inserter                iron-gear-wheel + electronic-circuit + iron-plate  3-belt arena (JJ: "3-ingredient")
+  6  iron-plate              iron-ore                   smelting via stone-furnace (NEW: burner furnace entity)
+  7  copper-plate            copper-ore                 smelting
+  8  stone-brick             stone                      smelting
+  9  steel-plate             iron-plate                 5x slower smelt; needs 5 iron per craft
+ 10  pipe                    iron-plate                 simple craft (for oil prep)
+ 11  pipe-to-ground          pipe                       simple
+ 12  engine-unit             steel-plate + iron-gear-wheel + pipe  3-ingredient
+ 13  electric-engine-unit    engine-unit + electronic-circuit + lubricant  needs lubricant (oil-derived)
+ 14  iron-stick              iron-plate                 cheap, used by rails
+ 15  rail                    iron-stick + steel-plate + stone                      3-ingredient
+
+## Phase B — automation-science (red) + early prerequisites (16-25)
+ 16  automation-science-pack iron-gear-wheel + copper-plate  red science (JJ: "red sci making gears too")
+ 17  long-handed-inserter    iron-gear-wheel + iron-plate + inserter
+ 18  underground-belt        iron-plate + transport-belt
+ 19  splitter                iron-plate + iron-gear-wheel + electronic-circuit + transport-belt  4-ingredient
+ 20  fast-transport-belt     iron-gear-wheel + transport-belt
+ 21  fast-underground-belt   iron-gear-wheel + underground-belt
+ 22  fast-splitter           iron-gear-wheel + electronic-circuit + splitter
+ 23  fast-inserter           electronic-circuit + iron-plate + inserter
+ 24  bulk-inserter           iron-gear-wheel + electronic-circuit + advanced-circuit + fast-inserter  (replaces filter-inserter; 2.0 doesn't have filter-inserter)
+ 25  small-electric-pole     copper-cable + wood (or substitute)
+
+## Phase C — logistic-science (green) + power (26-40)
+ 26  logistic-science-pack    inserter + transport-belt  green science (JJ: "green from plates")
+ 27  pipe + offshore-pump     basic fluid handling
+ 28  boiler                   pipe + stone-furnace
+ 29  steam-engine             iron-gear-wheel + iron-plate + pipe
+ 30  copper-wire-bundle       (synthetic; for tutorial purposes — combine copper-cable)
+ 31  small-lamp               electronic-circuit + iron-plate + copper-cable  test lighting
+ 32  battery                  copper-plate + iron-plate + sulfuric-acid  needs chemical plant
+ 33  advanced-circuit         copper-cable + electronic-circuit + plastic-bar  needs plastic
+ 34  processing-unit          advanced-circuit + electronic-circuit + sulfuric-acid  blue chips
+ 35  flying-robot-frame       electric-engine-unit + battery + steel-plate + electronic-circuit  4-ingredient
+ 36  construction-robot       flying-robot-frame + electronic-circuit
+ 37  logistic-robot           flying-robot-frame + advanced-circuit
+ 38  roboport                 advanced-circuit + iron-gear-wheel + steel-plate
+ 39  logistic-chest-storage   electronic-circuit + iron-plate + steel-plate
+ 40  logistic-chest-passive-provider  same + filter
+
+## Phase D — military-science (black) + combat (41-55)
+ 41  piercing-rounds-magazine firearm-magazine + steel-plate + copper-plate
+ 42  grenade                  iron-plate + coal
+ 43  stone-wall               stone-brick
+ 44  military-science-pack    piercing-rounds-magazine + grenade + stone-wall  black sci (JJ named)
+ 45  gun-turret               copper-plate + iron-gear-wheel + iron-plate
+ 46  laser-turret             battery + electronic-circuit + steel-plate
+ 47  artillery-turret         advanced-circuit + concrete + iron-gear-wheel + steel-plate
+ 48  artillery-shell          radar + explosives + explosive-cannon-shell
+ 49  flamethrower-turret      engine-unit + iron-gear-wheel + steel-plate
+ 50  combat-shotgun           iron-plate + copper-plate + steel-plate + wood
+ 51  rocket-launcher          iron-gear-wheel + iron-plate + electronic-circuit
+ 52  rocket                   electronic-circuit + explosives + iron-plate
+ 53  explosive-rocket         explosives + rocket
+ 54  cluster-grenade          steel-plate + grenade + explosives
+ 55  defender-capsule         electronic-circuit + iron-gear-wheel + piercing-rounds-magazine
+
+## Phase E — smelting + raw resources (56-65)
+ 56  raw iron-plate from iron-ore + coal (with burner furnace)  JJ named
+ 57  raw copper-plate from copper-ore + coal
+ 58  raw stone-brick from stone + coal
+ 59  raw steel-plate from iron-plate + coal
+ 60  coal + iron-ore mining loop (manual; programmatic via mining-drill)
+ 61  electric-mining-drill   iron-gear-wheel + iron-plate + electronic-circuit
+ 62  burner-mining-drill     iron-gear-wheel + iron-plate + stone-furnace
+ 63  furnace assemblies (smelt + craft in same arena chain)
+ 64  multi-output smelting (ore mix → multi plate types)
+ 65  steel-furnace           steel-plate + stone-brick
+
+## Phase F — oil + chemical (66-80)
+ 66  pumpjack                electronic-circuit + iron-gear-wheel + pipe + steel-plate
+ 67  oil-refinery            steel-plate + iron-gear-wheel + stone-brick + electronic-circuit + pipe
+ 68  basic-oil-processing    crude-oil → petroleum-gas
+ 69  advanced-oil-processing crude-oil + water → heavy-oil + light-oil + petroleum-gas
+ 70  heavy-oil-cracking      heavy-oil + water → light-oil
+ 71  light-oil-cracking      light-oil + water → petroleum-gas
+ 72  chemical-plant          steel-plate + iron-gear-wheel + electronic-circuit + pipe
+ 73  plastic-bar             coal + petroleum-gas
+ 74  sulfur                  water + petroleum-gas
+ 75  sulfuric-acid           iron-plate + sulfur + water
+ 76  lubricant               heavy-oil
+ 77  battery (real)          copper-plate + iron-plate + sulfuric-acid
+ 78  explosives              coal + sulfur + water
+ 79  rocket-fuel             light-oil + solid-fuel
+ 80  solid-fuel              light-oil (or heavy-oil)
+
+## Phase G — production-science (purple) + utility (purple/yellow) (81-90)
+ 81  electric-furnace        advanced-circuit + steel-plate + stone-brick
+ 82  productivity-module     electronic-circuit + advanced-circuit
+ 83  speed-module            electronic-circuit + advanced-circuit
+ 84  efficiency-module       electronic-circuit + advanced-circuit
+ 85  production-science-pack rail + electric-furnace + productivity-module  purple sci
+ 86  utility-science-pack    flying-robot-frame + low-density-structure + processing-unit  yellow sci
+ 87  low-density-structure   copper-plate + plastic-bar + steel-plate
+ 88  rocket-control-unit     processing-unit + speed-module
+ 89  rocket-fuel cycle (light + solid)
+ 90  satellite               low-density-structure + solar-panel + accumulator + radar + rocket-fuel + processing-unit
+
+## Phase H — chemical-science (blue) + space (91-100)
+ 91  chemical-science-pack   advanced-circuit + engine-unit + sulfur  blue sci
+ 92  silo (rocket-silo)      concrete + electric-engine-unit + pipe + processing-unit + steel-plate
+ 93  rocket-part             low-density-structure + rocket-control-unit + rocket-fuel
+ 94  full rocket (100 parts) full assembly chain
+ 95  satellite launch (end-game) launch satellite from silo for space-science
+ 96  space-science-pack      satellite (after launch)
+ 97  uranium-ore mining + processing (uranium-235, uranium-238)
+ 98  kovarex enrichment cycle
+ 99  nuclear reactor + heat pipes + heat exchangers + steam turbines
+100  multi-arena coordination: end-to-end rocket production from raw ore in a wider arena, with the policy choosing where to place chains
+```
+
+## Notes for me
+
+- Stages 1-25 reuse the existing 8x8 arena. Stage 26+ likely needs a bigger arena (16x16) for the chains involved.
+- Each stage's `arena_set_task` spec lives in `bridge/rl/curriculum_specs.py` (TO BE WRITTEN).
+- BC trains a stage from one or more hand-built demos (`demonstration_<stage>.py`). PPO fine-tunes if the BC checkpoint doesn't already crush the target.
+- Knowledge transfer: each new stage starts from the previous best checkpoint, then BC-augments with the new demo.
+- For stages needing new entity TYPES (burner furnace, chemical plant, pumpjack, etc.), the env's MultiDiscrete action space needs new entity slots — that's a mod + bridge change at the appropriate stage gate.

@@ -323,6 +323,47 @@ local function _arena_find_chest_early(a, which_key)
   return ents[1]
 end
 
+-- Helper: maintain a stack of display-panel entities 10 tiles above the
+-- grid, one per line. Stored in storage.arena.display_panels for reuse.
+--
+-- The 2.0 display-panel API: text on a panel is set via the
+-- combinator_description property (the chat-bubble "this signal means X"
+-- text). `entity.text` does NOT exist — that was the source of multiple
+-- silent failures in 0.8.10+. always_show_in_chart toggles whether the
+-- description renders in the world without a circuit signal.
+local function update_arena_panel(a, surface, lines, _title_color)
+  if a.panel_ids then
+    for _, id in ipairs(a.panel_ids) do
+      pcall(function() rendering.destroy(id) end)
+    end
+    a.panel_ids = nil
+  end
+  if not surface then return end
+  local panel_x = (a.bounds.x_min + a.bounds.x_max) / 2
+  local panel_y_top = a.bounds.y_min - 10
+  a.display_panels = a.display_panels or {}
+  for i = 1, #lines do
+    local dp = a.display_panels[i]
+    if not (dp and dp.valid) then
+      dp = surface.create_entity{
+        name = 'display-panel',
+        position = { panel_x, panel_y_top + (i - 1) * 1.0 },
+        force = 'player',
+      }
+      a.display_panels[i] = dp
+    end
+    if dp and dp.valid then
+      pcall(function() dp.combinator_description = lines[i] end)
+      pcall(function() dp.always_show_in_chart = true end)
+    end
+  end
+  for i = #lines + 1, #a.display_panels do
+    local dp = a.display_panels[i]
+    if dp and dp.valid then dp.destroy() end
+    a.display_panels[i] = nil
+  end
+end
+
 -- Arena (RL) simulation tick handler. When storage.arena.simulating is
 -- true, we count the output chest's gear count every tick. When it hits
 -- target_output OR sim_max_ticks elapsed, we stop the simulation and
@@ -370,6 +411,23 @@ local function process_arena_sim()
     a.sim_timed_out = true
     game.speed = 1.0
   end
+  -- Live panel updates: every 30 sim ticks show current state. Cheap.
+  if elapsed % 30 == 0 then
+    local surface = game.surfaces[a.surface_name]
+    local lines = {
+      string.format("SIMULATING  tick %d/%d  gears=%d/%d",
+        elapsed, a.sim_max_ticks or 3600, count, a.target_output),
+      string.format("input chest plates: %s",
+        (function()
+          local in_c = _arena_find_chest_early(a, 'input_chest')
+          if not in_c then return "?" end
+          local inv = in_c.get_inventory(defines.inventory.chest)
+          return tostring(inv and inv.get_item_count(a.input_item) or 0)
+        end)()),
+      "(panel auto-updates each ~0.5s sim time)",
+    }
+    update_arena_panel(a, surface, lines, {r=0.7, g=0.9, b=1})
+  end
 end
 
 script.on_event(defines.events.on_tick, function(event)
@@ -391,7 +449,7 @@ local function ping()
   init_all()
   return {
     ok = true,
-    pong = "from claude-companion 0.8.8",
+    pong = "from claude-companion 0.9.3",
     tick = game.tick,
     chat_buffer_size = #storage.chat_log,
     mining_jobs = count_kv(storage.mining_jobs),
@@ -1155,9 +1213,15 @@ end
 --   2 containers next to the loaders (left = input/iron-plate, right = output/gears)
 local function arena_setup(player_name)
   init_arena()
-  local p = game.players[player_name]
-  if not p then return { ok = false, error = 'no such player ' .. tostring(player_name) } end
-  local s = p.surface
+  -- player_name is optional; if no player or nil, use nauvis surface
+  -- directly so the function can be called headlessly via RCON.
+  local s
+  if player_name then
+    local p = game.players[player_name]
+    if p then s = p.surface end
+  end
+  if not s then s = game.surfaces.nauvis end
+  if not s then return { ok = false, error = 'no surface' } end
   local valves = s.find_entities_filtered{ type = 'valve' }
   if #valves < 2 then
     return { ok = false, error = 'expected 2 valves marking grid corners, found ' .. #valves }
@@ -1183,33 +1247,73 @@ local function arena_setup(player_name)
     area = {{ bounds.x_min - 4, bounds.y_min - 4 }, { bounds.x_max + 4, bounds.y_max + 4 }},
   }
   if #loaders < 2 then
-    return { ok = false, error = 'expected 2 loaders near grid, found ' .. #loaders }
+    return { ok = false, error = 'expected 2+ loaders near grid, found ' .. #loaders }
   end
-  table.sort(loaders, function(a, b) return a.position.x < b.position.x end)
-  local in_loader, out_loader = loaders[1], loaders[#loaders]
-  -- Chests adjacent to the loaders.
+  -- Classify: loaders on the WEST side (x < bounds.x_min) are inputs;
+  -- loaders on the EAST side (x > bounds.x_max) are outputs.
+  local input_loaders, output_loaders = {}, {}
+  for _, ld in ipairs(loaders) do
+    if ld.position.x < bounds.x_min then
+      table.insert(input_loaders, ld)
+    elseif ld.position.x > bounds.x_max then
+      table.insert(output_loaders, ld)
+    end
+  end
+  if #input_loaders < 1 or #output_loaders < 1 then
+    return { ok = false, error = 'need at least 1 input + 1 output loader' }
+  end
+  -- Sort inputs by Y so chest[i] pairs with loader[i] predictably.
+  table.sort(input_loaders, function(a, b) return a.position.y < b.position.y end)
+  table.sort(output_loaders, function(a, b) return a.position.y < b.position.y end)
+  -- Chests near the loaders.
   local chests = s.find_entities_filtered{
     type = 'container',
     area = {{ bounds.x_min - 5, bounds.y_min - 5 }, { bounds.x_max + 5, bounds.y_max + 5 }},
   }
-  if #chests < 2 then
-    return { ok = false, error = 'expected 2 chests near grid, found ' .. #chests }
+  local input_chests, output_chests = {}, {}
+  for _, c in ipairs(chests) do
+    if c.position.x < bounds.x_min then
+      table.insert(input_chests, c)
+    elseif c.position.x > bounds.x_max then
+      table.insert(output_chests, c)
+    end
   end
-  table.sort(chests, function(a, b) return a.position.x < b.position.x end)
-  local in_c, out_c = chests[1], chests[#chests]
+  if #input_chests < 1 or #output_chests < 1 then
+    return { ok = false, error = 'need at least 1 input + 1 output chest' }
+  end
+  table.sort(input_chests, function(a, b) return a.position.y < b.position.y end)
+  table.sort(output_chests, function(a, b) return a.position.y < b.position.y end)
+  -- Build list forms (new) plus single-form backward-compat fields.
+  local function pos_struct(e)
+    return { x = e.position.x, y = e.position.y, unit_number = e.unit_number }
+  end
+  local in_c = input_chests[1]
+  local out_c = output_chests[1]
+  local in_ld = input_loaders[1]
+  local out_ld = output_loaders[1]
+  local input_chest_list = {}
+  for _, c in ipairs(input_chests) do table.insert(input_chest_list, pos_struct(c)) end
+  local input_loader_list = {}
+  for _, l in ipairs(input_loaders) do table.insert(input_loader_list, pos_struct(l)) end
   storage.arena = {
     surface_name = s.name,
     bounds = bounds,
-    input_chest = { x = in_c.position.x, y = in_c.position.y, unit_number = in_c.unit_number },
-    output_chest = { x = out_c.position.x, y = out_c.position.y, unit_number = out_c.unit_number },
-    input_loader = { x = in_loader.position.x, y = in_loader.position.y },
-    output_loader = { x = out_loader.position.x, y = out_loader.position.y },
+    -- Backward-compat fields (used everywhere; first input/output entity)
+    input_chest = pos_struct(in_c),
+    output_chest = pos_struct(out_c),
+    input_loader = { x = in_ld.position.x, y = in_ld.position.y },
+    output_loader = { x = out_ld.position.x, y = out_ld.position.y },
+    -- New: full lists for multi-input setups (e.g. circuits with 2 belts).
+    input_chests = input_chest_list,
+    input_loaders = input_loader_list,
     valves = { { x = vminx, y = vminy }, { x = vmaxx, y = vmaxy } },
-    target_output = 50,
+    target_output = 10,
     refill_amount = 100,
+    recipe_name = 'iron-gear-wheel',
     output_item = 'iron-gear-wheel',
     input_item = 'iron-plate',
-    sim_max_ticks = 7200,
+    input_items = nil,  -- if set, distributes across input_chests by index
+    sim_max_ticks = 900,
     simulating = false,
     invalid_actions = 0,
     episode_start_tick = nil,
@@ -1241,7 +1345,9 @@ local function arena_get_constants()
     target_output = storage.arena.target_output,
     refill_amount = storage.arena.refill_amount,
     input_item = storage.arena.input_item,
+    input_items = storage.arena.input_items,
     output_item = storage.arena.output_item,
+    recipe_name = storage.arena.recipe_name,
     sim_max_ticks = storage.arena.sim_max_ticks,
   }
 end
@@ -1286,32 +1392,87 @@ local function arena_reset()
       removed = removed + 1
     end
   end
-  -- Refill input chest, empty output chest.
-  local in_c = arena_find_chest(a, 'input_chest')
+  -- Refill input chest(s), empty output chest.
+  -- Multi-input case: distribute a.input_items across a.input_chests by index.
+  -- Single-input case: all items go into the single input chest.
   local out_c = arena_find_chest(a, 'output_chest')
-  if in_c and in_c.valid then
-    local inv = in_c.get_inventory(defines.inventory.chest)
-    if inv then inv.clear(); inv.insert{ name = a.input_item, count = a.refill_amount } end
+  if a.input_chests and #a.input_chests > 1 and a.input_items and #a.input_items >= 1 then
+    for i, chest_info in ipairs(a.input_chests) do
+      -- Tight radius (0.4) so 1-tile-apart chests don't alias to the same entity.
+      local c = s.find_entities_filtered{
+        position = { chest_info.x, chest_info.y }, type = 'container', radius = 0.4,
+      }[1]
+      if c and c.valid then
+        local inv = c.get_inventory(defines.inventory.chest)
+        if inv then
+          inv.clear()
+          local it = a.input_items[i]  -- nil if more chests than items
+          if it then inv.insert{ name = it.name, count = it.count } end
+        end
+      end
+    end
+  else
+    local in_c = arena_find_chest(a, 'input_chest')
+    if in_c and in_c.valid then
+      local inv = in_c.get_inventory(defines.inventory.chest)
+      if inv then
+        inv.clear()
+        if a.input_items and #a.input_items > 0 then
+          for _, it in ipairs(a.input_items) do
+            inv.insert{ name = it.name, count = it.count }
+          end
+        else
+          inv.insert{ name = a.input_item, count = a.refill_amount }
+        end
+      end
+    end
   end
   if out_c and out_c.valid then
     local inv = out_c.get_inventory(defines.inventory.chest)
     if inv then inv.clear() end
   end
-  -- Clear items sitting on the input loader (so each episode starts fresh).
-  if a.input_loader then
+  -- Clear items sitting on BOTH loaders so each episode starts fresh.
+  -- Also DISABLE the loaders (.active = false) so they don't pull items
+  -- from the input chest during the build phase. arena_start_simulate
+  -- re-enables them. Without this, the input loader pulls 1 plate the
+  -- instant we refill, and the chest shows 9 instead of 10 (the
+  -- 10th plate is on the loader belt).
+  local function clear_and_disable_loader(pos)
+    if not pos then return end
     local loaders = s.find_entities_filtered{
-      position = { a.input_loader.x, a.input_loader.y },
+      position = { pos.x, pos.y },
       type = { 'loader', 'loader-1x1' }, radius = 1.0,
     }
     for _, ld in ipairs(loaders) do
-      if ld.valid and ld.get_max_transport_line_index then
-        local n = ld.get_max_transport_line_index()
-        for i = 1, n do
-          local tl = ld.get_transport_line(i)
-          if tl then tl.clear() end
+      if ld.valid then
+        if ld.get_max_transport_line_index then
+          local n = ld.get_max_transport_line_index()
+          for i = 1, n do
+            local tl = ld.get_transport_line(i)
+            if tl then tl.clear() end
+          end
         end
+        ld.active = false
       end
     end
+  end
+  clear_and_disable_loader(a.input_loader)
+  clear_and_disable_loader(a.output_loader)
+  -- Also disable any additional input loaders from the multi-input list.
+  if a.input_loaders then
+    for _, ld_pos in ipairs(a.input_loaders) do
+      clear_and_disable_loader(ld_pos)
+    end
+  end
+  -- Also clear any dropped items inside the arena (item-on-ground entities
+  -- pile up when inserters drop on empty tiles).
+  local stragglers = s.find_entities_filtered{
+    area = {{ a.bounds.x_min, a.bounds.y_min },
+            { a.bounds.x_max + 1, a.bounds.y_max + 1 }},
+    name = 'item-on-ground',
+  }
+  for _, e in ipairs(stragglers) do
+    if e.valid then e.destroy(); removed = removed + 1 end
   end
   a.episode_start_tick = game.tick
   return { ok = true, removed = removed, episode_start_tick = a.episode_start_tick }
@@ -1423,9 +1584,79 @@ local function arena_place(entity_idx, tile_idx, dir_idx)
     return { ok = false, error = 'create_entity returned nil', penalty = 1 }
   end
   if name == 'assembling-machine-1' then
-    e.set_recipe('iron-gear-wheel')
+    e.set_recipe(a.recipe_name or 'iron-gear-wheel')
   end
-  return { ok = true, placed_name = e.name, position = { x = e.position.x, y = e.position.y } }
+  -- Compute incremental chain bonus: how much this placement contributes to
+  -- a working chain RIGHT NOW. Bonuses are SMALL (max ~3 per placement) so
+  -- the agent can't farm them — actual production must dominate the reward.
+  local chain_bonus = 0
+  local belt_offsets = { [0]={0,-1}, [4]={1,0}, [8]={0,1}, [12]={-1,0} }
+  if name == 'transport-belt' then
+    local off = belt_offsets[direction]
+    if off then
+      local front = s.find_entities_filtered{
+        position = { e.position.x + off[1], e.position.y + off[2] },
+        name = 'transport-belt', radius = 0.4,
+      }[1]
+      if front and front.valid then chain_bonus = chain_bonus + 1 end
+      local back = s.find_entities_filtered{
+        position = { e.position.x - off[1], e.position.y - off[2] },
+        name = 'transport-belt', radius = 0.4,
+      }[1]
+      if back and back.valid and back.direction == direction then
+        chain_bonus = chain_bonus + 1
+      end
+    end
+  elseif name == 'inserter' then
+    local recipe_name = a.recipe_name or 'iron-gear-wheel'
+    local drop_asm = s.find_entities_filtered{
+      position = e.drop_position, name = 'assembling-machine-1', radius = 1.0,
+    }[1]
+    if drop_asm and drop_asm.valid then
+      local rec = drop_asm.get_recipe()
+      if rec and rec.name == recipe_name then chain_bonus = chain_bonus + 3
+      else chain_bonus = chain_bonus + 1 end
+    end
+    local drop_belt = s.find_entities_filtered{
+      position = e.drop_position, name = 'transport-belt', radius = 0.4,
+    }[1]
+    if drop_belt and drop_belt.valid then chain_bonus = chain_bonus + 2 end
+    local pickup_belt = s.find_entities_filtered{
+      position = e.pickup_position, name = 'transport-belt', radius = 0.4,
+    }[1]
+    if pickup_belt and pickup_belt.valid then chain_bonus = chain_bonus + 2 end
+    local pickup_asm = s.find_entities_filtered{
+      position = e.pickup_position, name = 'assembling-machine-1', radius = 1.0,
+    }[1]
+    if pickup_asm and pickup_asm.valid then
+      local rec = pickup_asm.get_recipe()
+      if rec and rec.name == recipe_name then chain_bonus = chain_bonus + 2 end
+    end
+  elseif name == 'assembling-machine-1' then
+    local nearby = s.find_entities_filtered{
+      area = {{ e.position.x - 2.5, e.position.y - 2.5 },
+              { e.position.x + 2.5, e.position.y + 2.5 }},
+      name = 'inserter',
+    }
+    for _, ins in ipairs(nearby) do
+      if ins.valid then
+        local d = ins.drop_position
+        if math.abs(d.x - e.position.x) < 1.5 and math.abs(d.y - e.position.y) < 1.5 then
+          chain_bonus = chain_bonus + 3
+        end
+        local p = ins.pickup_position
+        if math.abs(p.x - e.position.x) < 1.5 and math.abs(p.y - e.position.y) < 1.5 then
+          chain_bonus = chain_bonus + 2
+        end
+      end
+    end
+  end
+  return {
+    ok = true,
+    placed_name = e.name,
+    position = { x = e.position.x, y = e.position.y },
+    chain_bonus = chain_bonus,
+  }
 end
 
 local function arena_start_simulate(max_ticks)
@@ -1435,24 +1666,35 @@ local function arena_start_simulate(max_ticks)
   a.sim_max_ticks = max_ticks or a.sim_max_ticks
   a.sim_started_tick = game.tick
   a.simulating = true
-  -- Defensive: clear input-loader items so each simulate starts fresh
-  -- (in case the caller didn't go through arena_reset first).
-  if a.input_loader then
-    local s2 = game.surfaces[a.surface_name]
-    if s2 then
-      local loaders = s2.find_entities_filtered{
-        position = { a.input_loader.x, a.input_loader.y },
-        type = { 'loader', 'loader-1x1' }, radius = 1.0,
-      }
-      for _, ld in ipairs(loaders) do
-        if ld.valid and ld.get_max_transport_line_index then
+  -- Defensive: clear input-loader items + RE-ENABLE both loaders
+  -- (arena_reset disables them so they don't drain plates during the
+  -- build phase). Without re-enabling here, no plates flow into the
+  -- chain when simulate starts.
+  local s2 = game.surfaces[a.surface_name]
+  local function clear_and_enable_loader(pos)
+    if not pos or not s2 then return end
+    local loaders = s2.find_entities_filtered{
+      position = { pos.x, pos.y },
+      type = { 'loader', 'loader-1x1' }, radius = 1.0,
+    }
+    for _, ld in ipairs(loaders) do
+      if ld.valid then
+        if ld.get_max_transport_line_index then
           local n = ld.get_max_transport_line_index()
           for i = 1, n do
             local tl = ld.get_transport_line(i)
             if tl then tl.clear() end
           end
         end
+        ld.active = true
       end
+    end
+  end
+  clear_and_enable_loader(a.input_loader)
+  clear_and_enable_loader(a.output_loader)
+  if a.input_loaders then
+    for _, ld_pos in ipairs(a.input_loaders) do
+      clear_and_enable_loader(ld_pos)
     end
   end
   a.sim_ticks_taken = nil
@@ -1550,23 +1792,26 @@ local function arena_score()
   components.gears_on_belts = gears_belts
   components.gears_in_inserters = gears_inserters
   components.gears_total = gears_total
-  components.per_gear_reward = gears_total * 5
+  -- ONLY gears actually delivered to the chest count. Gears in-flight on
+  -- belts or held in inserters are not production — they're hopeful state.
+  -- Reward per delivered gear is high so end-of-episode dominates the
+  -- exploitable per-step neighborhood bonuses.
+  components.per_gear_reward = out_count * 50
   total = total + components.per_gear_reward
 
   if reached then
-    -- Speed bonus: every tick saved is +0.1 reward.
     local base = (a.sim_max_ticks - ticks_taken) * 0.1
     components.speed_bonus = base
     total = total + base
-    -- Big reached bonus (was +100, now +200) so achieving the goal is huge.
-    components.reached_bonus = 200
-    total = total + 200
+    -- Massive reached bonus so achieving the goal dwarfs anything farmable.
+    components.reached_bonus = 1000
+    total = total + 1000
   elseif out_count == 0 then
-    -- Moderate penalty for empty output.
-    components.base = -100
-    total = total - 100
+    -- Heavy penalty for 0 production — placing entities without actually
+    -- producing should be net-negative even with maxed chain bonuses.
+    components.base = -200
+    total = total - 200
   else
-    -- No flat partial penalty anymore — per_gear_reward IS the gradient.
     components.partial_output = out_count
   end
   -- Count functional inserters and useless belts inside arena.
@@ -1606,8 +1851,8 @@ local function arena_score()
     if not has_neighbor then useless_belts = useless_belts + 1 end
   end
   components.functional_inserters = functional_inserters
-  components.functional_inserter_bonus = 10 * functional_inserters
-  total = total + 10 * functional_inserters
+  -- functional_inserter_bonus addition is DEFERRED to after chain_alive is
+  -- computed below; we conditionally apply it then. Penalties always apply.
   components.useless_belts = useless_belts
   components.useless_belt_penalty = -5 * useless_belts
   total = total - 5 * useless_belts
@@ -1668,8 +1913,21 @@ local function arena_score()
   components.active_belts = active_belts
   components.active_inserters = active_inserters
   components.active_assemblers = active_assemblers
-  components.activity_reward = active_belts * 0.5 + active_inserters * 5 + active_assemblers * 30
-  total = total + components.activity_reward
+  -- "Chain is doing something real" gate: an assembler is actively crafting
+  -- OR an inserter is currently holding an item. If false, all the
+  -- exploitable bonuses (activity, chain_pts, neighborhood, functional
+  -- inserter) are ZEROED so the agent can't farm them by placing
+  -- decorative-looking entities that don't produce.
+  local chain_alive = (active_assemblers > 0) or (active_inserters > 0)
+  components.chain_alive = chain_alive
+  if chain_alive then
+    components.activity_reward = active_belts * 0.5 + active_inserters * 5 + active_assemblers * 30
+    components.functional_inserter_bonus = 10 * functional_inserters
+  else
+    components.activity_reward = 0
+    components.functional_inserter_bonus = 0
+  end
+  total = total + components.activity_reward + components.functional_inserter_bonus
 
   -- Graph-walk chain reward: trace from input loader east through belts ->
   -- inserter -> gear assembler -> inserter -> belts -> output loader. Each
@@ -1786,8 +2044,100 @@ local function arena_score()
     end
   end
   components.chain = chain
+
+  -- Neighborhood/adjacency bonuses: give gradient toward partial chains
+  -- even when the input->output graph walk doesn't reach end-to-end.
+  -- Rewards "good local connections" — belt-to-belt continuity, inserters
+  -- pointing at a gear-recipe assembler, inserters picking from belts/chest.
+  local belt_dir_offsets = {
+    [0]  = { 0, -1},  -- N
+    [4]  = { 1,  0},  -- E
+    [8]  = { 0,  1},  -- S
+    [12] = {-1,  0},  -- W
+  }
+  local belt_pairs = 0
+  for _, b in ipairs(belt_ents) do
+    if b.valid then
+      local off = belt_dir_offsets[b.direction]
+      if off then
+        local nx = b.position.x + off[1]
+        local ny = b.position.y + off[2]
+        local nb = s.find_entities_filtered{
+          position = { nx, ny }, name = 'transport-belt', radius = 0.4,
+        }[1]
+        if nb and nb.valid then belt_pairs = belt_pairs + 1 end
+      end
+    end
+  end
+  local good_drops = 0
+  local good_pickups = 0
+  for _, ins in ipairs(inserter_ents) do
+    if ins.valid then
+      local d = ins.drop_position
+      local drop_asm = s.find_entities_filtered{
+        position = d, name = 'assembling-machine-1', radius = 1.0,
+      }[1]
+      if drop_asm and drop_asm.valid then
+        local rec = drop_asm.get_recipe()
+        if rec and rec.name == 'iron-gear-wheel' then
+          good_drops = good_drops + 1
+        end
+      end
+      local drop_belt = s.find_entities_filtered{
+        position = d, name = 'transport-belt', radius = 0.4,
+      }[1]
+      if drop_belt and drop_belt.valid then
+        good_drops = good_drops + 1
+      end
+      local p = ins.pickup_position
+      local pickup_belt = s.find_entities_filtered{
+        position = p, name = 'transport-belt', radius = 0.4,
+      }[1]
+      if pickup_belt and pickup_belt.valid then
+        good_pickups = good_pickups + 1
+      end
+      local pickup_asm = s.find_entities_filtered{
+        position = p, name = 'assembling-machine-1', radius = 1.0,
+      }[1]
+      if pickup_asm and pickup_asm.valid then
+        local rec = pickup_asm.get_recipe()
+        if rec and rec.name == 'iron-gear-wheel' then
+          good_pickups = good_pickups + 1
+        end
+      end
+    end
+  end
+  local neighborhood_pts = belt_pairs * 3 + good_drops * 10 + good_pickups * 10
+  components.belt_pairs = belt_pairs
+  components.good_drops = good_drops
+  components.good_pickups = good_pickups
+  components.neighborhood_pts = neighborhood_pts
+  chain_pts = chain_pts + neighborhood_pts
+
+  -- Gate chain bonuses on chain_alive: agent must have at least one
+  -- working inserter or producing assembler before these pay out.
+  if not chain_alive then chain_pts = 0 end
   components.chain_points = chain_pts
   total = total + chain_pts
+
+  -- Final-of-episode stats panel (overrides any live updates from on_tick).
+  local outcome_color = reached and {r=0.4,g=1,b=0.4} or
+                        (out_count > 0 and {r=1,g=1,b=0.4} or {r=1,g=0.4,b=0.4})
+  local final_lines = {
+    string.format("EPISODE END  REWARD %+.1f  %s",
+      total,
+      reached and "REACHED 50!" or (out_count > 0 and ("partial " .. out_count) or "no output")),
+    string.format("gears: chest=%d  belts=%d  inserters=%d  total=%d",
+      out_count, gears_belts, gears_inserters, gears_total),
+    string.format("active: assemblers=%d  inserters=%d  belts=%d  (placed: %dB %dI %dA)",
+      active_assemblers, active_inserters, active_belts,
+      #belt_ents, #inserter_ents, #asm_ents),
+    string.format("chain=%d (graph=%d, neighbor=%d: bp=%d gd=%d gp=%d)  per_gear=%+d  ticks=%d",
+      chain_pts, chain_pts - neighborhood_pts, neighborhood_pts,
+      belt_pairs, good_drops, good_pickups,
+      components.per_gear_reward, ticks_taken),
+  }
+  update_arena_panel(a, s, final_lines, outcome_color)
 
   return {
     ok = true,
@@ -1796,6 +2146,207 @@ local function arena_score()
     ticks_taken = ticks_taken,
     output_count = out_count,
     components = components,
+  }
+end
+
+-- Apply overrides to the persistent arena config. Pass any subset of
+-- {target_output, sim_max_ticks, refill_amount}. Returns the merged state.
+local function arena_set_config(overrides)
+  init_arena()
+  local a = storage.arena
+  if not a.bounds then return { ok = false, error = 'arena not set up' } end
+  overrides = overrides or {}
+  if overrides.target_output then a.target_output = overrides.target_output end
+  if overrides.sim_max_ticks then a.sim_max_ticks = overrides.sim_max_ticks end
+  if overrides.refill_amount then a.refill_amount = overrides.refill_amount end
+  -- Also clear any stale display panels so they get recreated cleanly.
+  if a.display_panels then
+    for _, dp in pairs(a.display_panels) do
+      if dp and dp.valid then dp.destroy() end
+    end
+    a.display_panels = nil
+  end
+  return {
+    ok = true,
+    target_output = a.target_output,
+    sim_max_ticks = a.sim_max_ticks,
+    refill_amount = a.refill_amount,
+  }
+end
+
+-- Returns a snapshot of arena state useful for debugging: chest contents,
+-- assembler statuses, loader presence, raw storage fields. /silent-command
+-- can't access mod storage (it runs in scenario context), so anything
+-- that needs to see what the mod actually thinks must go through here.
+local function arena_debug_state()
+  init_arena()
+  local a = storage.arena
+  if not a.bounds then return { ok = false, error = 'arena not set up' } end
+  local s = game.surfaces[a.surface_name]
+  if not s then return { ok = false, error = 'no surface' } end
+  local function chest_contents(pos)
+    if not pos then return nil end
+    -- Tight radius (0.4) so adjacent chests don't alias.
+    local c = s.find_entities_filtered{
+      position = { pos.x, pos.y }, type = 'container', radius = 0.4,
+    }[1]
+    if not c or not c.valid then return { found = false, position = pos } end
+    local inv = c.get_inventory(defines.inventory.chest)
+    local contents = {}
+    if inv then
+      for name, count in pairs(inv.get_contents() or {}) do
+        contents[name] = count
+      end
+    end
+    return { found = true, name = c.name, position = { x = c.position.x, y = c.position.y }, contents = contents }
+  end
+  local asms = s.find_entities_filtered{
+    area = {{ a.bounds.x_min, a.bounds.y_min }, { a.bounds.x_max + 1, a.bounds.y_max + 1 }},
+    name = 'assembling-machine-1',
+  }
+  local asm_states = {}
+  for _, asm in ipairs(asms) do
+    if asm.valid then
+      local rec = asm.get_recipe()
+      local inv_in = asm.get_inventory(defines.inventory.assembling_machine_input)
+      local inv_out = asm.get_inventory(defines.inventory.assembling_machine_output)
+      local in_contents = {}
+      local out_contents = {}
+      if inv_in then for n, c in pairs(inv_in.get_contents() or {}) do in_contents[n] = c end end
+      if inv_out then for n, c in pairs(inv_out.get_contents() or {}) do out_contents[n] = c end end
+      table.insert(asm_states, {
+        position = { x = asm.position.x, y = asm.position.y },
+        recipe = rec and rec.name or nil,
+        crafting_progress = asm.crafting_progress,
+        products_finished = asm.products_finished,
+        input = in_contents,
+        output = out_contents,
+      })
+    end
+  end
+  return {
+    ok = true,
+    bounds = a.bounds,
+    input_chest = chest_contents(a.input_chest),
+    output_chest = chest_contents(a.output_chest),
+    input_loader = a.input_loader,
+    output_loader = a.output_loader,
+    -- Multi-input fields (added 0.9.1): if user set up >1 input chest+loader,
+    -- list each one with its current contents/position.
+    input_chests = (function()
+      if not a.input_chests then return nil end
+      local out = {}
+      for _, ch in ipairs(a.input_chests) do table.insert(out, chest_contents(ch)) end
+      return out
+    end)(),
+    input_loaders = a.input_loaders,
+    has_loaders = (a.input_loader ~= nil) and (a.output_loader ~= nil),
+    sim_max_ticks = a.sim_max_ticks,
+    target_output = a.target_output,
+    refill_amount = a.refill_amount,
+    invalid_actions = a.invalid_actions,
+    n_assemblers = #asm_states,
+    assemblers = asm_states,
+  }
+end
+
+-- One-shot cleanup: destroy any leftover rendering-API overlays (from old
+-- 0.8.9-0.8.11 stats panel) AND any display-panel entities created above
+-- the arena. Used when the UI has stale junk after mod version changes.
+local function _cleanup_panels()
+  init_arena()
+  local a = storage.arena
+  if not a.bounds then return { ok = false, error = 'arena not set up' } end
+  local s = game.surfaces[a.surface_name]
+  if not s then return { ok = false, error = 'no surface' } end
+  local destroyed = { renderings = 0, panels = 0, storage_ids = 0 }
+  -- Clear any rendering ids tracked in storage.
+  if a.panel_ids then
+    for _, id in ipairs(a.panel_ids) do
+      pcall(function() rendering.destroy(id) end)
+      destroyed.storage_ids = destroyed.storage_ids + 1
+    end
+    a.panel_ids = nil
+  end
+  -- Best-effort: destroy ALL renderings on this surface (cheap; arena is
+  -- the only thing using the rendering API in this mod).
+  local all_objs = rendering.get_all_objects()
+  if all_objs then
+    for _, obj in pairs(all_objs) do
+      pcall(function() rendering.destroy(obj.id or obj) end)
+      destroyed.renderings = destroyed.renderings + 1
+    end
+  end
+  -- Destroy any display-panel entities in a 30-tile zone above the arena.
+  local panel_area = {
+    { a.bounds.x_min - 5, a.bounds.y_min - 30 },
+    { a.bounds.x_max + 5, a.bounds.y_min },
+  }
+  local panels = s.find_entities_filtered{
+    area = panel_area, name = 'display-panel',
+  }
+  for _, p in ipairs(panels) do
+    if p.valid then p.destroy(); destroyed.panels = destroyed.panels + 1 end
+  end
+  -- Also clear storage.arena.display_panels (in case some are stale refs).
+  if a.display_panels then
+    for _, p in pairs(a.display_panels) do
+      if p and p.valid then p.destroy(); destroyed.panels = destroyed.panels + 1 end
+    end
+    a.display_panels = nil
+  end
+  return { ok = true, destroyed = destroyed }
+end
+
+-- Switch the active task: recipe, output item, target count, input refill spec.
+-- Used to advance the curriculum (gears -> circuits -> ...) without
+-- re-running arena_setup. Pass any subset; nil fields are left unchanged.
+local function arena_set_task(spec)
+  init_arena()
+  local a = storage.arena
+  if not a.bounds then return { ok = false, error = 'arena not set up' } end
+  spec = spec or {}
+  if spec.recipe_name then
+    if not prototypes.recipe[spec.recipe_name] then
+      return { ok = false, error = 'no such recipe ' .. spec.recipe_name }
+    end
+    a.recipe_name = spec.recipe_name
+  end
+  if spec.output_item then
+    if not prototypes.item[spec.output_item] then
+      return { ok = false, error = 'no such item ' .. spec.output_item }
+    end
+    a.output_item = spec.output_item
+  end
+  if spec.target_output then a.target_output = spec.target_output end
+  if spec.input_items then
+    for _, it in ipairs(spec.input_items) do
+      if not prototypes.item[it.name] then
+        return { ok = false, error = 'no such input item ' .. it.name }
+      end
+    end
+    a.input_items = spec.input_items
+  end
+  if spec.sim_max_ticks then a.sim_max_ticks = spec.sim_max_ticks end
+  -- Also re-set the recipe on any existing assemblers in the arena so a
+  -- mid-session switch doesn't leave a stale recipe selected.
+  local s = game.surfaces[a.surface_name]
+  if s then
+    local asms = s.find_entities_filtered{
+      area = {{ a.bounds.x_min, a.bounds.y_min }, { a.bounds.x_max + 1, a.bounds.y_max + 1 }},
+      name = 'assembling-machine-1',
+    }
+    for _, asm in ipairs(asms) do
+      if asm.valid then pcall(function() asm.set_recipe(a.recipe_name) end) end
+    end
+  end
+  return {
+    ok = true,
+    recipe_name = a.recipe_name,
+    output_item = a.output_item,
+    target_output = a.target_output,
+    input_items = a.input_items,
+    sim_max_ticks = a.sim_max_ticks,
   }
 end
 
@@ -1808,4 +2359,8 @@ remote.add_interface("claude_rl", {
   arena_start_simulate = arena_start_simulate,
   arena_get_sim_status = arena_get_sim_status,
   arena_score = arena_score,
+  arena_set_config = arena_set_config,
+  arena_set_task = arena_set_task,
+  arena_debug_state = arena_debug_state,
+  _cleanup_panels = _cleanup_panels,
 })

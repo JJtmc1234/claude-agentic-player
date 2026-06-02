@@ -1,0 +1,88 @@
+# Claude Agentic Player — Stable Context
+
+Slow-changing reference. Read at the start of every new conversation. Update
+when a durable fact changes (file moves, API field discovered, server config
+changed, version bump). Paired with what-im-doing.txt (live state).
+
+## Project goal
+
+Claude controls a Factorio character via RCON + a custom mod, eventually
+playing as a co-op teammate. Current focus: RL training of factory layouts
+in a fixed 8x8 walled "arena" (see PLAN_RL.txt, PLAN_CURRICULUM.txt).
+
+## Layout
+
+- `mod/claude-companion/` — the Factorio mod (info.json, control.lua, etc.)
+  - `control.lua` is ~1950 lines (KNOWN OFFENDER per [[feedback-split-large-files]]; refactor only when asked).
+  - `circuit_changes.lua` — DRAFT for mod 0.9.0 cables/circuits support; reference-only, not loaded.
+- `mod/dist/` — built .zip artifacts after each version bump (also copied to C:\FactorioServer\mods\).
+- `bridge/` — Python helpers
+  - `rcon_client.py` — RCON socket wrapper. Requires `FACTORIO_RCON_PASSWORD` env var.
+  - `_claude.py` — `call_mod(r, fn, *args, interface=...)` wrapper with retries.
+  - `_ping.py`, `_patch_arena.py`, `_check_dp.py`, `_exec.py` — one-off probes.
+  - `say.py`, `look.py`, `probe.py`, `build_lab.py` — pre-RL action scripts.
+  - `rl/` — RL pipeline
+    - `env.py` — gym env (`FactorioArenaEnv`); action MultiDiscrete([4, 64, 4]).
+    - `masked_env.py` — adds action masks (tile-empty).
+    - `train_masked.py` — MaskablePPO entry; `--policy mlp|cnn`, `--checkpoint`.
+    - `train_keepawake.py` — wraps train_masked with Windows SetThreadExecutionState (no sleep during long runs).
+    - `callbacks.py` — `BestCheckpointCallback`, `EpisodeJsonlLogger`.
+    - `grid_extractor.py` — CNN features extractor for grid obs (use `--policy cnn`).
+    - `eval_checkpoint.py` — load ckpt, run N deterministic episodes.
+    - `render_arena.py` — PIL PNG renderer (headless-safe).
+    - `demonstration_8x8.py` / `_cables.py` / `_circuits.py` / `_chain.py` — hand-built reference layouts.
+- `server/restart.ps1` — save → warn-chat → stop → deploy + publish mod → start → ping workflow. Use this for "start the server".
+- `logs/` — training logs (`train_*.log`).
+- `checkpoints/` — MaskablePPO `.zip` checkpoints.
+- `images/` — PIL-rendered arena snapshots.
+
+## Server
+
+- Path: `C:\FactorioServer\` (start-server.bat, server-settings.json, mods/, saves/).
+- Factorio 2.0.76, base game only (no Space Age DLC installed but `display-panel` prototype exists in base).
+- `auto_pause = false` in server-settings.json (otherwise game.speed is clamped while no player connected).
+- RCON: `127.0.0.1:27015`, password is the `--rcon-password` arg in start-server.bat.
+- `FACTORIO_RCON_PASSWORD` env var read by `bridge/rcon_client.py`. PowerShell pattern:
+  `$env:FACTORIO_RCON_PASSWORD = (Select-String -Path "C:\FactorioServer\start-server.bat" -Pattern '--rcon-password "([^"]+)"').Matches[0].Groups[1].Value`
+
+## Mod conventions
+
+- Latest version: 0.8.14 (always bump info.json + the pong string in control.lua together).
+- Storage namespace: `__claude-companion__` (separate from `__level__` — `/c` console runs in level context and CANNOT mutate the mod's storage; use a remote function instead).
+- Remote interfaces: `claude` (chat, walking, mining, ping) + `claude_rl` (arena_*).
+- Arena state persists across save/load in `storage.arena`. After a `restart.ps1` the arena bounds, chests, loaders all survive — but if you want to change `target_output` / `sim_max_ticks`, call `claude_rl.arena_set_config({target_output=N, sim_max_ticks=T})` (added in 0.8.14).
+- `arena_setup` requires a player in-game; subsequent calls don't.
+- Directions: raw integers 0/2/4/6/8/10/12/14. `defines.direction.north_east` is nil in 2.0 — DO NOT USE.
+- Position-based entity lookup (find_entities_filtered around a point) is more reliable than unit_number for editor-placed entities — unit_number-based lookup needs `script.register_on_entity_destroyed` first.
+
+## RL pipeline
+
+- Arena: 8x8 walled grid. Bounds currently `{x_min=-20, y_min=73, x_max=-13, y_max=80}`.
+- Entities: 0=transport-belt, 1=inserter, 2=assembling-machine-1, 3=no-op.
+- Hard placement caps per type (env.py): belt=9, inserter=4, asm=3. Over-cap = -1 step reward.
+- Diminishing returns within useful range: `multiplier = max(0.3, 1 / (1 + 0.5 * n_already))`.
+- Base step rewards: belt=+5, inserter=+5, assembler=+12.
+- Episode budget: `MAX_BUILD_ACTIONS = 25`, `MIN_ACTIONS_BEFORE_NOOP = 10`.
+- Sim phase: `SIM_MAX_TICKS_OVERRIDE = 900` (game.speed=64 during sim).
+- Episode reward components (control.lua arena_score): per_gear (×20 since 0.8.13), reached_bonus (+200 when 10 gears in output chest), speed_bonus, activity (asm×30 + ins×5 + belt×0.5), chain_pts (input loader → belts → inserter → asm → inserter → belts → output loader graph walk), neighborhood bonuses (belt-pairs ×3, good drops ×10, good pickups ×10), penalties (useless_belt, invalid_action).
+
+## Stats display
+
+Mod renders stats via real `display-panel` entities (one per line, stacked) 10
+tiles above the arena. Updates every 30 sim ticks during simulate phase, plus
+once at episode end. `always_show` is NOT a valid field on display-panel
+(crashed 0.8.12; removed in 0.8.13).
+
+## Curriculum (per PLAN_CURRICULUM.txt)
+
+1. Gears (CURRENT) — input iron-plate → output iron-gear-wheel, target 10.
+2. Cables — needs mod 0.9.0 (recipe_name in storage + arena_set_task remote per circuit_changes.lua draft).
+3. Circuits — needs mod 0.9.x.
+4. Cables+circuits chain — needs mod 0.10.x.
+
+## Editor convention for arena setup
+
+JJ places these entities in the editor; `arena_setup` reads their positions:
+- 2 "valve" entities (any prototype with type='valve', e.g. top-up-valve) marking opposite corners of the 8x8 grid.
+- 2 loaders just OUTSIDE the grid (one west = input, one east = output).
+- 2 containers next to the loaders (left of input loader = input chest, right of output loader = output chest).

@@ -48,8 +48,8 @@ def call_rl(r, fn, *args):
 SIM_POLL_INTERVAL = 0.1   # seconds; faster polling for short sims
 SIM_POLL_MAX = 600        # ~60 sec wall (sim should usually take ~1s)
 MAX_BUILD_ACTIONS = 25         # reduced from 50 so episodes are shorter
-MIN_ACTIONS_BEFORE_NOOP = 10   # force agent to actually build instead of bailing immediately
-SIM_MAX_TICKS_OVERRIDE = 1800  # override mod default (7200) for faster episodes during training
+MIN_ACTIONS_BEFORE_NOOP = 6    # matches demo length so BC-imprinted policy can end cleanly
+SIM_MAX_TICKS_OVERRIDE = 3600  # 60 game-sec; enough for 10 circuits w/ 2-input chain (gears finish in ~1450)
 
 
 class FactorioArenaEnv(gym.Env):
@@ -186,6 +186,10 @@ class FactorioArenaEnv(gym.Env):
                 # Over the cap: actively discourage.
                 step_reward = -1.0
             self._placements_by_type[entity_choice] += 1
+            # NEW (mod 0.8.15): incremental chain bonus — placements that
+            # contribute to a working chain RIGHT NOW (not just at episode
+            # end) get an immediate kick. Gives much denser gradient.
+            step_reward += float(res.get("chain_bonus", 0) or 0)
         else:
             step_reward = -0.2
         obs = self._read_observation()

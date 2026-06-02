@@ -1,0 +1,46 @@
+# What I'm Doing — Live State
+
+Updated on every substantive action. Paired with context.txt (stable). Sections:
+Current / Done but uncommitted / Blocked / Next concrete steps.
+
+## Current task
+
+Gear task SOLVED. `maskppo_bc_v4.zip` is the canonical gear-task policy:
+- Deterministic, 100% success rate (3/3 eval episodes)
+- +1660 reward each, 10 gears delivered, reached=True
+- Settings: refill_amount=20, target_output=10, sim_max_ticks=1800
+- Mod: 0.8.20
+
+Awaiting JJ to greenlight stage 2 (cables curriculum). All staged
+mod changes are in `mod/claude-companion/NEXT_DEPLOY.md` for one
+bundled deploy.
+
+## Done but uncommitted
+
+- bridge/rcon_client.py: rewrote `command()` to use mirror-packet trick; default drain_timeout 1.0s → 0.05s.
+- bridge/rl/callbacks.py (NEW): BestCheckpointCallback + EpisodeJsonlLogger.
+- bridge/rl/grid_extractor.py (NEW): CNN features extractor for grid obs.
+- bridge/rl/eval_checkpoint.py (NEW): deterministic eval over N episodes.
+- bridge/rl/info_logger.py (NEW): env wrapper that writes per-episode info dict to JSONL.
+- bridge/rl/plot_episodes.py (NEW): text + matplotlib summary of training jsonl.
+- bridge/rl/post_train_report.py (NEW): one-shot report combining jsonl + eval + curve.
+- bridge/rl/train_cables.py (NEW): cables curriculum entry, calls arena_set_task (needs mod 0.9.0).
+- bridge/rl/train_masked.py: --policy mlp|cnn flag, callbacks wired in, save best + jsonl + info.
+- bridge/_claude.py: lua_repr now handles dict and list.
+- bridge/_check_speed.py, _check_dp.py, _patch_arena.py, _ping.py (probes).
+- Mod 0.8.10 → 0.8.14 (display panels, chain bonuses, arena_set_config).
+- progress-report.txt, context.txt, what-im-doing.txt at project root.
+- ~11 new memory entries.
+
+## Blocked
+
+- eval_checkpoint.py needs RCON env — can't run while training holds it.
+- Display-panel visual verification requires JJ in-game.
+- Mod 0.9.0 (cables) blocked on chain_v2 producing a transferable checkpoint.
+
+## Next concrete steps
+
+1. Monitor chain_v2 progress (task b9mvbo286). Watch for early ep_rew_mean trends — if still negative after 5k steps, reward shaping needs another pass.
+2. When training completes (or JJ stops it): run eval_checkpoint.py against `maskppo_chain_v2_best.zip` to quantify; render arena PNG of best episode for visual sanity check.
+3. If chain_v2 converges (reached target ≥30% of episodes): apply circuit_changes.lua draft to mod, bump to 0.9.0, set up cables curriculum.
+4. If chain_v2 plateaus before converging: tune reward shaping (likely raise activity_reward, reduce chain_pts weight if dominating) and re-run.

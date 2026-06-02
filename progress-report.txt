@@ -1,0 +1,136 @@
+# Claude Agentic Player — Progress Report
+
+Running record of major milestones. Newest at top.
+
+---
+
+## 2026-06-01 (later) — Multi-demo BC v5b: variety achieved
+
+- JJ wanted variety: BC v4 alone rigidly builds the same layout every episode.
+- Wrote demo v2 (asm shifted +1 col → cols 3-5, with 2 input belts instead of 1). Direct replay: +1623 reward, 10 gears, reached=True.
+- bc_masked_multi.py trains BC on multiple demos simultaneously.
+- BC v5 (500 epochs, loss 2.0) hybridized into a broken middle-ground.
+- BC v5b (2000 epochs, 30 reps per demo = 60 trajectories total → 420 (obs, action) pairs, loss 6.93 → 0.13) — much tighter.
+- BC v5b stochastic eval over 10 eps: 5 build demo v1 layout, 4 build demo v2, 1 hybrid failure. **9/10 reached target, +1660 each.**
+- maskppo_bc_v5b.zip is the new canonical gear-task policy with variety.
+- Added bridge/rl/compare_policies.py (side-by-side trace of two checkpoints) and bridge/rl/plot_components.py (reward decomposition stacked area chart) for analysis.
+
+## 2026-06-01 — 🎯 GEAR TASK SOLVED
+
+- BC v4 (30 reps × 500 epochs, loss 6.93 → 1.02) with refill=20 plates + sim_max_ticks=1800 + target=10 reaches the target deterministically.
+- 3/3 deterministic eval: **+1660.6 reward, 10 gears in chest, reached=True, finished at tick 1446**.
+- No PPO fine-tuning needed — the BC checkpoint alone is optimal for the gear task.
+- Key insight from debugging: BC v4 was producing exactly 5 gears at refill=10, sim_max=900 — that was the mathematical ceiling (yellow inserter cycle = 0.83s, asm needs 2 plates per gear, so ~5 gears per 15 game-sec). Bumping to refill=20 + sim_max=1800 unlocked target=10.
+- Demo direct replay (replay_demo_8x8.py with arena_debug_state probes) confirmed exact chain dynamics: input chest drains fast when loaders re-enable on simulate, asm crafts at 0.5s game-time per gear, throughput bottleneck is the inserter cycle.
+
+Next: stage 2 (cables curriculum) bundled in next mod deploy per `mod/claude-companion/NEXT_DEPLOY.md`.
+
+## 2026-06-01 — Mod 0.8.17-0.8.19: loader reset, display-panel fix, anti-exploit reward
+
+- 0.8.17: arena_reset now also clears output loader's transport lines + destroys item-on-ground stragglers inside arena.
+- 0.8.18: display-panel text was being set via `dp.text` which doesn't exist on the entity in base 2.0 — switched to `combinator_description` (the actual property). Also added `_cleanup_panels` remote that wipes leftover rendering-API overlays from old 0.8.9-0.8.11 versions. First cleanup destroyed 991 stale rendering objects + 4 panels.
+- RCON sentinel-packet trick had a packet-ordering race (obs call sometimes got reset's response). Reverted rcon_client.command() to simple drain-timeout approach with a stale-packet drain at the start of each call. RTT 66ms but reliable.
+- chain_v6 (PPO from scratch with 0.8.18 dense rewards) ran 14.8k of 30k steps before crashing on transient empty-response burst. 702 episodes, 0/702 produced an active assembler — agent farmed neighborhood/chain bonuses without ever closing the loop.
+- 0.8.19: ANTI-EXPLOIT reward overhaul.
+  - Per-step chain_bonus values shrunk ~5x (max 3 per placement, was up to 15).
+  - per_gear_reward now ONLY counts gears in the chest (×50); gears-on-belts and gears-in-inserters no longer count as production.
+  - reached_bonus +200 → +1000.
+  - 0-production penalty -100 → -200.
+  - NEW gate `chain_alive` = (active_assemblers > 0) OR (active_inserters > 0). When false, ALL positive bonuses (activity_reward, chain_pts/neighborhood_pts, functional_inserter_bonus) ZERO OUT. Agent must have a real working chain before any of the gradient-shaping rewards pay.
+- chain_v7 launched: PPO from scratch with the new anti-exploit shaping.
+
+## 2026-05-31 (late night) — Mod 0.8.16 + arena debug remote + finding
+
+- chain_v5 finished. Best ckpt evaluated 8/8 deterministic = -64.5 reward, 0 gears, chain_pts=30 — PPO converged to a stable but mediocre layout, worse than BC v3 alone.
+- While investigating BC eval inconsistency, discovered: `/silent-command` runs in scenario context, NOT mod context. It cannot see `storage.arena` from the mod side. My earlier diag scripts were probing scenario storage (empty/garbage) and concluding the arena was broken.
+- Mod 0.8.16: added `arena_debug_state` remote that returns the real mod-side state (chest contents, asm crafting progress + inventories, loader presence, raw config). Use via `call_mod(r, 'arena_debug_state', interface='claude_rl')`.
+- Real state confirmed healthy: 8x8 bounds, both loaders + both chests present, input chest refills correctly (briefly shows 98 because the loader has already pulled 2 plates onto its belt by the time we probe).
+- Open: BC v3 eval ep 1 = +74.5 with 1 gear, eps 2-5 = -45.5 with 0 gears (same deterministic policy + env). Likely cause: the input loader keeps internal belt state across episodes; reset wipes the arena interior but not the loader's belt cargo, so ep 1's fresh-loader state differs from ep 2+ where leftover items from a partial chain are still on the loader.
+
+## 2026-05-31 (night) — BC v3 + chain_v5 positive learning
+
+- Realized chain_v3/v4 PPO drift root cause: demo is 6 actions, but env's MIN_ACTIONS_BEFORE_NOOP=10 forced the agent to keep placing entities after BC's last action — those random extra placements wrecked the BC-imprinted layout each rollout.
+- Lowered MIN_ACTIONS_BEFORE_NOOP 10 → 6 (matches demo length).
+- bc_masked.py: collect_demo_pairs now appends a final no-op as the 7th action. BC learns "after demo, stop", not "after demo, keep guessing".
+- BC v3: 7 actions × 15 reps = 105 pairs, 150 epochs, loss 6.93 → 3.54.
+- Eval of BC v3 alone: produced 1 actual gear (reward +74.5)! First time we've seen a real gear in the output chest.
+- Launched chain_v5: PPO from BC v3, ent_coef=0.01, lr=1e-5, target_kl=0.005 (very tight). First 100 eps show first 20 mean -68 → last 20 mean -45 (delta +23, positive learning trajectory).
+- Eval inconsistency: BC v3 ep 1 made 1 gear, eps 2-5 made 0 (same chain layout, chain_pts=31 each). Needs investigation — likely a reset/refill issue or sim-timing variance.
+
+## 2026-05-31 (later evening) — RCON sentinel fix + tight BC fine-tune
+
+- Factorio was logging "invalid message type 0" warnings every RCON call — the mirror-packet trick was sending type-0 (RESPONSE_VALUE) packets from the client side, which Source/Factorio considers invalid even though some servers tolerate it.
+- Fix: switched the sentinel packet from type-0 RESPONSE_VALUE to a valid type-2 EXECCOMMAND with body "/silent-command return" (cheap no-op). Same end-of-stream marker, no log spam.
+- Re-measured RTT: **16.2 ms/call** (was 67ms with mirror trick, 1018ms before any fix). ~63x speedup over the original.
+- chain_v3 (ent_coef 0.10, lr 2e-4) drifted away from BC: first 30 eps mean -38 → last 30 -59. PPO was exploring too far from BC imprint. Stopped at ~1500 steps.
+- Added `--target-kl` flag to train_masked.py so we can early-stop policy updates when KL diverges (useful after BC).
+- Launched chain_v4: ent_coef=0.02, lr=5e-5, target_kl=0.01 — tight fine-tune to preserve BC bias.
+
+## 2026-05-31 (evening) — Per-step chain bonus + BC warm-start
+
+- Mod 0.8.15: arena_place now returns a `chain_bonus` field. Computed at placement time from local neighborhood — belt→belt continuity (+3 each direction), inserter dropping on gear-asm (+15) or any belt (+10), inserter picking from belt (+10) or gear-asm (+10), assembler placed where existing inserters point at it (+15/+10 per pointer). Gives dense per-step gradient instead of only end-of-episode chain reward.
+- bridge/rl/env.py: step reward now adds `res.get("chain_bonus", 0)` on successful placements.
+- bridge/rl/bc_masked.py (NEW): Behavioral cloning for MaskablePPO+CNN, replaying the 8x8 demo trajectory N reps × M epochs. Output checkpoint is shape-compatible with train_masked.py.
+- Verified inserter direction semantics with a runtime probe (Use the Wiki, Luke!): direction=EAST means picks east, drops west. JJ's existing demonstration_8x8 layout is correct (W-facing inserters: picks west, drops east — matches comments).
+- BC trained for 100 epochs, 10 demo reps (60 pairs). Loss 6.93 → 3.47.
+- Fixed InfoJsonlWrapper to forward action_masks() to inner env (gym.Wrapper doesn't auto-forward non-standard methods).
+- Launched chain_v3: PPO fine-tune from BC ckpt, 25k steps, ent_coef=0.10, lr=2e-4, CNN policy, mod 0.8.15 dense rewards.
+
+## 2026-05-31 (later) — RCON 15x speedup + chain_v2 launch
+
+- Diagnosed chain_v1 training slowness: bridge/rcon_client.py used drain_timeout=1.0s per call, so every RCON round-trip waited a full second to confirm "no more packets". Average measured RTT 1018ms.
+- Rewrote `command()` to use the Source RCON "mirror packet" trick: send the real command, then an empty RESPONSE_VALUE packet with a tracked id. Server echoes the real response, then echoes the mirror — at which point we know the real response is fully delivered. drain_timeout drops to 50ms (safety net only).
+- New measured RTT: 67ms/call. ~15x speedup. Expected training rate jumps from ~0.4 fps to ~6 fps.
+- Added bridge/rl/callbacks.py (BestCheckpointCallback saves a separate _best.zip when ep_rew_mean improves; EpisodeJsonlLogger writes one JSON line per finished episode to checkpoints/<name>_episodes.jsonl for plotting/eval).
+- Added bridge/rl/grid_extractor.py (small 2-layer CNN over the 8x8x12 grid + 3 globals, feeds into a 128-dim feature head) and `--policy cnn` flag in train_masked.py.
+- Added bridge/rl/eval_checkpoint.py for deterministic N-episode evaluation runs.
+- Launched chain_v2: 30k steps, CNN policy, ent_coef=0.15, save_every=512, all new callbacks. ETA ~1.3 hr instead of ~30.
+
+## 2026-05-31 — Display panel as real entity + lowered training target
+
+- Mod 0.8.9: stats overlay drawn via rendering API (draw_text/draw_rectangle) 10 tiles above the arena, end-of-episode only.
+- Mod 0.8.10: panel auto-updates every 30 sim ticks (live updates during simulate phase).
+- Mod 0.8.11: chain/adjacency bonuses added to the reward — belt-to-belt continuity (+3 each), inserter dropping onto a gear-recipe assembler or belt (+10 each), inserter picking from belt or assembler (+10 each). Gives gradient for partial chains.
+- Mod 0.8.12: switched panel to real display-panel entities (one per line, stacked). CRASHED — `always_show` is not a valid LuaEntity field on display-panel.
+- Mod 0.8.13: removed `always_show`; pcall-guarded text set; lowered target_output 50→10 gears, sim_max_ticks 7200→900 ticks; per-gear reward 5→20 to keep signal scale right.
+- Mod 0.8.14: added `arena_set_config` remote function so target/ticks can be patched on a persistent save without re-running arena_setup (which needs a player in-game).
+- Bridge: `lua_repr` in _claude.py now serializes dicts/lists (needed to pass overrides through RCON).
+- Training: launched fresh 50k-step MaskablePPO run (task b2o9k0zsi) with the new shaping. Earlier runs that had hard placement caps (belt 9, inserter 4, asm 3) discarded — starting clean to learn the chain-reward gradient from scratch.
+
+## 2026-05-30 — Reward shaping iteration: hard caps to stop spam
+
+- Mod 0.8.8: hard caps per entity type with -1 over-cap penalty; agent had been placing 17 inserters then spamming belts. Caps + diminishing returns within useful range.
+- Empty/early-noop penalty tuned: -1000 → -100; valid placement +3; min 10 actions before no-op allowed; ent_coef 0.10 → 0.15 for curiosity.
+- Behavioral-cloning warm-start from hand-built 8x8 demonstration explored (see bridge/rl/demonstration_8x8.py).
+
+## 2026-05-29 — MaskablePPO + action masking
+
+- Switched from vanilla PPO to MaskablePPO (sb3_contrib). Action mask = entity_mask ∪ tile_empty_mask ∪ direction_mask — prevents wasted picks on occupied tiles.
+- train_masked.py + masked_env.py + train_keepawake.py (Windows SetThreadExecutionState wrapper for overnight runs).
+- PIL-based PNG renderer (render_arena.py) for headless arena visualization.
+
+## 2026-05-27 to 2026-05-28 — RL pipeline online
+
+- Gymnasium env wrapping the mod (bridge/rl/env.py) with MultiDiscrete([4, W*H, 4]) action space and Box observation.
+- Mod 0.8.0+: arena_setup uses 2 valves to mark corners, 2 loaders for I/O, 2 chests for input/output. arena_reset wipes interior, refills input chest. arena_start_simulate sets game.speed=64 with tick_paused=false (auto_pause disabled in server-settings.json).
+- Reward components: per_gear_reward, reached_bonus, speed_bonus, activity_reward (asm×30 + ins×5 + belt×0.5), chain_pts (input loader → belts → inserter → assembler → inserter → belts → output loader graph walk), penalties for useless belts and invalid actions.
+- Curriculum plan drafted (PLAN_CURRICULUM.txt): gears → cables → circuits → cables+circuits chain.
+
+## 2026-05-25 to 2026-05-26 — Autobuild + companion controller
+
+- Bridge build_lab.py: places pre-defined factory recipes via RCON.
+- Companion mod handles free-standing characters (no player_index) via on_tick action loop — walking-along-paths and mining work even without a logged-in player.
+- Mod 0.7.0 attempted Factorio 2.0 direction enums (`defines.direction.north_east`) but those are nil in 2.0; reverted to raw integers (0,2,4,6,8,10,12,14) in 0.7.1.
+
+## 2026-05-23 to 2026-05-25 — Perception + actions
+
+- look.py / probe.py: surface-snapshot, entity-find, and inspection helpers.
+- say.py: chat into the game via RCON.
+- Mod 0.3.x: walking (pathfinder request → on_tick walking_state ticking), mining job queue, basic actions. JJ insisted on real pathfinding over teleportation.
+
+## 2026-05-23 — Project bootstrap
+
+- Phase 0: dedicated Factorio server set up at C:\FactorioServer (start-server.bat, server-settings.json with auto_pause=false).
+- claude-companion mod scaffold (info.json, control.lua) — initial chat-buffer + ping/pong remote interface. Published to mod portal.
+- RCON client (bridge/rcon_client.py) + _claude.call_mod wrapper with retry on empty responses and raw_decode fallback for concatenated JSON.
+- Server-side helpers: restart.ps1 (save → warn-chat → stop → deploy → publish → start → ping workflow).
