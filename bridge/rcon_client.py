@@ -114,7 +114,7 @@ class RconClient:
             finally:
                 self.sock = None
 
-    def command(self, cmd: str, drain_timeout: float = 0.1) -> str:
+    def command(self, cmd: str, drain_timeout: float = 0.2) -> str:
         """Send one command and return concatenated output.
 
         Sentinel-packet tricks (mirror RESPONSE_VALUE, or "/silent-command

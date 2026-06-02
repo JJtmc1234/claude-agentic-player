@@ -45,11 +45,11 @@ def call_rl(r, fn, *args):
     return _call_mod(r, fn, *args, interface="claude_rl")
 
 
-SIM_POLL_INTERVAL = 0.1   # seconds; faster polling for short sims
-SIM_POLL_MAX = 600        # ~60 sec wall (sim should usually take ~1s)
-MAX_BUILD_ACTIONS = 25         # reduced from 50 so episodes are shorter
-MIN_ACTIONS_BEFORE_NOOP = 6    # matches demo length so BC-imprinted policy can end cleanly
-SIM_MAX_TICKS_OVERRIDE = 3600  # 60 game-sec; enough for 10 circuits w/ 2-input chain (gears finish in ~1450)
+SIM_POLL_INTERVAL = 0.25  # seconds; spaced enough to not saturate RCON during sim phase
+SIM_POLL_MAX = 240        # 60 sec wall max
+MAX_BUILD_ACTIONS = 60         # 16x16 arena = room for ~3 parallel chains (~20 entities each)
+MIN_ACTIONS_BEFORE_NOOP = 12   # force agent to build meaningful chain before bailing
+SIM_MAX_TICKS_OVERRIDE = 3600  # 60 game-sec; enough for ~30 cables w/ 1-2 chains
 
 
 class FactorioArenaEnv(gym.Env):
@@ -164,15 +164,11 @@ class FactorioArenaEnv(gym.Env):
             info["budget_exceeded"] = self._build_action_count >= MAX_BUILD_ACTIONS
             return obs, reward, True, False, info
 
-        # Per-step shaping with HARD CAPS per type. A typical working chain
-        # is ~3 assemblers, ~4 inserters, ~10 belts. Beyond those counts,
-        # additional placements of the same type are NEGATIVE — preventing
-        # the agent from gaming the placement reward by spamming one thing.
-        # Base rewards (first of type): belt=+5, inserter=+5, assembler=+12.
-        # Curve shape: full reward up to soft start (1st-3rd), diminishing
-        # to the cap, then -1 per excess placement.
-        TYPE_CAPS = {0: 9, 1: 4, 2: 3}    # belt, inserter, assembler (demo uses 6 belts; +slack for variations)
-        BASE_REWARDS = {0: 5.0, 1: 5.0, 2: 12.0}
+        # 16x16 arena needs more placements per type for parallel chains.
+        # Soft caps inflated proportionally; the mod's chain_alive gate
+        # plus active-chain rewards handle "useful vs useless" naturally.
+        TYPE_CAPS = {0: 30, 1: 12, 2: 6}  # belt, inserter, assembler — supports ~3 parallel chains
+        BASE_REWARDS = {0: 3.0, 1: 4.0, 2: 10.0}  # smaller per-placement, real reward comes from production
         res = call_rl(self._rcon, "arena_place", entity_choice, tile_index, direction)
         if res.get("ok") and not res.get("noop"):
             n_already = self._placements_by_type[entity_choice]

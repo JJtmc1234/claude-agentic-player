@@ -35,7 +35,7 @@ def lua_repr(v: object) -> str:
     raise TypeError(f"lua_repr: unsupported {type(v).__name__}")
 
 
-def call_mod(r, fn: str, *args, interface: str = "claude", retries: int = 2) -> dict:
+def call_mod(r, fn: str, *args, interface: str = "claude", retries: int = 5) -> dict:
     """Call remote.call(interface, fn, *args) via RCON; parse JSON response.
     Default interface is 'claude'; pass interface='claude_rl' for arena_* fns.
 
