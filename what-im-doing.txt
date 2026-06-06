@@ -36,9 +36,31 @@ fuller partial demo (e.g. 9 actions including 2 more output belts).
 
 ## Curriculum next
 
-- belts 16x16 initial (CURRENT BC)
+- belts 16x16 initial (CURRENT PPO)
 - circuits 16x16 initial (cables provided)
 - mastery stages later — need 3rd input loader for some
+
+## Useful tools added today
+
+- `bridge/rl/watch_training.py` — read-only tail of an info.jsonl with rolling stats.
+  `python bridge/rl/watch_training.py --jsonl checkpoints/maskppo_belt16_v1_info.jsonl --window 30 --once`
+- `bridge/rl/status.py` — one-shot summary of the most recent info.jsonl. No args.
+- `bridge/_check_lag.py` — quick lag/entity diagnosis script.
+- `bridge/_cleanup_panels.py` — wipe leftover rendering objects.
+
+## Likely next conversation items (for fresh-claude pickup)
+
+1. Belt v1 status: best ep reward, chain_alive rate, did it crack chest delivery?
+   `python bridge/rl/status.py`
+2. If belt v1 cracked chest: same recipe for circuits
+   `python bridge/rl/bc_circuits_partial.py` then PPO with target_kl=0.005
+3. If belt v1 did NOT crack: consider deploying mod 0.9.8 (multi-machine
+   bonus + speed_bonus boost staged in NEXT_DEPLOY.md), OR design a fuller
+   imperfect demo (e.g., 9 actions placing 2 more output belts), OR add a
+   "loader_reach_bonus" reward for belts that form a continuous chain to
+   the output loader.
+4. Mastery stages need a 3rd input loader. JJ would need to place it
+   in-game first (similar to how he did the 2nd loader).
 
 ## Solved milestones
 
