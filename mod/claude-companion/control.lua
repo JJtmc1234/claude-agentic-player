@@ -449,7 +449,7 @@ local function ping()
   init_all()
   return {
     ok = true,
-    pong = "from claude-companion 0.9.7",
+    pong = "from claude-companion 0.9.8",
     tick = game.tick,
     chat_buffer_size = #storage.chat_log,
     mining_jobs = count_kv(storage.mining_jobs),
@@ -1608,17 +1608,31 @@ local function arena_place(entity_idx, tile_idx, dir_idx)
   if name == 'transport-belt' then
     local off = belt_offsets[direction]
     if off then
+      -- Belt continuity bonus boosted from +1/+1 to +5/+5 (0.9.8) — explicit
+      -- strong gradient for "extend the belt chain" so PPO can find belts
+      -- that bridge from the asm output to the output loader (which has been
+      -- the cable/belt 16x16 plateau).
       local front = s.find_entities_filtered{
         position = { e.position.x + off[1], e.position.y + off[2] },
         name = 'transport-belt', radius = 0.4,
       }[1]
-      if front and front.valid then chain_bonus = chain_bonus + 1 end
+      if front and front.valid then chain_bonus = chain_bonus + 5 end
       local back = s.find_entities_filtered{
         position = { e.position.x - off[1], e.position.y - off[2] },
         name = 'transport-belt', radius = 0.4,
       }[1]
       if back and back.valid and back.direction == direction then
-        chain_bonus = chain_bonus + 1
+        chain_bonus = chain_bonus + 5
+      end
+      -- Output-loader proximity bonus: a belt that's east-facing AND within
+      -- a few tiles of the output loader's input position gets +X. Pushes
+      -- belt placements toward the actual chest delivery.
+      if direction == 4 and a.output_loader then
+        local dx = math.abs((e.position.x + 1) - a.output_loader.x)
+        local dy = math.abs(e.position.y - a.output_loader.y)
+        if dy < 1.0 and dx <= 6 then
+          chain_bonus = chain_bonus + (7 - dx)  -- +6 next to loader, +1 6 tiles away
+        end
       end
     end
   elseif name == 'inserter' then
@@ -1850,7 +1864,9 @@ local function arena_score()
   total = total + components.per_gear_reward
 
   if reached then
-    local base = (a.sim_max_ticks - ticks_taken) * 0.1
+    -- Speed bonus 3x stronger (0.1 -> 0.3) so reaching target FAST (= more
+    -- parallel chains) wins big. Multi-machine bonus below piles on top.
+    local base = (a.sim_max_ticks - ticks_taken) * 0.3
     components.speed_bonus = base
     total = total + base
     -- Massive reached bonus so achieving the goal dwarfs anything farmable.
@@ -1973,11 +1989,19 @@ local function arena_score()
   if chain_alive then
     components.activity_reward = active_belts * 0.5 + active_inserters * 5 + active_assemblers * 30
     components.functional_inserter_bonus = 10 * functional_inserters
+    -- Multi-machine bonus (0.9.8): pay +80 per ACTIVE assembler beyond the first.
+    -- Strongly incentivizes parallel chains in the 16x16 arena.
+    if active_assemblers > 1 then
+      components.multi_machine_bonus = (active_assemblers - 1) * 80
+    else
+      components.multi_machine_bonus = 0
+    end
   else
     components.activity_reward = 0
     components.functional_inserter_bonus = 0
+    components.multi_machine_bonus = 0
   end
-  total = total + components.activity_reward + components.functional_inserter_bonus
+  total = total + components.activity_reward + components.functional_inserter_bonus + components.multi_machine_bonus
 
   -- Graph-walk chain reward: trace from input loader east through belts ->
   -- inserter -> gear assembler -> inserter -> belts -> output loader. Each
