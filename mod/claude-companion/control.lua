@@ -449,7 +449,7 @@ local function ping()
   init_all()
   return {
     ok = true,
-    pong = "from claude-companion 0.9.11",
+    pong = "from claude-companion 0.9.12",
     tick = game.tick,
     chat_buffer_size = #storage.chat_log,
     mining_jobs = count_kv(storage.mining_jobs),
@@ -1624,14 +1624,16 @@ local function arena_place(entity_idx, tile_idx, dir_idx)
       if back and back.valid and back.direction == direction then
         chain_bonus = chain_bonus + 5
       end
-      -- Output-loader proximity bonus: a belt that's east-facing AND within
-      -- a few tiles of the output loader's input position gets +X. Pushes
-      -- belt placements toward the actual chest delivery.
+      -- Output-loader proximity bonus: ANY east-facing belt on the output
+      -- loader's row gets a bonus that scales with closeness. 0.9.12: range
+      -- extended from dx<=6 to dx<=12 so the entire row-7-east corridor
+      -- between the asm and the loader rewards placement, not just the
+      -- last 6 tiles. Strong gradient for "place belts to bridge to loader".
       if direction == 4 and a.output_loader then
         local dx = math.abs((e.position.x + 1) - a.output_loader.x)
         local dy = math.abs(e.position.y - a.output_loader.y)
-        if dy < 1.0 and dx <= 6 then
-          chain_bonus = chain_bonus + (7 - dx)  -- +6 next to loader, +1 6 tiles away
+        if dy < 1.0 and dx <= 12 then
+          chain_bonus = chain_bonus + (13 - dx)  -- +12 next to loader, +1 12 tiles away
         end
       end
     end
