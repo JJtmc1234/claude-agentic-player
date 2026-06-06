@@ -114,18 +114,21 @@ class RconClient:
             finally:
                 self.sock = None
 
-    def command(self, cmd: str, drain_timeout: float = 0.2) -> str:
+    def command(self, cmd: str, drain_timeout: float = 1.0,
+                inter_packet_timeout: float = 0.05) -> str:
         """Send one command and return concatenated output.
 
-        Sentinel-packet tricks (mirror RESPONSE_VALUE, or "/silent-command
-        return") both turn out to race with the original command's rcon.print
-        output — Factorio sends EXECCOMMAND responses immediately but
-        rcon.print output is queued separately, so the sentinel's reply
-        sometimes arrives BEFORE the real command's rcon.print, and we
-        break the read loop too early.
+        Two-phase drain:
+          1. After sending the command, wait up to `drain_timeout` seconds for
+             the FIRST response packet (the server may be busy under sim load).
+          2. After the first packet, only wait `inter_packet_timeout` for each
+             subsequent packet — packets within a single response come back
+             back-to-back from Factorio, so a short inter-packet gap is
+             plenty.
 
-        Simple drain_timeout (no sentinel) avoids the race entirely. Each
-        call costs ~drain_timeout wall time but is reliable.
+        This avoids both (a) cutting off slow first responses and (b) waiting
+        the full drain timeout after the last packet of every call. Each call
+        costs `(time to first packet) + inter_packet_timeout`.
         """
         if self.sock is None:
             raise RuntimeError("not connected")
@@ -138,8 +141,16 @@ class RconClient:
             pass
         self.sock.sendall(_pack(self._next_id, SERVERDATA_EXECCOMMAND, cmd))
         self._next_id += 1
-        self.sock.settimeout(drain_timeout)
         parts: list[str] = []
+        # Phase 1: wait up to drain_timeout for the first packet.
+        self.sock.settimeout(drain_timeout)
+        try:
+            _, _, body = _read_packet(self.sock)
+            parts.append(body)
+        except socket.timeout:
+            return ""
+        # Phase 2: keep reading while packets keep arriving fast.
+        self.sock.settimeout(inter_packet_timeout)
         try:
             while True:
                 _, _, body = _read_packet(self.sock)

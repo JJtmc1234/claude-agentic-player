@@ -449,7 +449,7 @@ local function ping()
   init_all()
   return {
     ok = true,
-    pong = "from claude-companion 0.9.3",
+    pong = "from claude-companion 0.9.6",
     tick = game.tick,
     chat_buffer_size = #storage.chat_log,
     mining_jobs = count_kv(storage.mining_jobs),
@@ -1475,6 +1475,17 @@ local function arena_reset()
     if e.valid then e.destroy(); removed = removed + 1 end
   end
   a.episode_start_tick = game.tick
+  a.placements_count = 0
+  -- Reset panel to show the new task ready.
+  do
+    local lines = {
+      string.format("READY  %s -> %s  target=%d",
+        a.recipe_name or '?', a.output_item or '?', a.target_output or 0),
+      "(awaiting first placement)",
+      "",
+    }
+    update_arena_panel(a, s, lines, {r=0.7, g=1, b=0.7})
+  end
   return { ok = true, removed = removed, episode_start_tick = a.episode_start_tick }
 end
 
@@ -1486,8 +1497,15 @@ local function arena_get_observation()
   if not a.bounds then return { ok = false, error = 'arena not set up' } end
   local s = game.surfaces[a.surface_name]
   local w, h = arena_width(a), arena_height(a)
-  local n_channels = 12
-  -- Initialize grid: empty=1 everywhere, all other channels 0.
+  -- 10 channels (was 12; dropped chest channels 10/11 which were never set
+  -- because chests are OUTSIDE arena bounds and find_entities_filtered
+  -- targets the arena interior). For 16x16: 16*16*10+3=2563 dims (was 3075).
+  local n_channels = 10
+  -- Channel layout:
+  --   0: empty
+  --   1..4: belt direction (N/E/S/W)
+  --   5..8: inserter direction (N/E/S/W)
+  --   9: assembler anchor
   local grid = {}
   for i = 1, w * h * n_channels do grid[i] = 0 end
   local function idx(col, row, ch) return ((row * w) + col) * n_channels + ch + 1 end
@@ -1500,6 +1518,7 @@ local function arena_get_observation()
     area = {{ a.bounds.x_min - 0.5, a.bounds.y_min - 0.5 },
             { a.bounds.x_max + 0.5, a.bounds.y_max + 0.5 }},
   }
+  -- Chest unit_numbers (still needed for the globals' input/output counts).
   local in_un, out_un = arena_chest_unums(a)
   local function set_channel(col, row, ch)
     if col < 0 or col >= w or row < 0 or row >= h then return end
@@ -1510,11 +1529,7 @@ local function arena_get_observation()
     if e.valid then
       local col = math.floor(e.position.x - a.bounds.x_min + 0.0)
       local row = math.floor(e.position.y - a.bounds.y_min + 0.0)
-      if e.unit_number == in_un then
-        set_channel(col, row, 10)
-      elseif e.unit_number == out_un then
-        set_channel(col, row, 11)
-      elseif e.name == 'transport-belt' then
+      if e.name == 'transport-belt' then
         local d = e.direction or 0
         local ch = ({ [0] = 1, [4] = 2, [8] = 3, [12] = 4 })[d] or 1
         set_channel(col, row, ch)
@@ -1523,7 +1538,6 @@ local function arena_get_observation()
         local ch = ({ [0] = 5, [4] = 6, [8] = 7, [12] = 8 })[d] or 5
         set_channel(col, row, ch)
       elseif e.name == 'assembling-machine-1' then
-        -- mark only the anchor (entity position is the center for 3x3)
         local acol = math.floor(e.position.x - a.bounds.x_min - 1 + 0.0)
         local arow = math.floor(e.position.y - a.bounds.y_min - 1 + 0.0)
         set_channel(acol, arow, 9)
@@ -1650,6 +1664,19 @@ local function arena_place(entity_idx, tile_idx, dir_idx)
         end
       end
     end
+  end
+  -- Live build-phase panel update: show what's been placed so far so JJ
+  -- can read progress in-game without waiting for the sim phase.
+  do
+    local n_placed = (a.placements_count or 0) + 1
+    a.placements_count = n_placed
+    local lines = {
+      string.format("BUILDING  action #%d (chain_bonus=%+d)", n_placed, chain_bonus),
+      string.format("recipe: %s -> %s  target=%d",
+        a.recipe_name or '?', a.output_item or '?', a.target_output or 0),
+      "(panel updates on each placement)",
+    }
+    update_arena_panel(a, s, lines, {r=1, g=0.9, b=0.4})
   end
   return {
     ok = true,

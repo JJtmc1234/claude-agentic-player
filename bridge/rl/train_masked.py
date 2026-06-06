@@ -78,7 +78,7 @@ def main() -> int:
                 features_extractor_class=GridExtractor,
                 features_extractor_kwargs=dict(
                     width=raw_env.width, height=raw_env.height,
-                    n_channels=12, n_globals=3, features_dim=128,
+                    n_channels=raw_env.n_channels, n_globals=3, features_dim=128,
                 ),
                 net_arch=[128],
             )

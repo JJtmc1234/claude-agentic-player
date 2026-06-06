@@ -47,8 +47,8 @@ class MaskableFactorioArenaEnv(FactorioArenaEnv):
         if self._last_obs is None:
             tile_mask = np.ones(n_tiles, dtype=bool)
         else:
-            # Obs layout: (H, W, 12) flattened + 3 globals.
-            grid = self._last_obs[: n_tiles * 12].reshape(self.height, self.width, 12)
+            ch = self.n_channels  # mod 0.9.4: 10 channels (was 12)
+            grid = self._last_obs[: n_tiles * ch].reshape(self.height, self.width, ch)
             tile_empty = (grid[:, :, 0] > 0.5).reshape(-1)  # row-major
             tile_mask = tile_empty
         return np.concatenate([entity_mask, tile_mask, direction_mask])

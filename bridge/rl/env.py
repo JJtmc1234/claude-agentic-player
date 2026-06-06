@@ -75,7 +75,8 @@ class FactorioArenaEnv(gym.Env):
         self.refill_amount = c["refill_amount"]
 
         n_tiles = self.width * self.height
-        self.obs_dim = n_tiles * 12 + 3
+        self.n_channels = 10  # mod 0.9.4: dropped chest channels (never set)
+        self.obs_dim = n_tiles * self.n_channels + 3
         self.observation_space = spaces.Box(
             low=0.0, high=1.0, shape=(self.obs_dim,), dtype=np.float32
         )
@@ -106,11 +107,14 @@ class FactorioArenaEnv(gym.Env):
                 idx = int(k) - 1
                 if 0 <= idx < self.obs_dim - 3:
                     out[idx] = float(v)
-        # Normalize globals into [0,1] range (or close to it)
         out[-3] = float(globals_.get("tick_in_episode", 0.0))
         out[-2] = float(globals_.get("output_count", 0.0)) / max(1, self.target_output)
         out[-1] = float(globals_.get("input_count", 0.0)) / max(1, self.refill_amount)
         return out
+
+    @property
+    def channels(self):
+        return self.n_channels
 
     def reset(self, *, seed=None, options=None):
         super().reset(seed=seed)
