@@ -1,4 +1,4 @@
-"""BC pretrain on imperfect 16x16 circuit demo, then PPO discovers rest."""
+"""BC pretrain on imperfect 16x16 transport-belt demo (initial stage)."""
 
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ from sb3_contrib.common.wrappers import ActionMasker
 
 from _claude import call_mod
 from rcon_client import RconClient
-from rl.demonstration_circuits_16x16_partial import as_actions
+from rl.demonstration_belts_16x16_partial import as_actions
 from rl.grid_extractor import GridExtractor
 from rl.masked_env import MaskableFactorioArenaEnv
 
@@ -27,16 +27,18 @@ def mask_fn(env):
     return env.action_masks()
 
 
-def configure_circuits_initial():
-    """Initial-stage: cables in input chest (not made by agent yet)."""
+def configure_belts_initial():
+    """Initial-stage: gears pre-made in input chest (cable task gives copper-
+    plate; this gives iron-gear-wheel). Mastery comes later when the agent
+    can compose a gear-making chain on its own."""
     with RconClient() as r:
         spec = {
-            'recipe_name': 'electronic-circuit',
-            'output_item': 'electronic-circuit',
-            'target_output': 20,  # 16x16, multi-machine pressure
+            'recipe_name': 'transport-belt',
+            'output_item': 'transport-belt',
+            'target_output': 40,  # 2 belts per craft * ~20 crafts; pressures parallelism
             'input_items': [
-                {'name': 'iron-plate', 'count': 20},
-                {'name': 'copper-cable', 'count': 60},
+                {'name': 'iron-plate', 'count': 40},
+                {'name': 'iron-gear-wheel', 'count': 40},
             ],
             'sim_max_ticks': 3600,
         }
@@ -61,29 +63,29 @@ def main() -> int:
     p.add_argument('--epochs', type=int, default=2000)
     p.add_argument('--reps', type=int, default=50)
     p.add_argument('--lr', type=float, default=3e-4)
-    p.add_argument('--save', default='checkpoints/maskppo_bc_circ16_v1.zip')
+    p.add_argument('--save', default='checkpoints/maskppo_bc_belt16_v1.zip')
     args = p.parse_args()
 
     save_path = Path(args.save)
     save_path.parent.mkdir(parents=True, exist_ok=True)
 
-    if not configure_circuits_initial():
-        print('[bc-circ16] failed to set circuit task')
+    if not configure_belts_initial():
+        print('[bc-belt] failed to set transport-belt task')
         return 1
 
     raw_env = MaskableFactorioArenaEnv()
     env = ActionMasker(raw_env, mask_fn)
     demo = list(as_actions())
-    print(f'[bc-circ16] partial demo: {len(demo)} actions')
+    print(f'[bc-belt] partial demo: {len(demo)} actions')
 
-    print(f'[bc-circ16] collecting {args.reps} reps ...')
+    print(f'[bc-belt] collecting {args.reps} reps ...')
     all_obs, all_acts = [], []
     for _ in range(args.reps):
         obs, acts = collect_demo_pairs(env, demo)
         all_obs.append(obs); all_acts.append(acts)
     demo_obs = np.concatenate(all_obs, axis=0)
     demo_acts = np.concatenate(all_acts, axis=0)
-    print(f'[bc-circ16] total: {len(demo_obs)} pairs')
+    print(f'[bc-belt] total: {len(demo_obs)} pairs')
 
     policy_kwargs = dict(
         features_extractor_class=GridExtractor,
@@ -101,16 +103,16 @@ def main() -> int:
     obs_t = th.as_tensor(demo_obs, device=policy.device)
     acts_t = th.as_tensor(demo_acts, device=policy.device)
 
-    print(f'[bc-circ16] training {args.epochs} epochs (short — partial demo) ...')
+    print(f'[bc-belt] training {args.epochs} epochs (target loss < 1.0 for demo reproduction) ...')
     for epoch in range(args.epochs):
         dist = policy.get_distribution(obs_t)
         log_probs = dist.log_prob(acts_t)
         loss = -log_probs.mean()
         optimizer.zero_grad(); loss.backward(); optimizer.step()
-        if epoch == 0 or (epoch + 1) % 10 == 0:
-            print(f'[bc-circ16] epoch {epoch+1}/{args.epochs}  loss = {loss.item():.4f}')
+        if epoch == 0 or (epoch + 1) % 100 == 0:
+            print(f'[bc-belt] epoch {epoch+1}/{args.epochs}  loss = {loss.item():.4f}')
 
-    print(f'[bc-circ16] saving {save_path}')
+    print(f'[bc-belt] saving {save_path}')
     model.save(str(save_path))
     env.close()
     return 0

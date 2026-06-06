@@ -449,7 +449,7 @@ local function ping()
   init_all()
   return {
     ok = true,
-    pong = "from claude-companion 0.9.6",
+    pong = "from claude-companion 0.9.7",
     tick = game.tick,
     chat_buffer_size = #storage.chat_log,
     mining_jobs = count_kv(storage.mining_jobs),
@@ -1814,16 +1814,39 @@ local function arena_score()
       gears_inserters = gears_inserters + ins.held_stack.count
     end
   end
-  gears_total = gears_total + gears_belts + gears_inserters
+  -- Also count items currently being crafted / sitting in any asm's
+  -- output buffer in the arena. Partial credit for "the asm is working,
+  -- it just hasn't been picked up yet."
+  local gears_in_asm = 0
+  for _, asm in ipairs(s.find_entities_filtered{
+    area = {{ a.bounds.x_min, a.bounds.y_min },
+            { a.bounds.x_max + 1, a.bounds.y_max + 1 }},
+    name = 'assembling-machine-1',
+  }) do
+    if asm.valid then
+      local oi = asm.get_output_inventory()
+      if oi then gears_in_asm = gears_in_asm + (oi.get_item_count(a.output_item) or 0) end
+    end
+  end
+  gears_total = gears_total + gears_belts + gears_inserters + gears_in_asm
   components.gears_in_chest = out_count
   components.gears_on_belts = gears_belts
   components.gears_in_inserters = gears_inserters
+  components.gears_in_asm = gears_in_asm
   components.gears_total = gears_total
-  -- ONLY gears actually delivered to the chest count. Gears in-flight on
-  -- belts or held in inserters are not production — they're hopeful state.
-  -- Reward per delivered gear is high so end-of-episode dominates the
-  -- exploitable per-step neighborhood bonuses.
-  components.per_gear_reward = out_count * 50
+  -- Reward partial production too: items in chest are FULL credit, in
+  -- transit on belts/inserter hands/asm output get partial credit. This
+  -- pays the agent for "chain alive and producing" even when sim runs
+  -- out before everything reaches the chest.
+  --   chest: 50  (full)
+  --   asm output: 20 (just needs an output inserter to pick)
+  --   inserter hand: 15 (item is being moved)
+  --   belt: 10 (item is in transit on a belt)
+  components.per_gear_reward =
+      out_count * 50
+    + gears_in_asm * 20
+    + gears_inserters * 15
+    + gears_belts * 10
   total = total + components.per_gear_reward
 
   if reached then
