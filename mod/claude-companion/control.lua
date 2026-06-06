@@ -449,7 +449,7 @@ local function ping()
   init_all()
   return {
     ok = true,
-    pong = "from claude-companion 0.9.12",
+    pong = "from claude-companion 0.10.0",
     tick = game.tick,
     chat_buffer_size = #storage.chat_log,
     mining_jobs = count_kv(storage.mining_jobs),
@@ -1598,7 +1598,15 @@ local function arena_place(entity_idx, tile_idx, dir_idx)
     return { ok = false, error = 'create_entity returned nil', penalty = 1 }
   end
   if name == 'assembling-machine-1' then
-    e.set_recipe(a.recipe_name or 'iron-gear-wheel')
+    -- Multi-product chains (0.10.0): if `a.recipe_options` is set, use
+    -- direction-as-recipe-index. dir_idx 0/1/2/3 -> recipe_options[1..4].
+    -- Falls back to a.recipe_name when no options are configured (single-
+    -- recipe tasks like gears, cables, circuits-initial).
+    local recipe_for_this_asm = a.recipe_name or 'iron-gear-wheel'
+    if a.recipe_options and a.recipe_options[dir_idx + 1] then
+      recipe_for_this_asm = a.recipe_options[dir_idx + 1]
+    end
+    pcall(function() e.set_recipe(recipe_for_this_asm) end)
   end
   -- Compute incremental chain bonus: how much this placement contributes to
   -- a working chain RIGHT NOW. Bonuses are SMALL (max ~3 per placement) so
@@ -2411,8 +2419,19 @@ local function arena_set_task(spec)
     a.input_items = spec.input_items
   end
   if spec.sim_max_ticks then a.sim_max_ticks = spec.sim_max_ticks end
-  -- Also re-set the recipe on any existing assemblers in the arena so a
-  -- mid-session switch doesn't leave a stale recipe selected.
+  -- 0.10.0: multi-product chains. recipe_options is an indexed list (1-based);
+  -- when the agent places an asm with direction dir, it gets recipe_options[dir+1].
+  -- If recipe_options is not set, all asms get a.recipe_name.
+  if spec.recipe_options then
+    for _, rname in pairs(spec.recipe_options) do
+      if not prototypes.recipe[rname] then
+        return { ok = false, error = 'no such recipe in options: ' .. rname }
+      end
+    end
+    a.recipe_options = spec.recipe_options
+  elseif spec.clear_recipe_options then
+    a.recipe_options = nil
+  end
   local s = game.surfaces[a.surface_name]
   if s then
     local asms = s.find_entities_filtered{
@@ -2426,6 +2445,7 @@ local function arena_set_task(spec)
   return {
     ok = true,
     recipe_name = a.recipe_name,
+    recipe_options = a.recipe_options,
     output_item = a.output_item,
     target_output = a.target_output,
     input_items = a.input_items,
