@@ -449,7 +449,7 @@ local function ping()
   init_all()
   return {
     ok = true,
-    pong = "from claude-companion 0.10.0",
+    pong = "from claude-companion 0.10.2",
     tick = game.tick,
     chat_buffer_size = #storage.chat_log,
     mining_jobs = count_kv(storage.mining_jobs),
@@ -1858,20 +1858,102 @@ local function arena_score()
   components.gears_in_inserters = gears_inserters
   components.gears_in_asm = gears_in_asm
   components.gears_total = gears_total
-  -- Reward partial production too: items in chest are FULL credit, in
-  -- transit on belts/inserter hands/asm output get partial credit. This
-  -- pays the agent for "chain alive and producing" even when sim runs
-  -- out before everything reaches the chest.
-  --   chest: 50  (full)
-  --   asm output: 20 (just needs an output inserter to pick)
-  --   inserter hand: 15 (item is being moved)
-  --   belt: 10 (item is in transit on a belt)
+  --   chest: 100 (FULL credit — JJ wants circuits BIG)
+  --   asm output: 25  (just needs an output inserter to pick)
+  --   inserter hand: 20 (item is being moved)
+  --   belt: 12 (item is in transit on a belt)
   components.per_gear_reward =
-      out_count * 50
-    + gears_in_asm * 20
-    + gears_inserters * 15
-    + gears_belts * 10
+      out_count * 100
+    + gears_in_asm * 25
+    + gears_inserters * 20
+    + gears_belts * 12
   total = total + components.per_gear_reward
+
+  -- 0.10.1: intermediate-product + inserter-bridging bonuses (multi-product
+  -- chains). Tier per JJ: inserter holding cable/input is HIGHEST partial
+  -- signal (= bridge between asms is built), circuits in chest is biggest
+  -- absolute reward, cables in transit get smaller credit.
+  local intermediate_items = {}
+  if a.recipe_options then
+    for _, rname in pairs(a.recipe_options) do
+      local rproto = prototypes.recipe[rname]
+      if rproto and rproto.products then
+        for _, prod in pairs(rproto.products) do
+          if prod.name and prod.name ~= a.output_item then
+            intermediate_items[prod.name] = true
+          end
+        end
+      end
+    end
+  end
+  local input_items_set = {}
+  if a.input_items then
+    for _, it in ipairs(a.input_items) do
+      if it.name then input_items_set[it.name] = true end
+    end
+  end
+  local intermediate_count = 0       -- cables in transit
+  local input_in_transit_count = 0   -- iron / copper plates on belts + asm input bufs
+  local inserter_bridging_count = 0  -- inserter holding ANY component of the chain
+  local arena_area = {{ a.bounds.x_min, a.bounds.y_min },
+                     { a.bounds.x_max + 1, a.bounds.y_max + 1 }}
+  -- Items on belts: intermediate (cable) OR input (plate) == "components of the chain"
+  for _, b in ipairs(s.find_entities_filtered{ area = arena_area, name = 'transport-belt' }) do
+    if b.valid then
+      for i = 1, b.get_max_transport_line_index() do
+        local tl = b.get_transport_line(i)
+        if tl then
+          for _, st in ipairs(tl.get_contents()) do
+            if intermediate_items[st.name] then
+              intermediate_count = intermediate_count + st.count
+            elseif input_items_set[st.name] then
+              input_in_transit_count = input_in_transit_count + st.count
+            end
+          end
+        end
+      end
+    end
+  end
+  -- Asm inventories: cables in output, plates+cables in input
+  for _, asm in ipairs(s.find_entities_filtered{ area = arena_area, name = 'assembling-machine-1' }) do
+    if asm.valid then
+      local oi = asm.get_output_inventory()
+      if oi then
+        for iname, _ in pairs(intermediate_items) do
+          intermediate_count = intermediate_count + (oi.get_item_count(iname) or 0)
+        end
+      end
+      local ii = asm.get_inventory(defines.inventory.assembling_machine_input)
+      if ii then
+        for iname, _ in pairs(input_items_set) do
+          input_in_transit_count = input_in_transit_count + (ii.get_item_count(iname) or 0)
+        end
+        for iname, _ in pairs(intermediate_items) do
+          intermediate_count = intermediate_count + (ii.get_item_count(iname) or 0)
+        end
+      end
+    end
+  end
+  -- Inserter bridging: count inserters holding any chain-relevant item
+  for _, ins in ipairs(s.find_entities_filtered{ area = arena_area, name = 'inserter' }) do
+    if ins.valid and ins.held_stack and ins.held_stack.valid_for_read then
+      local held = ins.held_stack.name
+      if intermediate_items[held] or input_items_set[held] then
+        inserter_bridging_count = inserter_bridging_count + 1
+      end
+    end
+  end
+  components.intermediate_in_transit = intermediate_count
+  components.input_in_transit = input_in_transit_count
+  components.inserter_bridging = inserter_bridging_count
+  -- Tier (JJ): cables/inputs in transit (small) < circuits in chest (*100) < inserter bridging (per-action HIGH)
+  components.intermediate_reward = intermediate_count * 6
+  components.input_in_transit_reward = input_in_transit_count * 4
+  components.inserter_bridging_reward = inserter_bridging_count * 35
+  total = total
+        + components.intermediate_reward
+        + components.input_in_transit_reward
+        + components.inserter_bridging_reward
 
   if reached then
     -- Speed bonus 3x stronger (0.1 -> 0.3) so reaching target FAST (= more

@@ -4,6 +4,22 @@ Running record of major milestones. Newest at top.
 
 ---
 
+## 2026-06-06 (evening) — Multi-product chain (cables + circuits) working
+
+- Mod 0.10.0: per-asm recipe via direction-as-recipe-index — one asm
+  makes cables, the other circuits, in the SAME arena.
+- Mod 0.10.1/0.10.2: tiered partial-credit reward (JJ's hierarchy):
+  - circuits in chest: x100 (BIGGEST)
+  - inserter holding chain item (= bridge built): x35 (highest partial)
+  - circuits in asm output: x25; in inserter hand: x20; on belt: x12
+  - intermediate cable in transit: x6; input plate in transit: x4
+- Fixed output loader: type=input + dir=4 (auto-flipped to 12 wrong)
+- Fixed save: game.server_save('server') + copy AppData→FactorioServer
+- Mastery demo (20 actions) replay: +2445 reward, 15 circuits in chest
+- Mastery PARTIAL demo (10 actions, just asms + key inserters + 3 anchor belts):
+  BC trained 1500 epochs, loss 0.90 (loose — leaves room for PPO discovery)
+- PPO mastery v1 in progress: ent=0.08, lr=1e-4, KL=0.02, 4000 steps
+
 ## 2026-06-01 (later) — Multi-demo BC v5b: variety achieved
 
 - JJ wanted variety: BC v4 alone rigidly builds the same layout every episode.
