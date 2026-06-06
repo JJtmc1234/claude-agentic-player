@@ -1,55 +1,56 @@
-# Staged changes for next mod deploy
+# Staged for next mod deploy
 
-These are improvements I want in the next bump (probably 0.9.0 or 0.8.21).
-Per [[feedback-batch-mod-changes]], DON'T deploy each one separately — wait
-until JJ asks for the next restart, then ship them all in one version bump.
+Per [[feedback-batch-mod-changes]]: don't ship each change individually
+to avoid restart churn. Bundle these into the next 0.9.8 deploy.
 
-## Pending list
+## 1. Multi-machine bonus (NEW)
 
-### 1. Action mask: assembler footprint
-`arena_get_observation` could include per-tile valid-asm flag (3x3 fits in
-bounds). Bridge could mask out tile indices where the asm anchor would put
-the 3x3 outside bounds. Saves ~30 invalid_action penalties per episode in
-the worst case.
+JJ wants the agent to discover parallel chains. The speed_bonus alone
+isn't strong enough — it only fires on reached=True, which a single
+chain can rarely achieve at target_output=40.
 
-Implementation:
-- Add to obs.globals or a new "valid_asm_tiles" mask field.
-- Bridge masked_env consumes it when entity_choice == 2.
+Add to `arena_score`, around the activity_reward block:
 
-### 2. `arena_apply_layout` remote
-For BC eval / scripted layout testing, place all entities in one RCON call
-instead of N. Saves ~25 round-trips per episode (~5 sec).
-
-Signature:
 ```lua
-arena_apply_layout({ actions = { {ec, ti, d}, {ec, ti, d}, ... } })
-  -> { ok, placed = N, errors = [...] }
+-- Multi-machine bonus: pay extra for each ACTIVE assembler beyond the
+-- first. Strongly incentivizes parallel chains.
+local active_asms = components.active_assemblers or 0
+if active_asms > 1 then
+  local mm_bonus = (active_asms - 1) * 80  -- +80 per extra working asm
+  components.multi_machine_bonus = mm_bonus
+  total = total + mm_bonus
+end
 ```
 
-### 3. Cables curriculum (was 0.9.0 plan)
-Apply circuit_changes.lua draft:
-- storage.arena.recipe_name (default 'iron-gear-wheel')
-- storage.arena.input_items list (replaces single input_item)
-- arena_reset uses input_items if present
-- arena_place sets recipe from a.recipe_name (already done in 0.8.15)
-- NEW remote `arena_set_task(spec)` for switching task mid-session
+Cap implicitly via env's TYPE_CAPS for asm=6, so max bonus = 5 * 80 = +400.
 
-### 4. Speed up `arena_get_observation`
-Currently does `find_entities_filtered` over the whole arena every call.
-For 8×8 that's 64 tiles × a few entities each = ~100 entity scans. Could
-maintain a cached grid in storage that updates on arena_place / arena_reset.
+## 2. Speed_bonus boost
 
-### 5. Better display panel text
-combinator_description renders but may be too narrow. Try multi-line via
-`\n` in one panel instead of stacked entities; or just go back to
-rendering.draw_text but track ids more carefully.
+Currently `speed_bonus = (sim_max_ticks - ticks_taken) * 0.1`. For
+3600-tick sims with chain finishing at 2000 ticks, that's +160. Bumping
+multiplier 0.1 → 0.3 makes the time pressure 3x stronger. With multi-
+machine bonus, agent has clear gradient: more asms = faster = more
+speed bonus.
 
-### 6. (Optional) Make arena_reset idempotent across mod-version migrations
-If the storage layout changes between mod versions, `init_arena` should
-migrate the existing storage instead of starting fresh. Useful when JJ's
-save has lots of in-progress state.
+```lua
+local base = (a.sim_max_ticks - ticks_taken) * 0.3  -- was 0.1
+```
 
-## When NOT pending
-- Reward shaping changes (done; let the agent learn the current setup first).
-- Display panel position/style (working now).
-- Per-step chain_bonus values (calibrated, leave alone until eval shows otherwise).
+## 3. Per-step extension bonus (consider)
+
+Currently the per-step chain_bonus (in arena_place) rewards belt-to-
+belt continuity at +3 each. Could boost to +6 if the placed belt is
+within 2 tiles of the output loader row — pushing the agent to extend
+the chain toward the loader specifically.
+
+Not staged yet — measure cable16_v3 final behavior first to see if
+this is needed.
+
+## 4. 3rd input loader infrastructure (LATER)
+
+Mastery stages (belt mastery, circuit mastery) need a 3rd input belt to
+route distinct items separately. Currently 2 loaders (rows 7 and 8).
+Add a 3rd loader at (-21, 79.5) row 9 when JJ is ready.
+
+Bridge support already accepts multiple loaders via arena_setup (since 0.9.1).
+Just needs placement in-game + bigger arena (might want 18x16 to fit a 3-asm chain).
