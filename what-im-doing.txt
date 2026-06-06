@@ -5,9 +5,26 @@ Current / Done but uncommitted / Blocked / Next concrete steps.
 
 ## Current task
 
-BC belt initial (16x16) — task b51z2hdud. 50 reps × 2000 epochs.
-After: PPO belt from this BC ckpt with target_kl=0.005 (tighter than
-cable's 0.01 since cable's PPO drifted into dead-chain territory).
+PPO belt v3 (16x16) under mod 0.9.11 + output-loader fix. BC v3 reaches
+loss 0.06 (perfectly reproduces 7-action demo). Now with 3 latent bugs
+fixed, PPO has a real path to chest delivery for the first time.
+
+## Recent bugfixes (in order discovered)
+
+1. Mod 0.9.10: chain walk hardcoded 'iron-gear-wheel' recipe check → use
+   a.recipe_name. Belt/cable/circuit tasks were silently getting 0
+   chain_walk points (no asm detected → no input/output bonuses).
+2. Mod 0.9.11: chain walk start x was loader.x + 1 = -20, but the first
+   interior tile center is -19.5. The radius=0.4 search missed the
+   first belt. Fixed to +1.5.
+3. Output loader was placed as type='output' (chest→belt) when it should
+   be type='input' (belt→chest). Items couldn't enter the output chest
+   regardless of belt placement. Now setting loader.loader_type='input'
+   after create in _rebuild_16x16.py.
+
+After fix 1+2, chain_pts jumped from ~30 to ~160 per episode (massive
+gradient toward chain completion). After fix 3, the +1000 reached_bonus
+and per_gear (50/chest item) actually have a path to fire.
 
 ## Cable 16x16 status (paused)
 
