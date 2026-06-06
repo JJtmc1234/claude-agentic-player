@@ -449,7 +449,7 @@ local function ping()
   init_all()
   return {
     ok = true,
-    pong = "from claude-companion 0.9.8",
+    pong = "from claude-companion 0.9.9",
     tick = game.tick,
     chat_buffer_size = #storage.chat_log,
     mining_jobs = count_kv(storage.mining_jobs),
@@ -2080,10 +2080,11 @@ local function arena_score()
 
             local d2 = output_inserter.drop_position
             -- Step 5a: drop directly onto output loader -> full chain.
+            -- Boosted in 0.9.9 from +60 to +200 since this IS chain completion.
             if math.abs(d2.x - a.output_loader.x) < 1.5
                and math.abs(d2.y - a.output_loader.y) < 1.5 then
               chain.direct_output_loader = true
-              chain_pts = chain_pts + 60
+              chain_pts = chain_pts + 200
             else
               -- Step 5b: drop on a belt, follow belt chain east to loader.
               local out_belt = s.find_entities_filtered{
@@ -2104,11 +2105,14 @@ local function arena_score()
                   px = px + 1
                 end
                 chain.output_belts = out_belts
-                chain_pts = chain_pts + 5 * out_belts
+                -- Boosted: each output belt now +10 (was +5). With 9 belts to
+                -- reach loader, that's +90. Plus +300 for reach (was +50). So
+                -- completing the chain jumps reward by ~+340 — strong gradient.
+                chain_pts = chain_pts + 10 * out_belts
                 if math.abs(px - a.output_loader.x) < 1.5
                    and math.abs(py - a.output_loader.y) < 1.5 then
                   chain.reached_output_loader = true
-                  chain_pts = chain_pts + 50
+                  chain_pts = chain_pts + 300
                 end
               end
             end
