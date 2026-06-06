@@ -41,7 +41,7 @@ print(r.command(
     "end; "
     # Create new ones to the east of x_max=-5
     "local l = s.create_entity{name='loader', position={-4, 77.5}, force=force, direction=4, raise_built=true}; "
-    "if l and l.valid then l.loader_type='input' end; "
+    "if l and l.valid then l.loader_type='input'; l.direction=4 end; "
     "local c = s.create_entity{name='steel-chest', position={-2.5, 77.5}, force=force, raise_built=true}; "
     "rcon.print('east_loader=' .. tostring(l and l.valid) .. ' east_chest=' .. tostring(c and c.valid))"
 ))
