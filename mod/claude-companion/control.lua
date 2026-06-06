@@ -449,7 +449,7 @@ local function ping()
   init_all()
   return {
     ok = true,
-    pong = "from claude-companion 0.9.10",
+    pong = "from claude-companion 0.9.11",
     tick = game.tick,
     chat_buffer_size = #storage.chat_log,
     mining_jobs = count_kv(storage.mining_jobs),
@@ -2011,7 +2011,10 @@ local function arena_score()
   local chain = {}
   if a.input_loader and a.output_loader then
     -- Step 1: follow belt chain east from input loader.
-    local cur_x = a.input_loader.x + 1
+    -- loader.x is the loader entity center (a half-tile offset from the first
+    -- interior tile center). Step +1.5 lands on the first east tile's center
+    -- so radius=0.4 finds the belt there.
+    local cur_x = a.input_loader.x + 1.5
     local cur_y = a.input_loader.y
     local in_belts = 0
     while in_belts < 30 do
