@@ -15,6 +15,37 @@ Running record of major milestones. Newest at top.
 - maskppo_bc_v5b.zip is the new canonical gear-task policy with variety.
 - Added bridge/rl/compare_policies.py (side-by-side trace of two checkpoints) and bridge/rl/plot_components.py (reward decomposition stacked area chart) for analysis.
 
+## 2026-06-04 — 16x16 arena + partial-credit reward + BC-v4 demo reproduction
+
+After several training failures in the 16x16 arena (cable16_v1/v2 with
+PPO-from-scratch found 0 chains in 50k steps; circ16_v1 crashed at the
+PPO-from-BC step), root-caused two issues:
+
+- BC at loss 4.2 wasn't reproducing the demo — the policy defaulted to
+  "belt at any tile" because belts are 4/7 of demo actions. Trace eval
+  showed 60 random belts in a row.
+- Reward was ONLY counting items delivered to the chest, but the agent's
+  early chains can produce 10+ in-transit items that never reach the
+  loader because the output belt stops short.
+
+Mod 0.9.7 fix: per_gear_reward now tiered (chest=50 / asm-output=20 /
+inserter=15 / belt=10). Partial chains get meaningful reward.
+
+BC v4 fix: 50 reps × 2000 epochs to loss 0.19. Trace shows the 7-action
+demo perfectly reproduced before the policy hits its trained edge.
+
+cable16_v3 launched off BC v4 with ent_coef=0.15, lr=1e-4. First 17
+episodes: 41% chain_alive (vs 0% in v1), best +160, partial chains
+producing cables actively. PPO has dense gradient toward extending
+the output belt chain because every additional belt adds reward.
+
+Curriculum infra in place for belts (initial: iron-plate + gear-wheel
+provided) and circuits (initial: iron-plate + copper-cable provided),
+both using the same partial-demo + long-BC + PPO recipe.
+
+Commits: 28a0b04 (obs slim + imperfect demos + live build panel),
+f911cbe (mod 0.9.7 partial credit + belt/circuit infra).
+
 ## 2026-06-01 — 🎯 GEAR TASK SOLVED
 
 - BC v4 (30 reps × 500 epochs, loss 6.93 → 1.02) with refill=20 plates + sim_max_ticks=1800 + target=10 reaches the target deterministically.

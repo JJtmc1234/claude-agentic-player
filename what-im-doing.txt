@@ -5,15 +5,34 @@ Current / Done but uncommitted / Blocked / Next concrete steps.
 
 ## Current task
 
-Gear task SOLVED. `maskppo_bc_v4.zip` is the canonical gear-task policy:
-- Deterministic, 100% success rate (3/3 eval episodes)
-- +1660 reward each, 10 gears delivered, reached=True
-- Settings: refill_amount=20, target_output=10, sim_max_ticks=1800
-- Mod: 0.8.20
+cable16_v3 training (task b7hgu98mx). 16x16 arena, mod 0.9.7,
+imperfect-demo-from-BC + partial-credit shaping. 17 eps in:
+- 41% chain_alive (vs 0% in v1 first 67 eps)
+- best reward +160
+- 0 chest deliveries yet — agent's demo-driven chain doesn't extend
+  to the output loader. Partial-credit pays for in-transit cables, so
+  PPO has gradient to add belts col 9-15 to bridge the gap.
 
-Awaiting JJ to greenlight stage 2 (cables curriculum). All staged
-mod changes are in `mod/claude-companion/NEXT_DEPLOY.md` for one
-bundled deploy.
+BC v4 is the key fix: 50 reps × 2000 epochs got loss to 0.19, so the
+7-action partial demo is faithfully reproduced. Then PPO from there
+with ent_coef=0.15.
+
+When cable16_v3 lands a chest-delivery, the same recipe applies to
+belts (16x16 initial stage) and circuits (16x16 initial stage with
+cables provided). Infra written.
+
+## Solved milestones
+
+- gears 8x8: BC v5b, 100% reached, 2 layout variants, +1660 reward
+- circuits 8x8: BC circ v1, 3/3 reached, +1785 reward, 10 circuits
+- gears 16x16 / cables 16x16: in flight via partial-demo approach
+
+## Next when cable16_v3 produces chest output
+
+1. Commit + tag cable16_v3 best ckpt
+2. BC belt initial (iron-plate + iron-gear-wheel inputs)
+3. BC circuit initial (iron-plate + copper-cable inputs)
+4. Then mastery stages (compositional curriculum: agent makes intermediates)
 
 ## Done but uncommitted
 

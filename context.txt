@@ -47,38 +47,70 @@ in a fixed 8x8 walled "arena" (see PLAN_RL.txt, PLAN_CURRICULUM.txt).
 
 ## Mod conventions
 
-- Latest version: 0.8.14 (always bump info.json + the pong string in control.lua together).
-- Storage namespace: `__claude-companion__` (separate from `__level__` — `/c` console runs in level context and CANNOT mutate the mod's storage; use a remote function instead).
+- Latest version: 0.9.7 (always bump info.json + the pong string in control.lua together).
+- Storage namespace: `__claude-companion__` (separate from `__level__` — `/silent-command` runs in scenario context and CANNOT see the mod's storage; route through remote functions or arena_debug_state).
 - Remote interfaces: `claude` (chat, walking, mining, ping) + `claude_rl` (arena_*).
-- Arena state persists across save/load in `storage.arena`. After a `restart.ps1` the arena bounds, chests, loaders all survive — but if you want to change `target_output` / `sim_max_ticks`, call `claude_rl.arena_set_config({target_output=N, sim_max_ticks=T})` (added in 0.8.14).
-- `arena_setup` requires a player in-game; subsequent calls don't.
+- Arena state persists across save/load in `storage.arena`. After `restart.ps1` the arena bounds, chests, loaders all survive in the save; storage updates from same session don't persist past a non-saving stop. To switch task: `claude_rl.arena_set_task({recipe_name=..., output_item=..., target_output=N, input_items=[...], sim_max_ticks=T})` (added in 0.9.0).
+- `arena_setup` accepts a player_name OR no argument (uses `game.surfaces.nauvis`) since 0.9.2 — works headlessly.
+- Multi-input support since 0.9.1: arena_setup classifies chests/loaders by x (west of bounds = input, east = output). With multiple input chests/loaders, arena_reset distributes `input_items[i]` to chest[i].
+- Loaders get `.active=false` during build phase (so chest shows true refill amount) and `.active=true` on `arena_start_simulate` (since 0.8.20).
 - Directions: raw integers 0/2/4/6/8/10/12/14. `defines.direction.north_east` is nil in 2.0 — DO NOT USE.
-- Position-based entity lookup (find_entities_filtered around a point) is more reliable than unit_number for editor-placed entities — unit_number-based lookup needs `script.register_on_entity_destroyed` first.
+- Inserter geometry: `direction=EAST` means picks east, drops west. So `dir=W` (3 in env mapping) picks west, drops east.
 
 ## RL pipeline
 
-- Arena: 8x8 walled grid. Bounds currently `{x_min=-20, y_min=73, x_max=-13, y_max=80}`.
+- Arena: **16x16** walled grid. Bounds `{x_min=-20, y_min=70, x_max=-5, y_max=85}`. 1 wall ring perimeter (not 4).
+- Loaders: 2 input at (-21, 77.5) + (-21, 78.5), 1 output at (-4, 77.5).
 - Entities: 0=transport-belt, 1=inserter, 2=assembling-machine-1, 3=no-op.
-- Hard placement caps per type (env.py): belt=9, inserter=4, asm=3. Over-cap = -1 step reward.
-- Diminishing returns within useful range: `multiplier = max(0.3, 1 / (1 + 0.5 * n_already))`.
-- Base step rewards: belt=+5, inserter=+5, assembler=+12.
-- Episode budget: `MAX_BUILD_ACTIONS = 25`, `MIN_ACTIONS_BEFORE_NOOP = 10`.
-- Sim phase: `SIM_MAX_TICKS_OVERRIDE = 900` (game.speed=64 during sim).
-- Episode reward components (control.lua arena_score): per_gear (×20 since 0.8.13), reached_bonus (+200 when 10 gears in output chest), speed_bonus, activity (asm×30 + ins×5 + belt×0.5), chain_pts (input loader → belts → inserter → asm → inserter → belts → output loader graph walk), neighborhood bonuses (belt-pairs ×3, good drops ×10, good pickups ×10), penalties (useless_belt, invalid_action).
+- Action space: MultiDiscrete([4, 256, 4]). Tile index = row * 16 + col.
+- Obs: 10 channels (was 12 — chest channels dropped in 0.9.4) × 16 × 16 + 3 globals = 2563 dims.
+- Hard placement caps per type (env.py): belt=30, inserter=12, asm=6 (relaxed for parallel chains).
+- Diminishing returns within useful range: `max(0.3, 1 / (1 + 0.5 * n_already))`.
+- Base step rewards: belt=+3, inserter=+4, assembler=+10.
+- Episode budget: `MAX_BUILD_ACTIONS = 60`, `MIN_ACTIONS_BEFORE_NOOP = 12`.
+- Sim phase: `SIM_MAX_TICKS_OVERRIDE = 3600` (60 game-sec at game.speed=64; agent rate-limit is the yellow inserter 0.83s cycle).
+- Episode reward components (mod 0.9.7 arena_score):
+  - per_gear: chest×50 + asm_output×20 + inserter×15 + belt×10 (PARTIAL CREDIT for in-transit items)
+  - reached_bonus: +1000 when out_count >= target
+  - base: -200 if 0 chest output, else 0
+  - speed_bonus: (sim_max_ticks - ticks_taken) * 0.1, fires only on reached
+  - chain_alive gate: zeros chain_points, activity, functional_inserter, etc if no chain active
+  - chain_points: graph walk (loader→belt→inserter→asm→inserter→belt→loader) plus neighborhood pts (belt pairs ×3, good drops ×10, good pickups ×10)
+  - penalties: useless_belt ×5, invalid_action ×1
 
 ## Stats display
 
-Mod renders stats via real `display-panel` entities (one per line, stacked) 10
-tiles above the arena. Updates every 30 sim ticks during simulate phase, plus
-once at episode end. `always_show` is NOT a valid field on display-panel
-(crashed 0.8.12; removed in 0.8.13).
+`display-panel` entities (one per line, stacked) 10 tiles above the arena.
+2.0 vanilla: text via `combinator_description` (NOT `text`) + `always_show_in_chart=true`.
+Updates: every successful arena_place during build phase (since 0.9.6), every 30 sim ticks during sim, plus end-of-episode summary.
+Old rendering API leftovers wiped via `claude_rl._cleanup_panels` remote.
 
-## Curriculum (per PLAN_CURRICULUM.txt)
+## Curriculum (per ROADMAP_RL.txt; compositional per JJ)
 
-1. Gears (CURRENT) — input iron-plate → output iron-gear-wheel, target 10.
-2. Cables — needs mod 0.9.0 (recipe_name in storage + arena_set_task remote per circuit_changes.lua draft).
-3. Circuits — needs mod 0.9.x.
-4. Cables+circuits chain — needs mod 0.10.x.
+Each recipe has 2 sub-stages: INITIAL (direct ingredients provided) and MASTERY
+(only upstream raw ingredients; agent must build sub-chains for intermediates).
+
+Solved:
+- gears 8x8: `maskppo_bc_v5b.zip`, 100% reached, 2 layout variants, +1660 reward
+- circuits 8x8: `maskppo_bc_circ_v1.zip`, 3/3 reached, +1785 reward
+
+In progress / queued:
+- cables 16x16: training via 7-action partial demo + BC-to-loss<1 + PPO tight (cable16_v3)
+- belts 16x16 initial (Phase A stage 4): infra ready (bc_belts_partial.py)
+- circuits 16x16 initial (cables provided): infra ready (bc_circuits_partial.py)
+- mastery stages later (will need a 3rd input loader for some)
+
+## Training recipe (current best practice)
+
+1. Design partial demo: ~7 actions covering input chain + asm + output start (but
+   stopping short of completing the output chain to the loader).
+2. BC pretrain: 50 reps × 2000 epochs to loss < 1 so the demo is faithfully
+   reproduced (loss > 2 → policy defaults to "belt at any tile" because belts
+   are the majority entity in demos).
+3. PPO from BC ckpt: ent_coef 0.08-0.15, lr 5e-5 to 1e-4, target_kl 0.005-0.01.
+   Without target_kl, PPO drifts away from BC in ~20 episodes.
+4. Mod 0.9.7's partial-credit shaping pays the agent for in-transit items so
+   even pre-loader chains get reward.
 
 ## Editor convention for arena setup
 
