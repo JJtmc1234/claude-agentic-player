@@ -449,7 +449,7 @@ local function ping()
   init_all()
   return {
     ok = true,
-    pong = "from claude-companion 0.9.9",
+    pong = "from claude-companion 0.9.10",
     tick = game.tick,
     chat_buffer_size = #storage.chat_log,
     mining_jobs = count_kv(storage.mining_jobs),
@@ -2052,7 +2052,7 @@ local function arena_score()
       }[1]
       if asm then
         local rec = asm.get_recipe()
-        if rec and rec.name == 'iron-gear-wheel' then
+        if rec and rec.name == (a.recipe_name or 'iron-gear-wheel') then
           chain.gear_assembler = true
           chain_pts = chain_pts + 30
 
@@ -2157,7 +2157,7 @@ local function arena_score()
       }[1]
       if drop_asm and drop_asm.valid then
         local rec = drop_asm.get_recipe()
-        if rec and rec.name == 'iron-gear-wheel' then
+        if rec and rec.name == (a.recipe_name or 'iron-gear-wheel') then
           good_drops = good_drops + 1
         end
       end
@@ -2179,7 +2179,7 @@ local function arena_score()
       }[1]
       if pickup_asm and pickup_asm.valid then
         local rec = pickup_asm.get_recipe()
-        if rec and rec.name == 'iron-gear-wheel' then
+        if rec and rec.name == (a.recipe_name or 'iron-gear-wheel') then
           good_pickups = good_pickups + 1
         end
       end
