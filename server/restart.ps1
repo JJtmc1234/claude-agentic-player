@@ -61,8 +61,21 @@ function Save-IfRunning {
   Write-Output "[restart] saving running server (PID $($proc.ProcessId)) ..."
   $env:FACTORIO_RCON_PASSWORD = $rconPwd
   try {
-    & python (Join-Path $repoRoot "bridge\_exec.py") "game.server_save() rcon.print('saved')" | Out-Null
-    Write-Output "[restart] save OK"
+    # Save to 'server' name. Factorio writes to its own data dir
+    # (%APPDATA%\Roaming\Factorio\saves\server.zip), NOT the path we pass
+    # to --start-server. We then copy it over so the start-server reload
+    # actually gets the latest state. Without this copy, every restart
+    # loads from an old server.zip.
+    & python (Join-Path $repoRoot "bridge\_exec.py") "game.server_save('server') rcon.print('saved')" | Out-Null
+    Start-Sleep -Seconds 2  # let factorio finish writing
+    $srcSave = "C:\Users\pmarc\AppData\Roaming\Factorio\saves\server.zip"
+    $dstSave = "C:\FactorioServer\saves\server.zip"
+    if (Test-Path $srcSave) {
+      Copy-Item $srcSave $dstSave -Force -ErrorAction SilentlyContinue
+      Write-Output "[restart] save OK -> copied $srcSave -> $dstSave"
+    } else {
+      Write-Output "[restart] WARNING: src save not found at $srcSave"
+    }
   } catch {
     Write-Output "[restart] save command errored (continuing anyway): $_"
   }
