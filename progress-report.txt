@@ -15,6 +15,42 @@ Running record of major milestones. Newest at top.
 - maskppo_bc_v5b.zip is the new canonical gear-task policy with variety.
 - Added bridge/rl/compare_policies.py (side-by-side trace of two checkpoints) and bridge/rl/plot_components.py (reward decomposition stacked area chart) for analysis.
 
+## 2026-06-06 — 16x16 curriculum: cable baseline + belt initial in progress
+
+### Cable 16x16 (paused as baseline)
+
+- `maskppo_bc_cab16_v4.zip` (loss 0.19) reproduces the 7-action partial
+  demo perfectly. Eval first action trace matches demo exactly.
+- `maskppo_cable16_v3` PPO from BC ran 17 eps. Pattern:
+  - Eps 1-8: 100% chain_alive, best ep +160 (24 cables in transit:
+    8 asm + 1 ins + 15 belts).
+  - Eps 9-17: 50% chain_alive, mean dropping. Drift even at target_kl=0.01.
+- 0 chest deliveries — agent's chain doesn't extend belts col 9-15 row 7
+  to reach the loader at col 16. PPO has insufficient gradient to push
+  past BC ceiling.
+- Saved as `maskppo_cable16_FINAL_BC_baseline.zip`.
+
+### Belt 16x16 initial (in progress)
+
+- `maskppo_bc_belt16_v1.zip`: 50 reps × 2000 epochs, loss 0.297.
+- PPO `maskppo_belt16_v1` running (task bnw3qcwff): target_kl=0.005
+  (TIGHTER than cable's 0.01), ent_coef=0.05, lr=5e-5.
+- First 5 eps: 60% chain_alive, best +65, mean -101.
+
+### Lesson
+
+In the 16x16 arena, the 7-action partial demo + tight PPO can build
+working chains (asm produces, inserters pick) but rarely extends the
+output belt all the way to the output loader (9+ tiles away). PPO
+gradient on "place belt at col 9" is weak because the agent only
+gets +3 chain_bonus for adjacent belts.
+
+Next options if belt v1 doesn't crack chest delivery:
+- mod 0.9.8 with multi-machine bonus + speed_bonus boost (staged in
+  NEXT_DEPLOY.md) for stronger reward gradient
+- Even more imperfect demo: 9 actions including belts at col 7, 8, 9
+  so agent only needs 6 more
+
 ## 2026-06-04 — 16x16 arena + partial-credit reward + BC-v4 demo reproduction
 
 After several training failures in the 16x16 arena (cable16_v1/v2 with
