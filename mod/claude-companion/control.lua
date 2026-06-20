@@ -449,7 +449,7 @@ local function ping()
   init_all()
   return {
     ok = true,
-    pong = "from claude-companion 0.10.2",
+    pong = "from claude-companion 0.10.3",
     tick = game.tick,
     chat_buffer_size = #storage.chat_log,
     mining_jobs = count_kv(storage.mining_jobs),
@@ -1647,12 +1647,18 @@ local function arena_place(entity_idx, tile_idx, dir_idx)
     end
   elseif name == 'inserter' then
     local recipe_name = a.recipe_name or 'iron-gear-wheel'
+    -- 0.10.3: build set of "chain-relevant" recipes — primary + any recipe_options.
+    -- Inserter feeding ANY of those asms gets the full +3 bonus, not just the primary.
+    local chain_recipes = { [recipe_name] = true }
+    if a.recipe_options then
+      for _, rname in pairs(a.recipe_options) do chain_recipes[rname] = true end
+    end
     local drop_asm = s.find_entities_filtered{
       position = e.drop_position, name = 'assembling-machine-1', radius = 1.0,
     }[1]
     if drop_asm and drop_asm.valid then
       local rec = drop_asm.get_recipe()
-      if rec and rec.name == recipe_name then chain_bonus = chain_bonus + 3
+      if rec and chain_recipes[rec.name] then chain_bonus = chain_bonus + 3
       else chain_bonus = chain_bonus + 1 end
     end
     local drop_belt = s.find_entities_filtered{
@@ -1668,7 +1674,7 @@ local function arena_place(entity_idx, tile_idx, dir_idx)
     }[1]
     if pickup_asm and pickup_asm.valid then
       local rec = pickup_asm.get_recipe()
-      if rec and rec.name == recipe_name then chain_bonus = chain_bonus + 2 end
+      if rec and chain_recipes[rec.name] then chain_bonus = chain_bonus + 2 end
     end
   elseif name == 'assembling-machine-1' then
     local nearby = s.find_entities_filtered{

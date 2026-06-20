@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+import time
 from pathlib import Path
 
 import numpy as np
@@ -48,7 +49,10 @@ def configure_circuits_mastery():
         return call_mod(r, 'arena_set_task', spec, interface='claude_rl').get('ok', False)
 
 
-def collect_demo_pairs(env, demo_actions):
+def collect_demo_pairs(env, demo_actions, trailing_noops=2):
+    """Run demo, plus N trailing no-op (entity=3) actions so the policy
+    learns when to stop. The env's MIN_ACTIONS_BEFORE_NOOP must be <= len(demo)
+    for these to count as real no-ops rather than rejected early-noops."""
     obs, _ = env.reset()
     obss, acts = [], []
     for action in demo_actions:
@@ -56,16 +60,31 @@ def collect_demo_pairs(env, demo_actions):
         acts.append(list(action))
         next_obs, _r, term, _trunc, _info = env.step(list(action))
         if term:
-            break
+            return np.asarray(obss, dtype=np.float32), np.asarray(acts, dtype=np.int64)
         obs = next_obs
+    # Trailing no-ops: pair the post-demo obs with action [3, 0, 0]. We record
+    # the (obs, no-op) pair but only fire the FIRST no-op env.step (which ends
+    # the episode). The other no-op samples just teach "this is a valid stop."
+    NOOP = [3, 0, 0]
+    for i in range(trailing_noops):
+        obss.append(obs.copy())
+        acts.append(NOOP)
+        if i == 0:
+            # First no-op terminates the env. Subsequent samples repeat the
+            # same obs/action to up-weight the "stop here" pattern.
+            env.step(NOOP)
     return np.asarray(obss, dtype=np.float32), np.asarray(acts, dtype=np.int64)
 
 
 def main() -> int:
     p = argparse.ArgumentParser()
-    p.add_argument('--epochs', type=int, default=1500)
-    p.add_argument('--reps-per-demo', type=int, default=25)
+    p.add_argument('--epochs', type=int, default=3000)
+    p.add_argument('--reps-per-demo', type=int, default=30)
     p.add_argument('--lr', type=float, default=3e-4)
+    p.add_argument('--rep-delay', type=float, default=0.4,
+                   help='seconds between reps so the RCON drain catches up')
+    p.add_argument('--trailing-noops', type=int, default=2,
+                   help='trailing no-op samples per trajectory (teaches the stop)')
     p.add_argument('--save', default='checkpoints/maskppo_bc_circ16_mastery_multi.zip')
     args = p.parse_args()
 
@@ -86,9 +105,11 @@ def main() -> int:
     all_obs, all_acts = [], []
     for name, demo in demos.items():
         print(f'[bc-circ16-multi] collecting {args.reps_per_demo} reps of demo {name} ...')
-        for _ in range(args.reps_per_demo):
-            obs, acts = collect_demo_pairs(env, demo)
+        for rep in range(args.reps_per_demo):
+            obs, acts = collect_demo_pairs(env, demo, trailing_noops=args.trailing_noops)
             all_obs.append(obs); all_acts.append(acts)
+            if args.rep_delay > 0:
+                time.sleep(args.rep_delay)
 
     demo_obs = np.concatenate(all_obs, axis=0)
     demo_acts = np.concatenate(all_acts, axis=0)

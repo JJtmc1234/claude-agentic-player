@@ -48,7 +48,7 @@ def call_rl(r, fn, *args):
 SIM_POLL_INTERVAL = 0.25  # seconds; spaced enough to not saturate RCON during sim phase
 SIM_POLL_MAX = 240        # 60 sec wall max
 MAX_BUILD_ACTIONS = 60         # 16x16 arena = room for ~3 parallel chains (~20 entities each)
-MIN_ACTIONS_BEFORE_NOOP = 12   # force agent to build meaningful chain before bailing
+MIN_ACTIONS_BEFORE_NOOP = 10   # matches partial mastery demo length; lets BC teach the stop
 SIM_MAX_TICKS_OVERRIDE = 3600  # 60 game-sec; enough for ~30 cables w/ 1-2 chains
 
 
