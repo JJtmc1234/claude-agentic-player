@@ -85,6 +85,36 @@ in a fixed 8x8 walled "arena" (see PLAN_RL.txt, PLAN_CURRICULUM.txt).
 Updates: every successful arena_place during build phase (since 0.9.6), every 30 sim ticks during sim, plus end-of-episode summary.
 Old rendering API leftovers wiped via `claude_rl._cleanup_panels` remote.
 
+## Agentic-play library (`bridge/agent/`)
+
+Distillation of day-1+2 agentic play (2026-06-20) into a clean module library:
+- `agent.Agent.connect()` → context-manager that resolves char unum from `storage.claude_char_unum`
+- `agent.movement` — walking with chunked long-distance + step_aside
+- `agent.placement` — snap-aware placement (geometry encoded), blocker clearing, take_back
+- `agent.mining` — mine_at with walk-in retry, mine_nearest, chop_trees
+- `agent.fuel` — single-slot-aware fueling (won't error on mixed-fuel slot)
+- `agent.inventory` — chest transfers, craft+wait helpers
+- `agent.geometry` — snap math + drill_drop_position (+1.3 not +2 in 2.0!) + inserter helpers
+- `agent.layouts` — declarative LineSpecs for iron line, drill→chest, power chain
+
+All modules <150 lines. Library written offline; smoke-test against live server before relying.
+See `bridge/agent/README.md` and `POWER_CHAIN.md`.
+
+## Factorio 2.0 geometry constants we keep getting wrong
+
+- **Burner-mining-drill drop**: center + (0.5, 1.296875) for south-facing — NOT +2.
+  Drop tile is FIRST row south of drill's south edge.
+- **Inserter direction**: side it PICKS FROM, not where it drops. dir=0 (north)
+  → pickup north, drop south. The mod's chain_walk reward depends on this.
+- **2x2 / 1x1 snap mismatch**: 2x2 entities snap to integer centers (x, y),
+  1x1 to half-integer (x.5, y.5). Inserter Y south of 2x2 furnace at (fx, fy)
+  must be `fy + 1` (snaps to `fy + 1.5`) for pickup to land ON the furnace's
+  south row. `fy + 2` is one tile too south.
+- **Offshore-pump direction is auto-detected** by terrain in 2.0; the `direction`
+  arg is ignored. Query `pump.fluidbox.get_pipe_connections(1)[1].target_position`
+  to learn where to put the receiving pipe.
+- **Boiler 3x2 dir=4** (east-flow): water inputs on N+S of west column, steam out east.
+
 ## Curriculum (per ROADMAP_RL.txt; compositional per JJ)
 
 Each recipe has 2 sub-stages: INITIAL (direct ingredients provided) and MASTERY

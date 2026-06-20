@@ -4,6 +4,27 @@ Running record of major milestones. Newest at top.
 
 ---
 
+## 2026-06-20 — Pivot to agentic play (Claude drives a character)
+
+- Spawned a free-standing Claude character on a fresh biter world (the old
+  no-biter sandbox is preserved as `server.with-iron-line.zip`).
+- Built two working production lines at base:
+  - Iron: drill (−14, 51) → furnace (−14, 53) → inserter (−13.5, 54.5) → chest (−13.5, 55.5)
+  - Copper smelter: furnace (−11, 52) → inserter (−10.5, 53.5) → chest (−10.5, 54.5)
+- Autonomous mines: copper drill+chest at (87, 42)/(87.5, 43.5); coal at (54, −48)/(54.5, −46.5).
+- Looted the crashed spaceship: **200 firearm-magazines** (ammo reserve for future
+  turret defense per JJ's turret-creep plan).
+- Power infrastructure (boiler + steam-engine + offshore-pump + 4 small-electric-poles)
+  crafted and individually placed, but the pipe topology didn't connect on first
+  try — pump's output direction in 2.0 is auto-detected by terrain, not the
+  `direction` arg. See `POWER_CHAIN.md` for the discovery-driven deploy procedure.
+- **New library**: `bridge/agent/` — distills the ~40 ad-hoc agentic-play scripts
+  into 10 focused modules (each <150 lines): core, movement, placement (snap-aware),
+  mining, fuel (single-slot-aware), inventory, geometry, layouts, lua, README.
+- Saved alignment lessons to memory and CLAUDE.md: inserter direction = pickup
+  side; 2x2-vs-1x1 snap offset; burner-drill drop = center+1.3 (not +2) in 2.0.
+- `CLAUDE.md` written at project root consolidating all 31 memory entries.
+
 ## 2026-06-06 (evening) — Multi-product chain (cables + circuits) working
 
 - Mod 0.10.0: per-asm recipe via direction-as-recipe-index — one asm
