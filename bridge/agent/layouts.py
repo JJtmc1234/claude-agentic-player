@@ -123,12 +123,22 @@ def plan_power_chain(water_x: float, water_y: float,
     )
 
 
-def execute_layout(agent, spec: LineSpec, clear_blockers: bool = True) -> list:
-    """Execute a LineSpec via the agent. Returns list of placement results."""
+def execute_layout(agent, spec: LineSpec, clear_blockers: bool = True,
+                   mine_resources: bool = True) -> list:
+    """Execute a LineSpec via the agent. Returns list of placement results.
+
+    `mine_resources=True` (default) lets the furnace/inserter/chest placements
+    consume any ore tiles in their footprint — important on dense ore patches
+    where the iron-smelt-line's furnace would otherwise fail placement.
+    Drills are intentionally NOT mine_resources (they need to be on ore).
+    """
     results = []
     for p in spec.placements:
+        # Drills want resources under them; everything else can consume them
+        mine = mine_resources and not p.item.endswith('-mining-drill')
         res = agent.placement.place(p.item, p.x, p.y, p.direction,
-                                    clear_blockers=clear_blockers)
+                                    clear_blockers=clear_blockers,
+                                    mine_resources=mine)
         results.append(res)
         if not res.get('ok'):
             break

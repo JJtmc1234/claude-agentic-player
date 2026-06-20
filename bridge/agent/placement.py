@@ -30,10 +30,15 @@ class Placement:
         return snap_1x1_center(x, y)
 
     def place(self, item: str, x: float, y: float, direction: int = 0,
-              clear_blockers: bool = True, step_aside: bool = True) -> dict:
+              clear_blockers: bool = True, step_aside: bool = True,
+              mine_resources: bool = False) -> dict:
         """Place an entity, returning the place_entity result dict.
         If `clear_blockers`, removes trees/rocks at the snapped center first.
         If `step_aside`, walks the character off the spot if it's in the way.
+        If `mine_resources`, mines any resource tiles (iron-ore, copper-ore, coal, stone)
+            in the entity's bbox first — needed when placing entities on dense ore patches.
+            Off by default because most placements shouldn't destroy resources accidentally.
+            Mined ore goes into the character's inventory.
         """
         sx, sy = self._snap(item, x, y)
         if step_aside:
@@ -45,6 +50,8 @@ class Placement:
                 self.a.movement.step_aside(tile_extent + 1.5)
         if clear_blockers:
             self._clear_blockers(sx, sy, kind=_ENTITY_SNAP.get(item, '1x1'))
+        if mine_resources:
+            self._mine_resources(sx, sy, kind=_ENTITY_SNAP.get(item, '1x1'))
         res = self.a.call('place_entity', self.a.unit, item, sx, sy, direction)
         return res
 
@@ -57,6 +64,28 @@ class Placement:
             f"{{{cx+half}, {cy+half}}}}}}}; "
             "for _, e in ipairs(b) do "
             "  if e.valid and (e.type == 'tree' or e.type == 'simple-entity') then "
+            "    e.destroy() "
+            "  end "
+            "end"
+        )
+        self.a.rcon.command('/silent-command ' + body)
+
+    def _mine_resources(self, cx: float, cy: float, kind: str = '2x2'):
+        """Mine ore/coal/stone resource tiles in the bbox; ore goes to character inv.
+        Needed when placing entities (furnace, asm) inside a dense ore patch.
+        Resources are mineable_properties.minable but type='resource', not 'tree'."""
+        half = {'1x1': 0.5, '2x2': 1.0, '3x3': 1.5}.get(kind, 1.0)
+        body = (
+            f"local c = game.get_entity_by_unit_number({self.a.unit}); "
+            f"local s = c.surface; local ci = c.get_main_inventory(); "
+            f"local b = s.find_entities_filtered{{area={{{{{cx-half}, {cy-half}}}, "
+            f"{{{cx+half}, {cy+half}}}}}, type='resource'}}; "
+            "for _, e in ipairs(b) do "
+            "  if e.valid and e.prototype.mineable_properties.products then "
+            "    for _, p in ipairs(e.prototype.mineable_properties.products) do "
+            "      local amt = p.amount or 1; "
+            "      ci.insert{name=p.name, count=amt} "
+            "    end; "
             "    e.destroy() "
             "  end "
             "end"

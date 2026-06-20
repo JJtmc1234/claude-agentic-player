@@ -34,6 +34,20 @@ Running record of major milestones. Newest at top.
 - `bridge/agent/test_geometry.py` (11/11 PASS) + `test_layouts.py` (14/14 PASS).
 - `bridge/build_starter_base.py` — one-command bootstrap that rebuilds the
   iron/copper/coal mines from a freshly-spawned character using the library.
+- **Library live-tested 2026-06-20**: 11/12 features confirmed working against
+  the live server — Agent.connect/position/inventory/chest_count, autopilot
+  refuel loop (refueled 5 entities across 2 cycles, coal chest 26→31),
+  status decoding (18=no_ingredients, 21=no_minable_resources, 32=waiting_for_source,
+  34=waiting_for_space), take_back, craft+wait, chunked walk, place. The 1
+  failing case was a dense-ore-patch furnace placement; fixed by adding
+  `mine_resources=True` flag to `placement.place` (and defaulted on for
+  non-drill entities in `execute_layout`). Iron drill at (-14, 51) found
+  status=21 (mined out — its 4 ore tiles exhausted from days of running);
+  patch still has 1077-ore tile at (-19.5, 61.5) for next session.
+- `bridge/autopilot.py` — factory babysitter: scans 7 watched entities,
+  refuels low ones (prefer coal > wood), chops wood if char inv low,
+  reports chest levels per cycle. Verified live.
+- `AGENTIC_PLAY_QUICKSTART.md` — one-page library guide at project root.
 
 ## 2026-06-06 (evening) — Multi-product chain (cables + circuits) working
 
