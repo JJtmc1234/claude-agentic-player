@@ -64,3 +64,24 @@ class Inventory:
                 recipe, count = entry[0], entry[1] if len(entry) > 1 else 1
             results.append(self.craft(recipe, count))
         return results
+
+    def sort(self) -> bool:
+        """Sort + merge the character's main inventory (in-game's auto-sort button)."""
+        body = (
+            f"local c = game.get_entity_by_unit_number({self.a.unit}); "
+            "local inv = c.get_main_inventory(); "
+            "if inv then inv.sort_and_merge(); rcon.print('SORTED') end"
+        )
+        out = self.a.rcon.command('/silent-command ' + body).strip()
+        return out == 'SORTED'
+
+    def have_at_least(self, kit: dict) -> dict:
+        """Return {item: shortfall} for items we have less of than the kit says.
+        Empty dict = inventory satisfies the kit."""
+        have = self.list()
+        out = {}
+        for item, need in kit.items():
+            short = need - have.get(item, 0)
+            if short > 0:
+                out[item] = short
+        return out

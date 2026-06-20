@@ -20,31 +20,54 @@ from agent.geometry import DIR_EAST, snap_1x1_center
 
 
 def _find_pump_friendly_water(agent, hint_x: float, hint_y: float,
-                              radius: int = 30) -> Optional[Dict[str, float]]:
+                              radius: int = 30, max_tries: int = 20) -> Optional[Dict[str, float]]:
     """Find a water tile where placing a pump produces a connection target on LAND.
     Returns {water_x, water_y, target_x, target_y} or None.
 
-    Strategy: for each water tile within radius, simulate placement by reading
-    the prototype's pipe_connections offset. Actually simpler: just place + query
-    in a loop, undoing failures. Most efficient: probe water tiles.
+    Iterative try-and-undo: place pump, query target, if target is water,
+    take_back and try the next tile.
     """
     body = (
         "local c = game.get_entity_by_unit_number(" + str(agent.unit) + "); "
         "local s = c.surface; "
-        f"local water = s.find_tiles_filtered{{position=c.position, radius={radius}, name={{'water','deepwater'}}}}; "
+        f"local water = s.find_tiles_filtered{{position={{{hint_x},{hint_y}}}, radius={radius}, name={{'water','deepwater'}}}}; "
+        "local out = {}; "
         "for _, wt in ipairs(water) do "
         "  local cx, cy = wt.position.x + 0.5, wt.position.y + 0.5; "
         "  if s.can_place_entity{name='offshore-pump', position={cx,cy}, force='player', direction=0} then "
-        "    rcon.print(string.format('%.1f,%.1f', cx, cy)); return "
+        "    table.insert(out, string.format('%.1f,%.1f', cx, cy)) "
         "  end "
+        f"  if #out >= {max_tries} then break end "
         "end; "
-        "rcon.print('NONE')"
+        "for _, p in ipairs(out) do rcon.print(p) end"
     )
     out = agent.rcon.command('/silent-command ' + body).strip()
-    if out == 'NONE' or ',' not in out:
+    if not out:
         return None
-    wx, wy = (float(p) for p in out.split(','))
-    return {'water_x': wx, 'water_y': wy}
+    candidates = [tuple(float(s) for s in line.split(',')) for line in out.split('\n') if ',' in line]
+
+    # Place + query + take_back for each candidate until one has a land target
+    for wx, wy in candidates:
+        # Place
+        place_body = (
+            f"local s = game.surfaces['nauvis']; "
+            f"local e = s.create_entity{{name='offshore-pump', position={{{wx},{wy}}}, force='player', direction=0}}; "
+            "if not e then rcon.print('NO'); return end; "
+            "local conn = e.fluidbox.get_pipe_connections(1)[1]; "
+            "local tx, ty = conn.target_position.x, conn.target_position.y; "
+            "local can = s.can_place_entity{name='pipe', position={tx,ty}, force='player'}; "
+            "if can then "
+            "  rcon.print(string.format('OK,%.1f,%.1f', tx, ty)) "
+            "else "
+            "  e.destroy(); "
+            "  rcon.print(string.format('BAD,%.1f,%.1f', tx, ty)) "
+            "end"
+        )
+        res = agent.rcon.command('/silent-command ' + place_body).strip()
+        if res.startswith('OK,'):
+            _, sx, sy = res.split(',')
+            return {'water_x': wx, 'water_y': wy, 'target_x': float(sx), 'target_y': float(sy)}
+    return None
 
 
 def _read_pump_connection(agent, pump_x: float, pump_y: float) -> Dict[str, float]:
@@ -87,28 +110,17 @@ def build_power_chain(agent, water_hint_x: float, water_hint_y: float,
     6. Place pole within 7 tiles of engine
     7. Fuel boiler, wait, verify production
     """
-    # Stage 1: find good water tile
-    agent.movement.walk_to(water_hint_x, water_hint_y, radius=3)
+    # Stage 1: find good water tile (already places + queries pump). On success,
+    # the pump is LIVE at (wx, wy) and connection target is known.
+    agent.movement.walk_chunked(water_hint_x, water_hint_y, chunk_size=30, radius_final=3)
     spot = _find_pump_friendly_water(agent, water_hint_x, water_hint_y, max_search_radius)
     if not spot:
-        return {'ok': False, 'stage': 'find_water', 'reason': 'no suitable water tile'}
+        return {'ok': False, 'stage': 'find_water',
+                'reason': 'no water tile produced a land-placeable output target'}
     wx, wy = spot['water_x'], spot['water_y']
+    tx, ty = spot['target_x'], spot['target_y']
 
-    # Stage 2: place pump + read connection
-    pump = agent.placement.place('offshore-pump', wx, wy, 0,
-                                 clear_blockers=False, step_aside=True)
-    if not pump.get('ok'):
-        return {'ok': False, 'stage': 'place_pump', 'reason': pump}
-    conn = _read_pump_connection(agent, wx, wy)
-    if not conn:
-        return {'ok': False, 'stage': 'read_pump_conn', 'reason': 'no conn'}
-    tx, ty = conn['target_x'], conn['target_y']
-
-    # Stage 3: place pipe at target — if target is on water, mine pump + abort
-    if not _can_place(agent, 'pipe', tx, ty):
-        agent.placement.take_back('offshore-pump', wx, wy)
-        return {'ok': False, 'stage': 'pump_target_on_water',
-                'reason': f"pump connection target ({tx},{ty}) is not land-placeable; try different hint"}
+    # Stage 3: place pipe at target — we've already verified it's placeable
     pipe = agent.placement.place('pipe', tx, ty, 0, clear_blockers=True, step_aside=False)
 
     # Stage 4: place boiler. We want its WEST water-input (one of N/S of west tile)

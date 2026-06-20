@@ -127,7 +127,19 @@ When `entity.status` returns a number, decode with:
 local names={}; for k,v in pairs(defines.entity_status) do names[v]=k end
 rcon.print(names[the_number])
 ```
-Common ones: `1 = working`, `12 = full_output`, `17 = no_power`, `32 = waiting_for_source_items`, `34 = waiting_for_space_in_destination`. Always decode before assuming what's wrong.
+
+Codes verified live on 2026-06-20:
+- `1 = working` (everything's fine)
+- `12 = full_output` (output buffer maxed; nothing draining it)
+- `17 = no_power` (electric entity not connected to a generator)
+- `18 = no_ingredients` (furnace/assembler has no input items — usually a cascade from a drill out of ore)
+- `19 = no_fuel` (burner has no fuel item)
+- `21 = no_minable_resources` (drill is on a tile with no resource — mined dry OR off-patch)
+- `27 = missing_required_fluid` (boiler with no water input)
+- `32 = waiting_for_source_items` (inserter's pickup tile is empty)
+- `34 = waiting_for_space_in_destination` (inserter/drill drop tile is full)
+
+Always decode before guessing.
 
 ---
 
