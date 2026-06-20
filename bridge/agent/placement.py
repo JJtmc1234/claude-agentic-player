@@ -56,15 +56,24 @@ class Placement:
         return res
 
     def _clear_blockers(self, cx: float, cy: float, kind: str = '1x1'):
-        """Destroy trees + rocks (simple-entity) within the entity's bbox."""
+        """Destroy trees + rocks (simple-entity), pick up item-on-ground in the bbox.
+        Items get inserted into character inventory (free loot).
+        """
         half = {'1x1': 0.5, '2x2': 1.0, '3x3': 1.5}.get(kind, 0.5)
         body = (
+            f"local c = game.get_entity_by_unit_number({self.a.unit}); "
             f"local s = game.surfaces['nauvis']; "
+            f"local ci = c.get_main_inventory(); "
             f"local b = s.find_entities_filtered{{area={{{{{cx-half}, {cy-half}}}, "
             f"{{{cx+half}, {cy+half}}}}}}}; "
             "for _, e in ipairs(b) do "
-            "  if e.valid and (e.type == 'tree' or e.type == 'simple-entity') then "
-            "    e.destroy() "
+            "  if e.valid then "
+            "    if e.type == 'tree' or e.type == 'simple-entity' then "
+            "      e.destroy() "
+            "    elseif e.name == 'item-on-ground' and e.stack and e.stack.valid_for_read then "
+            "      ci.insert{name=e.stack.name, count=e.stack.count}; "
+            "      e.destroy() "
+            "    end "
             "  end "
             "end"
         )

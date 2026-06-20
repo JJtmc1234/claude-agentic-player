@@ -57,24 +57,26 @@ def plan_drill_to_chest(ore_x: float, ore_y: float, direction: int = DIR_SOUTH) 
 
 def plan_iron_smelt_line(drill_ore_x: float, drill_ore_y: float) -> LineSpec:
     """Iron line: drill (on ore) → furnace (south) → inserter → chest. All south-facing chain.
-    The drill's drop goes directly into the furnace input (touching adjacency)."""
+    The drill's drop goes directly into the furnace input (touching adjacency).
+
+    IMPORTANT placement order: drill is placed LAST. If drill is placed first
+    and fueled, it spam-drops mined ore onto the future furnace tile, which then
+    blocks furnace placement (item-on-ground entity in the way). Verified live
+    2026-06-20."""
     dx, dy = snap_2x2_center(drill_ore_x, drill_ore_y)
-    # Furnace at center (dx, dy+2.5)? Actually 2x2 at integer center,
-    # one tile south of drill bottom edge means center at (dx, dy + 2).
     fx, fy = snap_2x2_center(dx, dy + 2)
-    # Inserter 1 tile south of furnace south edge — for furnace at (fx, fy),
-    # inserter Y target = fy + 1 (snaps to fy + 1.5)
     ix, iy = inserter_pickup_for_furnace(fx, fy, inserter_side=DIR_SOUTH)
-    # Chest 1 tile south of inserter
     cx, cy = snap_1x1_center(ix, iy + 1)
     return LineSpec(
         name=f"iron smelt line @ drill ({dx},{dy})",
+        # ORDER MATTERS: chest → inserter → furnace → drill (downstream first).
         placements=[
-            Placement('burner-mining-drill', dx, dy, DIR_SOUTH, 'on ore, drops S'),
-            Placement('stone-furnace', fx, fy, 0, 'receives ore from drill'),
+            Placement('wooden-chest', cx, cy, 0, 'collects plates'),
             Placement('burner-inserter', ix, iy, DIR_NORTH,
                       'picks N from furnace, drops S to chest'),
-            Placement('wooden-chest', cx, cy, 0, 'collects plates'),
+            Placement('stone-furnace', fx, fy, 0, 'receives ore from drill'),
+            Placement('burner-mining-drill', dx, dy, DIR_SOUTH,
+                      'on ore, drops S — placed LAST so it doesnt spam-drop on furnace spot'),
         ],
         fuel=[
             ('burner-mining-drill', dx, dy, 'wood', 5),
