@@ -24,6 +24,16 @@ Running record of major milestones. Newest at top.
 - Saved alignment lessons to memory and CLAUDE.md: inserter direction = pickup
   side; 2x2-vs-1x1 snap offset; burner-drill drop = center+1.3 (not +2) in 2.0.
 - `CLAUDE.md` written at project root consolidating all 31 memory entries.
+- `bridge/chat_loop.py` — in-game chat command listener. JJ can type
+  `claude: where`, `claude: walk x y`, `claude: chop 10`, `claude: mine coal 5`,
+  `claude: status`, `claude: stop` in chat (handle must be IdBaj98/factoriobrine).
+  Safety filter blocks destructive keywords (delete/remove/kill/admin/rcon).
+- `bridge/agent/power.py` — autonomous power-chain builder. Untested live
+  but follows the verified POWER_CHAIN.md procedure step-by-step with
+  can_place + fluidbox queries between each placement.
+- `bridge/agent/test_geometry.py` (11/11 PASS) + `test_layouts.py` (14/14 PASS).
+- `bridge/build_starter_base.py` — one-command bootstrap that rebuilds the
+  iron/copper/coal mines from a freshly-spawned character using the library.
 
 ## 2026-06-06 (evening) — Multi-product chain (cables + circuits) working
 
