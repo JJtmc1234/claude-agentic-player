@@ -22,6 +22,9 @@ from agent.layouts import (
     plan_iron_smelt_line,
     plan_drill_to_chest,
     plan_power_chain,
+    plan_multi_drill_line,
+    plan_steel_smelt,
+    plan_wall_turret_segment,
 )
 from agent.power import build_power_chain
 
@@ -32,5 +35,6 @@ __all__ = [
     'inserter_pickup_for_drill', 'inserter_pickup_for_furnace',
     'LineSpec',
     'plan_iron_smelt_line', 'plan_drill_to_chest', 'plan_power_chain',
+    'plan_multi_drill_line', 'plan_steel_smelt', 'plan_wall_turret_segment',
     'build_power_chain',
 ]

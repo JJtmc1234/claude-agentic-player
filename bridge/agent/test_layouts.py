@@ -8,7 +8,9 @@ _BRIDGE = _HERE.parent
 if str(_BRIDGE) not in sys.path:
     sys.path.insert(0, str(_BRIDGE))
 
-from agent.layouts import plan_iron_smelt_line, plan_drill_to_chest
+from agent.layouts import (plan_iron_smelt_line, plan_drill_to_chest,
+                            plan_multi_drill_line, plan_steel_smelt,
+                            plan_wall_turret_segment)
 
 
 def check(name, want, got):
@@ -52,6 +54,31 @@ def main():
     p = spec.placements
     check("drill pos", (-14.0, 90.0), (p[0].x, p[0].y))
     check("chest pos", (-13.5, 91.5), (p[1].x, p[1].y))
+
+    print("plan_multi_drill_line at (-14.5, 50.5) x2:")
+    spec = plan_multi_drill_line(-14.5, 50.5, n_drills=2, spacing_x=3)
+    check("4 entities per chain x 2 chains", 8, len(spec.placements))
+    check("3 fuel entries per chain x 2 chains", 6, len(spec.fuel))
+    # Chain 0 ends with drill at (-14, 51), chain 1's drill at (-11, 51)
+    drills = [p for p in spec.placements if p.item == 'burner-mining-drill']
+    check("drill 0 x", -14.0, drills[0].x)
+    check("drill 1 x (shifted by spacing)", -11.0, drills[1].x)
+
+    print("plan_steel_smelt at chest (10, 10):")
+    spec = plan_steel_smelt(10, 10)
+    check("5 entities (chest+ins+furnace+ins+chest)", 5, len(spec.placements))
+    items = [p.item for p in spec.placements]
+    check("first is output chest", 'wooden-chest', items[0])
+    check("last is input chest", 'wooden-chest', items[-1])
+    check("middle is furnace", 'stone-furnace', items[2])
+
+    print("plan_wall_turret_segment east length=8:")
+    spec = plan_wall_turret_segment(0, 0, length=8, direction='east')
+    check("8 placements", 8, len(spec.placements))
+    types = [p.item for p in spec.placements]
+    # Pattern: W T W W T W W T   (turret every 3rd starting index 1)
+    expected = ['stone-wall' if i % 3 != 1 else 'gun-turret' for i in range(8)]
+    check("pattern matches W-T-W-W-T-W-W-T", expected, types)
 
 
 if __name__ == '__main__':

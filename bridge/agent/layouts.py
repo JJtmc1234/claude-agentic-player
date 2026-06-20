@@ -86,6 +86,120 @@ def plan_iron_smelt_line(drill_ore_x: float, drill_ore_y: float) -> LineSpec:
     )
 
 
+def plan_multi_drill_line(drill_ore_x: float, drill_ore_y: float,
+                          n_drills: int = 2,
+                          spacing_x: int = 3) -> LineSpec:
+    """N drills side-by-side, each with its own furnace+inserter, sharing chest column.
+
+    For n_drills=2, spacing_x=3:
+      Drill 0 at (dx, dy), furnace (dx, dy+2), inserter (dx+0.5, dy+3.5), chest (dx+0.5, dy+4.5)
+      Drill 1 at (dx+3, dy), furnace (dx+3, dy+2), inserter (dx+3.5, dy+3.5), chest (dx+3.5, dy+4.5)
+    Doubles iron-plate throughput. Per JJ's multi-machine target."""
+    dx0, dy0 = snap_2x2_center(drill_ore_x, drill_ore_y)
+    placements = []
+    fuel = []
+    for i in range(n_drills):
+        dx, dy = dx0 + i * spacing_x, dy0
+        fx, fy = snap_2x2_center(dx, dy + 2)
+        ix, iy = inserter_pickup_for_furnace(fx, fy, inserter_side=DIR_SOUTH)
+        cx, cy = snap_1x1_center(ix, iy + 1)
+        # Downstream-first order PER CHAIN (chest, inserter, furnace, drill)
+        placements.append(Placement('wooden-chest', cx, cy, 0, f'chain {i} chest'))
+        placements.append(Placement('burner-inserter', ix, iy, DIR_NORTH, f'chain {i} inserter'))
+        placements.append(Placement('stone-furnace', fx, fy, 0, f'chain {i} furnace'))
+        placements.append(Placement('burner-mining-drill', dx, dy, DIR_SOUTH, f'chain {i} drill'))
+        fuel.extend([
+            ('burner-mining-drill', dx, dy, 'wood', 5),
+            ('stone-furnace', fx, fy, 'wood', 5),
+            ('burner-inserter', ix, iy, 'wood', 3),
+        ])
+    return LineSpec(
+        name=f"multi-drill x{n_drills} @ ore ({dx0},{dy0})",
+        placements=placements,
+        fuel=fuel,
+        notes=f"{n_drills} parallel chains. Per chain output goes to its own chest. "
+              "Could be unified later via belt + splitter."
+    )
+
+
+def plan_steel_smelt(chest_in_x: float, chest_in_y: float,
+                     iron_per_steel: int = 5) -> LineSpec:
+    """Steel line: chest of iron-plate → inserter → stone-furnace (steel-plate recipe)
+    → inserter → chest of steel-plate.
+
+    Stone furnace can smelt steel-plate (5 iron → 1 steel) without needing
+    a smelting tech in 2.0 if the recipe is set. Set via furnace.set_recipe('steel-plate')
+    or use a steel-furnace which has steel as default. We use stone-furnace + set_recipe."""
+    icx, icy = snap_1x1_center(chest_in_x, chest_in_y)
+    # input inserter east of chest, dir=W (picks west from chest)
+    iicx, iicy = snap_1x1_center(icx + 1, icy)
+    # furnace east of input inserter, dir=0
+    ffx, ffy = snap_2x2_center(iicx + 1.5, iicy)
+    # output inserter east of furnace, dir=W (picks west from furnace)
+    oicx, oicy = snap_1x1_center(ffx + 1.5, ffy)
+    # output chest east of output inserter
+    ocx, ocy = snap_1x1_center(oicx + 1, oicy)
+    return LineSpec(
+        name=f"steel smelt @ ({ffx},{ffy})",
+        placements=[
+            Placement('wooden-chest', ocx, ocy, 0, 'steel-plate output'),
+            Placement('burner-inserter', oicx, oicy, DIR_WEST, 'picks W from furnace, drops E to out chest'),
+            Placement('stone-furnace', ffx, ffy, 0, 'steel recipe (set via API)'),
+            Placement('burner-inserter', iicx, iicy, DIR_WEST, 'picks W from input chest, drops E to furnace'),
+            Placement('wooden-chest', icx, icy, 0, 'iron-plate input'),
+        ],
+        fuel=[
+            ('stone-furnace', ffx, ffy, 'coal', 5),
+            ('burner-inserter', iicx, iicy, 'coal', 2),
+            ('burner-inserter', oicx, oicy, 'coal', 2),
+        ],
+        notes=(
+            f"Each steel-plate costs {iron_per_steel} iron-plate and ~16 sec to smelt.\n"
+            "After placing, call: surface.find_entities_filtered{position=furnace_pos, name='stone-furnace'}[1].set_recipe('steel-plate')\n"
+            "Top up input chest with iron-plate periodically (or pipe in from iron line)."
+        ),
+    )
+
+
+def plan_wall_turret_segment(start_x: float, start_y: float, length: int = 8,
+                             direction: str = 'east') -> LineSpec:
+    """Defensive segment: alternating wall+turret along a line.
+
+    Pattern (east-going, length 8):
+      W T W W T W W T W W T W W T W W   (W=stone-wall, T=gun-turret)
+    Spacing: every 3rd tile is a turret to give them overlapping fire arcs.
+
+    REQUIRES: stone-wall recipe (Automation 1) + gun-turret recipe (Military 1) +
+    firearm-magazine ammo. JJ has 200 magazines from the spaceship loot, but the
+    turret recipe is gated on research. Plan is ready for once Military is unlocked.
+    """
+    sx, sy = snap_1x1_center(start_x, start_y)
+    placements = []
+    for i in range(length):
+        if direction == 'east':
+            x, y = sx + i, sy
+        elif direction == 'south':
+            x, y = sx, sy + i
+        else:
+            raise ValueError(f"direction must be 'east' or 'south', got {direction}")
+        x, y = snap_1x1_center(x, y)
+        # Every 3rd position is a turret
+        if i % 3 == 1:
+            placements.append(Placement('gun-turret', x, y, 0, f'turret {i//3}'))
+        else:
+            placements.append(Placement('stone-wall', x, y, 0, f'wall'))
+    return LineSpec(
+        name=f"wall+turret segment {direction} from ({sx},{sy}) length={length}",
+        placements=placements,
+        fuel=[],
+        notes=(
+            "Load each turret with firearm-magazines via insert_into_entity "
+            "(slot = defines.inventory.turret_ammo). "
+            "Pattern is wall-turret-wall-wall-turret-wall (turret every 3rd tile)."
+        ),
+    )
+
+
 def plan_power_chain(water_x: float, water_y: float,
                      land_direction: str = 'east') -> LineSpec:
     """Plan an offshore-pump + boiler + steam-engine chain on a water/land edge.
