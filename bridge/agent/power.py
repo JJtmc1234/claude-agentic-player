@@ -27,19 +27,33 @@ def _find_pump_friendly_water(agent, hint_x: float, hint_y: float,
     Iterative try-and-undo: place pump, query target, if target is water,
     take_back and try the next tile.
     """
+    # Prefer water tiles whose SOUTH neighbor is land — those are where the
+    # pump's auto-southward output target will land on a placeable tile.
     body = (
         "local c = game.get_entity_by_unit_number(" + str(agent.unit) + "); "
         "local s = c.surface; "
         f"local water = s.find_tiles_filtered{{position={{{hint_x},{hint_y}}}, radius={radius}, name={{'water','deepwater'}}}}; "
-        "local out = {}; "
+        "local edges = {}; local others = {}; "
         "for _, wt in ipairs(water) do "
-        "  local cx, cy = wt.position.x + 0.5, wt.position.y + 0.5; "
+        "  local wx, wy = wt.position.x, wt.position.y; "
+        "  local cx, cy = wx + 0.5, wy + 0.5; "
         "  if s.can_place_entity{name='offshore-pump', position={cx,cy}, force='player', direction=0} then "
-        "    table.insert(out, string.format('%.1f,%.1f', cx, cy)) "
+        "    local south = s.get_tile(wx, wy + 1); "
+        "    local east = s.get_tile(wx + 1, wy); "
+        "    local north = s.get_tile(wx, wy - 1); "
+        "    local west = s.get_tile(wx - 1, wy); "
+        "    local function isLand(t) return t and not (t.name == 'water' or t.name == 'deepwater') end; "
+        "    if isLand(south) or isLand(north) or isLand(east) or isLand(west) then "
+        "      table.insert(edges, string.format('%.1f,%.1f', cx, cy)) "
+        "    else "
+        "      table.insert(others, string.format('%.1f,%.1f', cx, cy)) "
+        "    end "
         "  end "
-        f"  if #out >= {max_tries} then break end "
         "end; "
-        "for _, p in ipairs(out) do rcon.print(p) end"
+        f"for i = 1, math.min({max_tries}, #edges) do rcon.print(edges[i]) end; "
+        "if #edges == 0 then "
+        f"  for i = 1, math.min({max_tries}, #others) do rcon.print(others[i]) end "
+        "end"
     )
     out = agent.rcon.command('/silent-command ' + body).strip()
     if not out:

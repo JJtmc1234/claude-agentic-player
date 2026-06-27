@@ -183,7 +183,14 @@ local function process_mining_jobs()
         end
         job.completed = true
         job.gained = gained
-        t.destroy{}
+        -- Resource entities (coal, iron-ore, etc.) carry an `amount` field
+        -- and should be DECREMENTED, not destroyed — destroying wipes the
+        -- whole patch tile. Trees / rocks (no amount) are one-shot, destroy.
+        if t.type == 'resource' and t.amount and t.amount > 1 then
+          t.amount = t.amount - 1
+        else
+          t.destroy{}
+        end
         to_remove[#to_remove + 1] = char_unum
       end
     end
@@ -449,7 +456,7 @@ local function ping()
   init_all()
   return {
     ok = true,
-    pong = "from claude-companion 0.10.3",
+    pong = "from claude-companion 0.10.5",
     tick = game.tick,
     chat_buffer_size = #storage.chat_log,
     mining_jobs = count_kv(storage.mining_jobs),

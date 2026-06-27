@@ -35,8 +35,15 @@ class Agent:
         if password is None:
             password = os.environ.get('FACTORIO_RCON_PASSWORD')
             if not password:
+                bat = Path(r'C:\FactorioServer\start-server.bat')
+                if bat.exists():
+                    import re
+                    m = re.search(r'--rcon-password "([^"]+)"', bat.read_text())
+                    if m:
+                        password = m.group(1)
+            if not password:
                 raise RuntimeError(
-                    "FACTORIO_RCON_PASSWORD not set — export it before calling Agent.connect()"
+                    "FACTORIO_RCON_PASSWORD not set and start-server.bat not readable"
                 )
         os.environ['FACTORIO_RCON_PASSWORD'] = password
         r = RconClient()
