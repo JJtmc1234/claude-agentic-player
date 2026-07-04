@@ -127,17 +127,21 @@ Waiting on Manager for:
 
 Employee-3:
 
-Suggested role: BUILDER — ghost placement. Reads JJ's entity ghosts,
-takes materials from workshop, executes placement with tile-lock
-awareness.
+Role: BUILDER — ghost placement. Reads JJ's entity ghosts, takes
+materials from workshop chest (-30.5, 41.5), executes placement with
+tile-lock awareness.
 Branch: `employee-3`.
-Character name: (suggest `builder`)
-Last position:
-Current task (from Manager):
+Character name: (blank — multi-char mod not yet deployed)
+Last position: (blank — not yet probed RCON)
+Current task (from Manager): awaiting Manager assignment.
 
 Recent changes:
+  - 2026-07-04 12:01 — Session start. Read onboarding + team handbooks.
+    Checked out employee-3, fast-forwarded to master @ a716366 (team
+    infra + onboarding). Filled in this section.
 
 Waiting on Manager for:
+  - Initial task assignment (default suggested role: BUILDER).
 
 --------------------------------------------------------------------------
 
