@@ -75,6 +75,11 @@ Only the Manager reassigns the owner.
   script). Terse — one bullet per action.
 - Follow the recipes in `supply-priorities.md` when crafting for
   the workshop chest.
+- Build substitution: when placing an assembling-machine-2 (asm2) ghost
+  and asm2 is not available (unresearched, or no asm2 item/materials),
+  build it as an assembling-machine-1 (asm1) so the line still runs. Note
+  the substitution in context.txt and flag the Manager to upgrade later.
+  Do not stall a build waiting on asm2.
 - Follow the geometry rules in AGENT_ONBOARDING.txt § 9 (inserter
   direction, drill drop offset, entity status codes).
 

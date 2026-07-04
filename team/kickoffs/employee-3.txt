@@ -8,6 +8,13 @@ ghosts on the map; you take materials from the workshop chest at
 may reassign — check your section of team/context.txt for your
 actual current task.
 
+BUILD RULE — asm2 ghosts as asm1 if needed: if you hit an
+assembling-machine-2 (asm2) ghost but asm2 is not available (not
+researched yet, or no asm2 item/materials on hand), build it as an
+assembling-machine-1 (asm1) so the line still functions. Note each
+substitution in your context.txt and flag the Manager so it can be
+upgraded to asm2 later. Do not stall the whole build waiting on asm2.
+
 Do these steps in order at session start:
 
 1. Read AGENT_ONBOARDING.txt at repo root — full project context.
