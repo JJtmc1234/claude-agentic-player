@@ -186,9 +186,9 @@ Role: MINER — CONFIRMED. Also: you are the SOLE in-game actor this
   session (only one character exists; multi-char mod not deployed).
   No other employee touches the game, so no tile-lock coordination
   needed. Employees 2/3/4 are on code-only tasks.
-Character name: (blank — multi-char mod not deployed yet)
-Last position: (blank — not probed; single shared char, not driving
-  without Manager assignment)
+Character name: miner (unum 333695, spawned @ (-40,45) by Manager 2026-07-04).
+  Do NOT drive it yet — wait for employee-3 to confirm driving works (wave 2).
+Last position: (-40, 45) at spawn
 ** IN-GAME OWNER = manager-keepalive (see team/in-game-owner.txt). Do NOT
    drive the character. Read-only RCON probes (position/inventory/status)
    are allowed for anyone. **
@@ -246,10 +246,9 @@ Branch: `employee-2`.
 Worktree name mismatch (agent-3 dir / employee-2 branch): acknowledged
   by Manager — harmless, ignore it. What matters is you're on branch
   employee-2. Carry on.
-Character name: (blank — multi-char mod not yet deployed; suggest
-`courier`)
-Last position: (blank — only one shared char exists; not probed/moved
-mine yet)
+Character name: courier (unum 333697, spawned @ (-36,47) by Manager
+  2026-07-04). Do NOT drive yet — wait for employee-3's driving-PASS (wave 2).
+Last position: (-36, 47) at spawn
 Current task (from Manager): MOD AUDIT — de-risk multi-char driving (CODE-ONLY,
   no driving, no deploy). Confirmed: 0.10.6 is deployed, list_chars resolves.
   Open question that gates the whole team: when spawn_named_char creates a
@@ -309,25 +308,24 @@ Employee-3:
 Role THIS SESSION: BRIDGE DEV (in-game BUILDER role resumes once
   multi-char is deployed — Employee-1 holds the single character now).
 Branch: `employee-3`.
-Character name: (suggest `builder`)
-Last position:
-Current task (from Manager): MULTI-CHAR BOOTSTRAP + VERIFY (GATING TASK — you
-  hold the in-game driver token this wave, owner=employee-3 in
-  in-game-owner.txt). Mod 0.10.6 is DEPLOYED (list_chars resolves, returns {}).
-  Nobody has confirmed a SPAWNED named char can actually be DRIVEN yet — that's
-  the gate for the whole team. Steps:
-   1. Spawn named chars for the roster via bridge/team.py bootstrap() or a
-      direct remote.call('claude','spawn_named_char', name, x, y): names
-      "miner","builder","courier","scout" near anchor (-40,45), fanned out so
-      they don't stack.
-   2. VERIFY DRIVING end-to-end on ONE of them: Agent.connect_named("builder"),
-      walk it ~5 tiles (walk_chunked), re-probe position, confirm it MOVED.
-      KNOWN RISK: Factorio 2.0 get_entity_by_unit_number only resolves entities
-      registered via script.register_on_entity_destroyed (see control.lua:1265).
-      If the spawned char's unum does NOT resolve / does NOT move, multi-char
-      driving is BROKEN — file a bug in bug-log.md (severity HIGH, owner
-      employee-2) and report; do NOT force it.
-   3. Report the roster {name->unum} + PASS/FAIL in your Recent changes.
+Character name: builder (unum 333696, spawned @ (-37.5,44.5) by Manager
+  2026-07-04). This is YOUR char — verify driving on it, then build.
+Last position: (-37.5, 44.5) at spawn
+Current task (from Manager): VERIFY MULTI-CHAR DRIVING, then BUILD (you hold
+  the driver token this wave, owner=employee-3). Mod 0.10.6 is DEPLOYED.
+  ** MANAGER ALREADY SPAWNED THE 4 NAMED CHARS — DO NOT RE-SPAWN (a second
+     spawn_named_char with the same name overwrites the map + leaks the old
+     entity). ** Roster (verified resolving via get_entity_by_unit_number +
+     list_chars, 2026-07-04):
+       miner=333695 @ (-40,45)   builder=333696 @ (-37.5,44.5)
+       courier=333697 @ (-36,47) scout=333698 @ (-34,45)
+  Registration risk (control.lua:1265) is CLEARED — all four resolve. The only
+  thing left unverified is on_tick DRIVING (walk/mine). Steps:
+   1. VERIFY DRIVING: Agent.connect_named("builder"), walk it ~5 tiles
+      (walk_chunked), re-probe position, confirm it MOVED. If it does NOT move,
+      file a bug (bug-log.md, severity HIGH, owner employee-2) + report; do NOT
+      force it. If it moves → multi-char is GO for the whole team; note PASS.
+   2. Report PASS/FAIL in your Recent changes.
   THEN (only if PASS): as BUILDER on the "builder" char, build the MILITARY
   SCIENCE PACK plant. JJ's EXACT spec (in-conversation): "10 assemblers, fully
   fed, and I can plug it to labs." So:
@@ -371,8 +369,9 @@ Employee-4:
 Role THIS SESSION: LAYOUT/DESIGN DEV (in-game SCOUT/DEFENSE resumes once
   multi-char is deployed — Employee-1 holds the single character now).
 Branch: `employee-4`.
-Character name: (suggest `scout`)
-Last position:
+Character name: scout (unum 333698, spawned @ (-34,45) by Manager 2026-07-04).
+  Do NOT drive yet — wait for employee-3's driving-PASS (wave 2).
+Last position: (-34, 45) at spawn
 Current task (from Manager): OIL-TRIP SUPPLY SPEC (CODE/DOC-ONLY, no driving).
   JJ is going on an OIL TRIP (pumpjack expedition, historically to ~(160,350)
   SE) and wants a chest stocked for it. Produce a concrete BILL OF MATERIALS
