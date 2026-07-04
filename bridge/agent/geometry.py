@@ -107,3 +107,54 @@ def inserter_pickup_for_furnace(furnace_cx: float, furnace_cy: float,
 def opposite_direction(d: int) -> int:
     return {DIR_NORTH: DIR_SOUTH, DIR_SOUTH: DIR_NORTH,
             DIR_EAST: DIR_WEST, DIR_WEST: DIR_EAST}[d]
+
+
+# --- electric-mining-drill (3x3) + small-electric-pole constants ---------------
+# Source: base/prototypes/entity/mining-drill.lua (electric-mining-drill, ~line 259)
+#   selection_box = {{-1.5,-1.5},{1.5,1.5}}  -> 3x3 footprint (odd dim -> *.5 center)
+#   vector_to_place_result = {0, -1.85}      -> drop 1.85 tiles along facing, X-CENTERED
+#     (NOTE: unlike the burner-mining-drill whose drop is offset +0.5 in X, the
+#      electric drill drops on its own centre column — X offset is 0.)
+#   resource_searching_radius = 2.49
+# Source: base/prototypes/entity/entities.lua (small-electric-pole, ~line 1631)
+#   supply_area_distance = 2.5   (half-side of the square supply area, from pole centre;
+#     measured from the collision-box edge in-engine, so real coverage is >= this — 2.5
+#     is the safe underestimate we plan against)
+#   maximum_wire_distance = 7.5  (max centre-to-centre gap for two poles to auto-wire)
+ELECTRIC_DRILL_DROP_OFFSET = 1.85
+ELECTRIC_DRILL_SIZE = 3
+SMALL_POLE_SUPPLY_AREA = 2.5
+SMALL_POLE_WIRE_DISTANCE = 7.5
+
+
+def snap_3x3_center(target_x: float, target_y: float) -> Tuple[float, float]:
+    """3x3 entities (electric-mining-drill) have an ODD tile dimension, so — like 1x1 —
+    they snap to *.5 centers (a 3x3 centred at 0.5 occupies tiles -1,0,1)."""
+    return snap_1x1_center(target_x, target_y)
+
+
+def electric_drill_drop_position(cx: float, cy: float,
+                                 direction: int = DIR_SOUTH) -> Tuple[float, float]:
+    """Continuous drop point of a 3x3 electric-mining-drill at centre (cx,cy).
+    vector_to_place_result magnitude 1.85 along the facing axis; X (perp) offset is 0."""
+    dx, dy = DIR_VECTORS[direction]
+    return (cx + dx * ELECTRIC_DRILL_DROP_OFFSET, cy + dy * ELECTRIC_DRILL_DROP_OFFSET)
+
+
+def electric_drill_output_tile(cx: float, cy: float,
+                               direction: int = DIR_SOUTH) -> Tuple[float, float]:
+    """The 1x1 belt tile that catches an electric drill's drop: one tile beyond the
+    3x3 footprint along the facing direction. For south-facing: (cx, cy+2)."""
+    dx, dy = DIR_VECTORS[direction]
+    return snap_1x1_center(cx + dx * 2, cy + dy * 2)
+
+
+def direction_toward(from_xy: Tuple[float, float],
+                     to_xy: Tuple[float, float]) -> int:
+    """Cardinal DIR_* pointing from one tile toward another (dominant axis wins).
+    Used to orient each belt segment toward the next tile in a path."""
+    fx, fy = from_xy
+    tx, ty = to_xy
+    if abs(tx - fx) >= abs(ty - fy):
+        return DIR_EAST if tx > fx else DIR_WEST
+    return DIR_SOUTH if ty > fy else DIR_NORTH

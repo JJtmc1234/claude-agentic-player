@@ -9,10 +9,11 @@ from dataclasses import dataclass, field
 from typing import List, Tuple, Optional
 
 from agent.geometry import (
-    DIR_NORTH, DIR_SOUTH, DIR_EAST, DIR_WEST,
-    snap_2x2_center, snap_1x1_center,
-    drill_drop_position,
+    DIR_NORTH, DIR_SOUTH, DIR_EAST, DIR_WEST, DIR_VECTORS,
+    snap_2x2_center, snap_1x1_center, snap_3x3_center,
+    drill_drop_position, electric_drill_output_tile, direction_toward,
     inserter_pickup_for_drill, inserter_pickup_for_furnace,
+    SMALL_POLE_SUPPLY_AREA, SMALL_POLE_WIRE_DISTANCE,
 )
 
 
@@ -236,6 +237,152 @@ def plan_power_chain(water_x: float, water_y: float,
                       'direction ignored; output auto-set by terrain'),
         ],
         notes=notes,
+    )
+
+
+def plan_belt_run(start: Tuple[float, float], end: Tuple[float, float],
+                  belt_item: str = 'transport-belt',
+                  first: str = 'h') -> LineSpec:
+    """A straight or L-shaped transport-belt path from `start` to `end` tile.
+
+    Belt `direction` = the direction items MOVE (the belt's output side). Each belt
+    in the path faces toward the NEXT tile; at an L-corner the corner belt faces the
+    turn (vertical) direction so items flow around it. The final belt keeps the
+    heading of the segment that fed it (items run off the end).
+
+    `first`: for an L-shape, 'h' goes horizontal-then-vertical (corner at end_x,start_y),
+    'v' goes vertical-then-horizontal (corner at start_x,end_y). Ignored when the run
+    is already straight (shared x or y).
+
+    Coords are snapped to 1x1 (*.5) tile centers, so the path steps by whole tiles.
+    """
+    sx, sy = snap_1x1_center(*start)
+    ex, ey = snap_1x1_center(*end)
+
+    # Build the ordered list of tile centers along the path.
+    tiles: List[Tuple[float, float]] = []
+
+    def _line(ax, ay, bx, by):
+        """Inclusive tile walk from (ax,ay) to (bx,by) along one axis."""
+        pts = []
+        if ax == bx:
+            step = 1 if by >= ay else -1
+            n = int(round(abs(by - ay)))
+            for k in range(n + 1):
+                pts.append((ax, ay + step * k))
+        else:
+            step = 1 if bx >= ax else -1
+            n = int(round(abs(bx - ax)))
+            for k in range(n + 1):
+                pts.append((ax + step * k, ay))
+        return pts
+
+    if sx == ex or sy == ey:
+        tiles = _line(sx, sy, ex, ey)
+    elif first == 'h':
+        corner = (ex, sy)
+        tiles = _line(sx, sy, *corner)          # horizontal leg incl. corner
+        tiles += _line(*corner, ex, ey)[1:]      # vertical leg, skip dup corner
+    elif first == 'v':
+        corner = (sx, ey)
+        tiles = _line(sx, sy, *corner)          # vertical leg incl. corner
+        tiles += _line(*corner, ex, ey)[1:]      # horizontal leg, skip dup corner
+    else:
+        raise ValueError(f"first must be 'h' or 'v', got {first!r}")
+
+    placements = []
+    for i, (tx, ty) in enumerate(tiles):
+        if i + 1 < len(tiles):
+            d = direction_toward((tx, ty), tiles[i + 1])
+        else:
+            d = placements[-1].direction if placements else DIR_EAST
+        placements.append(Placement(belt_item, tx, ty, d, f'belt {i}'))
+
+    return LineSpec(
+        name=f"belt run ({sx},{sy})->({ex},{ey}) {first if sx!=ex and sy!=ey else 'straight'}",
+        placements=placements,
+        fuel=[],
+        notes=f"{len(placements)} belts. direction = item-flow (output side).",
+    )
+
+
+def plan_electric_drill_array(patch_center: Tuple[float, float],
+                              rows: int = 2, cols: int = 4,
+                              drill_dir: int = DIR_SOUTH,
+                              belt_flow: int = DIR_EAST) -> LineSpec:
+    """Scalable electric-mining-drill array over an ore patch, centred on `patch_center`.
+
+    Geometry (all from base prototypes — see geometry.py):
+      * electric-mining-drill is 3x3, snaps to *.5 centres.
+      * Column pitch = 3 (footprints edge-to-edge, no gap).
+      * Row pitch = 5: drill row (3 tiles) + belt lane (1 tile, catches the drops at
+        centre+2 south) + pole strip (1 tile, holds small-electric-poles). This keeps
+        belts, poles and drill footprints on mutually-disjoint tiles.
+      * Each drill drops on its own centre column (vector_to_place_result X offset = 0),
+        so the belt lane tile under a drill is exactly (drill_x, drill_y+2) for south.
+
+    Power: small-electric-pole supply_area_distance=2.5, wire<=7.5. Poles sit in the
+    strip 3 tiles south of each drill row (within reach of that row AND the next row's
+    drills), one pole per 2 columns (x offset +1.5 covers the adjacent column pair).
+    Pole strips are 5 apart in Y (<=7.5 wire) so the network stays connected.
+
+    Electric entities need NO burner fuel, so `fuel` is empty. Placement order is
+    poles -> belts -> drills (downstream/support first, drills last).
+
+    Currently supports drill_dir=DIR_SOUTH + belt_flow horizontal (the common case);
+    raises for other orientations rather than emitting an unverified layout.
+    """
+    if drill_dir != DIR_SOUTH:
+        raise NotImplementedError("plan_electric_drill_array currently supports drill_dir=DIR_SOUTH")
+    if belt_flow not in (DIR_EAST, DIR_WEST):
+        raise ValueError("belt_flow must be DIR_EAST or DIR_WEST")
+
+    pcx, pcy = patch_center
+    col_pitch, row_pitch = 3, 5
+    # Anchor: top-left drill centre so the drill grid is centred on patch_center.
+    cx0, cy0 = snap_3x3_center(pcx - (cols - 1) * col_pitch / 2.0,
+                               pcy - (rows - 1) * row_pitch / 2.0)
+
+    poles: List[Placement] = []
+    belts: List[Placement] = []
+    drills: List[Placement] = []
+
+    for r in range(rows):
+        row_y = cy0 + r * row_pitch
+        # --- drills in this row ---
+        for c in range(cols):
+            dx = cx0 + c * col_pitch
+            drills.append(Placement('electric-mining-drill', dx, row_y, drill_dir,
+                                    f'r{r}c{c} drill'))
+        # --- belt lane: continuous run catching every drop, flowing belt_flow ---
+        bx0, by = electric_drill_output_tile(cx0, row_y, drill_dir)
+        bx_last, _ = electric_drill_output_tile(cx0 + (cols - 1) * col_pitch, row_y, drill_dir)
+        lane = plan_belt_run((bx0, by), (bx_last, by),
+                             belt_item='transport-belt', first='h')
+        # Force flow direction (a 1-row run defaults to EAST; honor belt_flow=WEST too)
+        if belt_flow == DIR_WEST:
+            lane = plan_belt_run((bx_last, by), (bx0, by), first='h')
+        for p in lane.placements:
+            belts.append(Placement(p.item, p.x, p.y, p.direction, f'r{r} {p.note}'))
+        # --- pole strip: 1 tile south of the belt lane, one pole per 2 columns ---
+        pole_y = row_y + 3
+        for c in range(0, cols, 2):
+            px = cx0 + c * col_pitch + 1.5   # between column c and c+1
+            px, py = snap_1x1_center(px, pole_y)
+            poles.append(Placement('small-electric-pole', px, py, 0, f'r{r} pole'))
+
+    placements = poles + belts + drills
+    return LineSpec(
+        name=f"electric drill array {rows}x{cols} @ {patch_center}",
+        placements=placements,
+        fuel=[],   # electric drills + belts + poles: no burner fuel
+        notes=(
+            f"{rows*cols} electric-mining-drills, {len(belts)} belts, {len(poles)} poles. "
+            "Each row's belt lane is independent (merge lanes with plan_belt_run + a "
+            "splitter on the output side). Drills face south, drop into the lane at "
+            "centre+2; poles sit 3 tiles south of each row (supply<=2.5 reaches drill "
+            "edges, wire<=7.5 keeps strips connected). No fuel — all electric."
+        ),
     )
 
 
