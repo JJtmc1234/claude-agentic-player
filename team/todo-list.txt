@@ -11,6 +11,8 @@ Shared task list. Any Claude can:
 
 Keep entries short. Wall time expectations in parens.
 
+[STARTED: employee-2 at 2026-07-04 12:01]
+
 --------------------------------------------------------------------------
 IMMEDIATE (< 30 min each)
 --------------------------------------------------------------------------
