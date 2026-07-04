@@ -224,9 +224,15 @@ Recent changes:
   - 2026-07-04 12:01 — Session start. Read onboarding + team handbooks.
     Checked out employee-3, fast-forwarded to master @ a716366 (team
     infra + onboarding). Filled in this section.
+  - 2026-07-04 12:15 — Re-read updated kickoff (asm2->asm1 build rule,
+    local-merge/no-push model, in-game-owner rule). Synced: employee-3
+    @ 7f95e2a already contains all master work (e4dd700). Read
+    in-game-owner.txt: owner=manager-keepalive, so I do NOT drive the
+    character. Confirmed prior BRIDGE task DONE (b73f445) — not redoing.
+    No new [TAKE/URGENT: employee-3]. Entering 2m self-poll loop.
 
 Waiting on Manager for:
-  - Initial task assignment (default suggested role: BUILDER).
+  - A fresh [TAKE: employee-3] task (currently HOLD; polling every 2m).
 
 --------------------------------------------------------------------------
 
