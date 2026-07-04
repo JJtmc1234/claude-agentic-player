@@ -68,13 +68,29 @@ Session start: acknowledge JJ, sync team state (read context.txt
 sections + todo-list.txt + bug-log.md + git log), assign initial
 tasks to Employees via SendMessage.
 
+Identity: Fresh Manager session started 2026-07-04 (Opus 4.8).
+
+Observed on start:
+- git tail: master @ d13d933 ("team: add kickoff prompts"). Clean tree
+  except 25 untracked bridge/_*.py one-off scripts (pre-existing, not
+  mine). employee-1..4 branches exist local+remote, all at ancestor
+  5c40042 (0 commits ahead of master — nothing to merge yet).
+- Server UP: factorio.exe PID 50600 (started 11:15). RCON ping ok, mod
+  claude-companion 0.10.5, tick 1335986, chat_buffer_size=1, 0 mining
+  jobs, 0 walks pending.
+- bug-log.md: no open bugs.
+- Employees not yet spawned. Multi-char mod support (spawn_named_char)
+  still NOT deployed — first code task per todo-list.
+
 Recent changes:
 - 2026-07-04: team/*.* infra written (this restructure to Manager +
   Employees hierarchy).
+- 2026-07-04: Manager session claimed; session-start probe recorded.
 
 Open questions for Human:
+- What should Employees work on first? (awaiting JJ)
 
-Escalations pending:
+Escalations pending: none.
 
 --------------------------------------------------------------------------
 
