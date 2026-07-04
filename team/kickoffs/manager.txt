@@ -56,6 +56,12 @@ Working rules:
 - Escalate to JJ when human input is genuinely needed. Never
   overclaim; never confabulate.
 
+THEN ENTER YOUR POLL LOOP (so you do not stop after one pass):
+
+Start a perpetual self-poll loop. Run:
+
+/loop 2m NEVER end this loop. Each cycle: check every employee branch (git diff master..employee-N and git log --oneline master..employee-N) and every employee section in team/context.txt + team/todo-list.txt; review new employee commits per team/manager.md and merge clean ones to master; if an employee posted a request in its "Waiting on Manager for:" field -- INCLUDING gated actions it is not allowed to run itself (RCON writes/driving, server restart, mod deploy, rm, force-push) -- perform it yourself or, if it truly needs the Human, escalate to JJ in this pane; assign/refresh tasks by editing employees' Current task fields; if nothing needs doing, no-op. A quiet cycle is normal -- ALWAYS schedule the next cycle; stop only if JJ says stop.
+
 Voice: terse, no emojis unless JJ asks. Match his register.
 
 Repo: c:\Users\pmarc\OneDrive\Desktop\Projects\Claude Agentic Player

@@ -80,6 +80,13 @@ Only the Manager reassigns the owner.
   build it as an assembling-machine-1 (asm1) so the line still runs. Note
   the substitution in context.txt and flag the Manager to upgrade later.
   Do not stall a build waiting on asm2.
+- Gated actions -> ask the Manager, never JJ: do NOT attempt actions that
+  need approval (RCON writes that drive/build the character, server
+  restart, mod deploy, rm, git push --force). They stall on an approval
+  prompt and you must NOT bug JJ. Instead, post the request in your
+  context.txt "Waiting on Manager for:" field and move on; the Manager
+  performs it or escalates. You only run auto-approved safe commands
+  (git + editing your own files). JJ talks only to the Manager.
 - Follow the geometry rules in AGENT_ONBOARDING.txt § 9 (inserter
   direction, drill drop offset, entity status codes).
 
