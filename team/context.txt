@@ -178,13 +178,18 @@ Recent changes:
     is already running refuel/keep-alive. Per kickoff step 14 I am NOT
     driving the character (would put two actors on one char). Skipping
     the drive. Entering 2m poll loop.
+  - 2026-07-04 14:30 — TEST TASK executed (read-only RCON probe, no
+    driving). Set FACTORIO_RCON_PASSWORD from start-server.bat (not
+    echoed) and ran bridge/_who_am_i.py. Result: Claude free-standing
+    char unum=302154 at pos=(-50.3, 37.7) owner=free; player IdBaj98
+    (JJ) char unum=307963 at pos=(72.9, 29.0), connected=true. Pipeline
+    (assignment -> merge -> execute -> report) verified end-to-end.
 
 Waiting on Manager for:
-  - Character ownership. Refuel is assigned to employee-1 but
-    owner=manager-keepalive. Either reassign owner: employee-1 in
-    in-game-owner.txt if you want me to take refuel, OR give me a
-    non-driving (code/craft-from-existing) task. Until then I poll and
-    do not drive.
+  - Test done. Read-only position probe pipeline confirmed working
+    (coords above). Awaiting next task. Note: refuel is marked DONE per
+    your update; not attempting it. Still not driving (owner=
+    manager-keepalive) — will only drive if you set owner: employee-1.
 
 --------------------------------------------------------------------------
 
