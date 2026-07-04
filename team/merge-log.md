@@ -20,8 +20,36 @@ Manager updates this file in the SAME commit as the merge itself
 
 ---
 
-_(empty — no merges tracked yet in the 6-team era. Pre-team commits
-listed below for reference.)_
+### 2026-07-04 ~12:2x — mod 0.10.6 multi-char → master
+sha: bcc2b2f (merge of worktree 72fcbf9)
+Reviewed-by: Manager (Opus 4.8)
+merge-commit (--no-ff)
+Summary: adds spawn_named_char / list_chars / remove_char to the `claude`
+  remote interface + storage.claude_chars map + on_configuration_changed
+  migration (legacy claude_char_unum -> {main=unum}, idempotent).
+Files: 2 changed, 82+, 3-.
+Notes: NOT DEPLOYED. luac -p OK, but in-game spawn + migration-firing are
+  UNVERIFIED (need running server + JJ present). Deploy this in a
+  controlled window; validate spawn_named_char round-trip before relying
+  on it. Author sub-agent forked from master pre-team-doc-commit; clean
+  merge (disjoint from docs).
+
+### 2026-07-04 ~12:3x — bridge connect_named + placement fix + team.py → master
+sha: (this merge) (merge of worktree 54506e3)
+Reviewed-by: Manager (Opus 4.8)
+merge-commit (--no-ff)
+Summary: (A) Agent.connect_named(name) resolves unum via mod list_chars with
+  graceful single-char fallback; (B) placement._mine_resources now
+  decrements resource amount instead of destroy() (was wiping whole ore
+  tiles — mirrors control.lua 0.10.4 fix); (C) new bridge/team.py
+  scaffolding (bootstrap/assign_task).
+Files: 4 changed, 305+, 4-.
+Notes: tests green on master post-merge — test_placement 15/15,
+  test_geometry 11/11, test_layouts 23/23, compileall OK. list_chars
+  round-trip UNVERIFIED (mod 0.10.6 not deployed); connect_named happy
+  path only exercised against the {name->unum} contract, not live RCON.
+
+_(pre-team commits below for reference.)_
 
 ## Pre-team (single-Claude era, 2026-06 → 2026-07)
 
