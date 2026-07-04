@@ -83,6 +83,24 @@ Observed on start:
   still NOT deployed — first code task per todo-list.
 
 Recent changes:
+- 2026-07-04 ~15:00 FRESH MANAGER SESSION (Opus 4.8). Read full onboarding
+  + all team handbooks + configurator-notes.md. Observed on start:
+  * master @ e4dd700 ("manager: refresh stale assignments..."). Working
+    tree clean except 25 pre-existing untracked bridge/_*.py one-offs.
+  * POLL LOOP NOW WORKS (Configurator's fix landed). employees 1/3/4 had
+    commits ahead — all doc-only status updates confirming they are alive
+    and self-polling every 2m. Merged all three to master (clean).
+    employee-2 = 0 ahead (relaunched but nothing to commit; holding).
+  * employee-1 ran the read-only pipeline TEST successfully:
+    Claude free-standing char unum=302154 @ (-50.3, 37.7) owner=free;
+    player IdBaj98 (JJ) char unum=307963 @ (72.9, 29.0) connected=TRUE.
+    => JJ IS ONLINE / PLAYING right now. Assignment->merge->execute->report
+    pipeline verified end-to-end. The reachability gap is CLOSED.
+  * in-game-owner.txt still = manager-keepalive. No employee driving.
+  * bug-log.md: no open bugs.
+  Next: acknowledge JJ (he's online), report poll loop is live, ask what
+  to assign. Employees 2/3/4 HOLDING for fresh tasks; employee-1 idle
+  after test. Not driving the character / not restarting (JJ playing).
 - 2026-07-04: team/*.* infra written (this restructure to Manager +
   Employees hierarchy).
 - 2026-07-04: Manager session claimed; session-start probe recorded.
