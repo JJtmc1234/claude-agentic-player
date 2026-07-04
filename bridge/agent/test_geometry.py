@@ -10,8 +10,9 @@ if str(_BRIDGE) not in sys.path:
     sys.path.insert(0, str(_BRIDGE))
 
 from agent.geometry import (
-    snap_2x2_center, snap_1x1_center,
+    snap_2x2_center, snap_1x1_center, snap_3x3_center,
     drill_drop_position,
+    electric_drill_drop_position, electric_drill_output_tile, direction_toward,
     inserter_pickup_for_drill, inserter_pickup_for_furnace,
     DIR_NORTH, DIR_SOUTH, DIR_EAST, DIR_WEST, opposite_direction,
 )
@@ -63,6 +64,27 @@ def main():
     print("opposite_direction:")
     check("N <-> S", DIR_NORTH, opposite_direction(DIR_SOUTH))
     check("E <-> W", DIR_WEST, opposite_direction(DIR_EAST))
+
+    print("snap_3x3_center (odd dim -> *.5, like 1x1):")
+    check("(0, 0) -> (0.5, 0.5)", (0.5, 0.5), snap_3x3_center(0, 0))
+    check("(-4.5, -2.5) stays", (-4.5, -2.5), snap_3x3_center(-4.5, -2.5))
+
+    print("electric_drill_drop_position (offset 1.85, X-centered):")
+    # south-facing 3x3 drill at (0.5, 0.5) drops at (0.5, 2.35)
+    check("(0.5,0.5) south -> (0.5, 2.35)",
+          (0.5, 2.35), electric_drill_drop_position(0.5, 0.5, DIR_SOUTH))
+    check("(0.5,0.5) north -> (0.5, -1.35)",
+          (0.5, -1.35), electric_drill_drop_position(0.5, 0.5, DIR_NORTH))
+
+    print("electric_drill_output_tile (belt tile beyond footprint):")
+    check("(0.5,0.5) south -> (0.5, 2.5)",
+          (0.5, 2.5), electric_drill_output_tile(0.5, 0.5, DIR_SOUTH))
+    check("(0.5,0.5) east -> (2.5, 0.5)",
+          (2.5, 0.5), electric_drill_output_tile(0.5, 0.5, DIR_EAST))
+
+    print("direction_toward:")
+    check("east", DIR_EAST, direction_toward((0.5, 0.5), (1.5, 0.5)))
+    check("north", DIR_NORTH, direction_toward((0.5, 0.5), (0.5, -1.5)))
 
 
 if __name__ == '__main__':
