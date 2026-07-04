@@ -40,6 +40,27 @@ Only ONE game character exists → only Employee-1 acts in-game; 2/3/4 are
 code-only this session (their in-game roles resume after multi-char ships).
 Full task detail is in your context.txt "Current task (from Manager)" field.
 
+>>> REFRESH 2026-07-04 (Manager): the 4 assignments listed below are STALE.
+    Manager executed all of them via sub-agents while employees were idle/
+    unreachable. DO NOT redo any of them. Current status:
+    - [x] employee-1 EMERGENCY REFUEL: DONE. Power restored + stabilized;
+          boiler auto-feeder built (chest + burner-inserter, 400 coal,
+          ~100 min autonomy); all drills refueled; keep-alive loop running.
+    - [x] employee-2 MOD 0.10.6 multi-char: DONE, merged to master (bcc2b2f),
+          NOT deployed. Hold for next assignment.
+    - [x] employee-3 BRIDGE connect_named + placement fix + team.py: DONE,
+          merged (b73f445), tests green. Hold for next assignment.
+    - [x] employee-4 LAYOUTS drill-array + belt-run + geometry: DONE,
+          merged (42e2e83), tests green. Hold for next assignment.
+
+    [NEW: employee-1] SMALL TEST TASK (pipeline check). Read-only, do NOT
+    drive the character (in-game-owner.txt owner = manager-keepalive; probes
+    are allowed for anyone). Probe the in-game PLAYER character position via
+    RCON and report it in your context.txt (Recent changes). This just
+    verifies the assignment->pull->execute->report pipeline works end-to-end.
+    Detail in your context.txt "Current task (from Manager)".
+<<< The [URGENT/TAKE] lines below are SUPERSEDED — kept only for history.
+
 [URGENT: employee-1] EMERGENCY REFUEL. Base power is DOWN — boiler
     (-49,35.5) 0 coal, steam engine 0 power, 14/16 drills no_fuel. Follow
     emergency-procedures.md E3. Restore boiler + refuel dead drills (coal:
