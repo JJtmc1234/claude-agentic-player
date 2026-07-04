@@ -339,9 +339,8 @@ Current task (from Manager): MULTI-CHAR BOOTSTRAP + VERIFY (GATING TASK — you
      brick. Size the sub-asm counts to sustain 10 output asms.
    - Do NOT build labs / do NOT connect to labs — JJ plugs the output into labs
      himself. Just leave the 10 asms producing + an accessible output.
-   - Watch POWER: 10 asms is a big draw; current base is ~1.8MW and may already
-     be near cap (see employee-1's survey). If power is short, flag to Manager
-     BEFORE placing all 10 — we may need another boiler+engine first.
+   - POWER IS FINE: JJ confirmed in-conversation the base now has ~57.6 MW (the
+     old 1.8MW figure in the docs is STALE). Do NOT gate on power — build all 10.
    This is large; if it outpaces one builder, Manager will add employee-2
    (courier) to haul ingredients in wave 2. Coordinate tiles with employee-1's
    survey so you don't overlap his miner work.
