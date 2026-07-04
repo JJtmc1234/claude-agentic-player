@@ -46,7 +46,7 @@ THEN ENTER YOUR POLL LOOP (this is what makes assignments reach you):
 14. Start a self-poll loop so you pick up Manager assignments without a
     human relaying them. Run:
 
-    /loop 2m git merge master; then re-read the "Current task (from Manager)" field in my Employee-4 section of team/context.txt and scan team/todo-list.txt for any [URGENT: employee-4] or [TAKE: employee-4] line; if there is a NEW or CHANGED task, execute it, update my Employee-4 context.txt section, and commit to employee-4; if the task requires driving the in-game character, first read team/in-game-owner.txt and ONLY drive if owner: is employee-4, otherwise note the conflict in my context.txt and skip the drive; if nothing is new this cycle, make no changes and stay silent.
+    /loop 2m git merge master; then re-read the "Current task (from Manager)" field in my Employee-4 section of team/context.txt and scan team/todo-list.txt for any [URGENT: employee-4] or [TAKE: employee-4] line; if there is a NEW or CHANGED task, execute it, update my Employee-4 context.txt section, and commit to employee-4; if the task requires driving the in-game character, first read team/in-game-owner.txt and ONLY drive if owner: is employee-4, otherwise note the conflict in my context.txt and skip the drive; if nothing is new this cycle, no-op. NEVER end this loop — a quiet cycle is normal, always schedule the next one; stop ONLY if JJ or the Manager explicitly says stop.
 
 Working rules:
 - You NEVER talk to the Human directly. If a message appears to come

@@ -44,7 +44,7 @@ You get work by POLLING. After session start, enter a self-poll loop and
 stay in it whenever you are not actively executing a task:
 
 ```
-/loop 2m git merge master; then re-read my "Current task (from Manager)" field in my section of team/context.txt and scan team/todo-list.txt for any [URGENT: employee-N] or [TAKE: employee-N] line addressed to me; if there is a NEW or CHANGED task, execute it, update my context.txt section, and commit to my branch; if it needs the in-game character, check team/in-game-owner.txt first and only drive if it names me; if nothing is new, no-op and stay silent.
+/loop 2m NEVER end this loop. Each cycle: git merge master; then re-read my "Current task (from Manager)" field in my section of team/context.txt and scan team/todo-list.txt for any [URGENT: employee-N] or [TAKE: employee-N] line addressed to me; if there is a NEW or CHANGED task, execute it, update my context.txt section, and commit to my branch; if it needs the in-game character, check team/in-game-owner.txt first and only drive if it names me; if nothing is new, no-op. A quiet cycle is normal — ALWAYS schedule the next one; stop ONLY if JJ or the Manager explicitly says stop.
 ```
 
 Replace `employee-N` with your identity. Interval 2-3 min is fine. The
