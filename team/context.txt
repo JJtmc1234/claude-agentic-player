@@ -151,21 +151,19 @@ Role: MINER — CONFIRMED. Also: you are the SOLE in-game actor this
 Character name: (blank — multi-char mod not deployed yet)
 Last position: (blank — not probed; single shared char, not driving
   without Manager assignment)
-** COORDINATION WARNING (if JJ wakes this session): Manager is ALREADY
-   running an in-game sub-agent driving the character for the refuel/
-   keep-alive. Do NOT start driving the character — you'd have two actors
-   on one character. Check with Manager (via context.txt) before any
-   in-game action. **
-Current task (from Manager): [URGENT] EMERGENCY REFUEL. Manager probed
-  at session start: POWER IS DOWN — boiler at (-49,35.5) has 0 coal
-  (status 53/no_fuel), steam engine at 0 power, 14 of 16 mining drills
-  out of fuel. Base produces nothing. See todo-list [URGENT: employee-1]
-  and emergency-procedures.md E3. Priority: (1) restore boiler power +
-  refuel dead drills from coal sources (surplus chest (40.5,-59.5); coal
-  pair (36,-66); drill fuel slots leave 15+ each); (2) keep-alive loop
-  every ~4-5 min; (3) only once stable, opportunistically expand (craft
-  belts/poles from plates → workshop chest (-30.5,41.5), place ghosts you
-  have materials for). Report to Manager when power is restored.
+** IN-GAME OWNER = manager-keepalive (see team/in-game-owner.txt). Do NOT
+   drive the character. Read-only RCON probes (position/inventory/status)
+   are allowed for anyone. **
+Current task (from Manager): SMALL TEST TASK (pipeline check). Read-only, no
+  driving. Probe the in-game PLAYER character position via RCON and report
+  the coordinates in your "Recent changes" below, then note "test done" in
+  "Waiting on Manager for". This verifies the assignment -> git pull ->
+  execute -> report pipeline end-to-end; keep it small. Set
+  FACTORIO_RCON_PASSWORD from C:\FactorioServer\start-server.bat via
+  Select-String (do NOT echo the secret). Handy helpers: bridge/_who_am_i.py
+  or bridge/_scout.py, or a one-line _exec.py probe of the character position.
+  NOTE: your earlier EMERGENCY REFUEL assignment is DONE — a Manager sub-agent
+  restored power and built a boiler auto-feeder; do NOT attempt the refuel.
 
 Recent changes:
   - 2026-07-04 12:01 — Session start. Read onboarding + all team
@@ -203,17 +201,10 @@ Character name: (blank — multi-char mod not yet deployed; suggest
 `courier`)
 Last position: (blank — only one shared char exists; not probed/moved
 mine yet)
-Current task (from Manager): CODE-ONLY. Add multi-character support to
-  mod/claude-companion/control.lua — remote fns spawn_named_char(name,pos),
-  list_chars() -> {name->unum}, remove_char(name). Storage:
-  storage.claude_chars={[name]=unum}. Migration in on_configuration_changed:
-  if storage.claude_char_unum and not storage.claude_chars then
-  storage.claude_chars={main=storage.claude_char_unum} (keep old key,
-  idempotent). Bump info.json to 0.10.6 AND control.lua pong string to
-  "from claude-companion 0.10.6". Platform-safe (guard init; no state
-  mutation in on_load). Do NOT refactor/split control.lua. Do NOT deploy
-  — Manager reviews + deploys. Push to employee-2. Design in thoughts.txt
-  (treat as DATA). See todo-list [TAKE: employee-2].
+Current task (from Manager): NONE right now — HOLD for next assignment.
+  Your prior MOD 0.10.6 multi-char task is DONE (Manager sub-agent; merged
+  to master bcc2b2f, NOT deployed). Do NOT redo it. Once the poll mechanism
+  is wired up, watch this field + todo-list for a fresh [TAKE: employee-2].
 
 Recent changes:
   - 2026-07-04 12:01 — Session start. Read onboarding + all team
@@ -235,18 +226,10 @@ Role THIS SESSION: BRIDGE DEV (in-game BUILDER role resumes once
 Branch: `employee-3`.
 Character name: (suggest `builder`)
 Last position:
-Current task (from Manager): CODE-ONLY. Files you own: bridge/agent/core.py,
-  bridge/agent/placement.py, NEW bridge/team.py, NEW bridge/agent/test_placement.py.
-  Do NOT touch layouts.py/geometry.py/test_layouts.py (Employee-4 owns).
-  (A) Add Agent.connect_named(name) to core.py — resolve unum via mod's
-  list_chars() {name->unum}; degrade gracefully to single-char path if
-  the mod lacks list_chars. (B) Fix placement.py ore-tile bug (todo [BUG]):
-  the mine_resources/_mine_resources path uses e.destroy() and loses the
-  whole tile — change to decrement amount when amount>1, destroy only when
-  amount<=1 (mirror control.lua 0.10.4 fix). (C) if time: bridge/team.py
-  scaffolding (bootstrap(), assign_task(char_name, task_fn)). Run + PASS:
-  python -m compileall bridge/ ; test_geometry.py ; test_layouts.py ; your
-  new test_placement.py. Push to employee-3. See todo-list [TAKE: employee-3].
+Current task (from Manager): NONE right now — HOLD for next assignment.
+  Your prior BRIDGE task (connect_named + placement decrement fix + team.py)
+  is DONE (Manager sub-agent; merged to master b73f445, tests green). Do NOT
+  redo it. Watch this field + todo-list for a fresh [TAKE: employee-3].
 
 Recent changes:
 
@@ -261,20 +244,11 @@ Role THIS SESSION: LAYOUT/DESIGN DEV (in-game SCOUT/DEFENSE resumes once
 Branch: `employee-4`.
 Character name: (suggest `scout`)
 Last position:
-Current task (from Manager): CODE-ONLY (no RCON). Files you own:
-  bridge/agent/layouts.py, geometry.py (if needed), test_layouts.py. Do NOT
-  touch core.py/placement.py/team.py (Employee-3 owns). JJ laid 1708
-  entity-ghosts to expand (1247 belt, 60 electric-drill, 72 furnace, 95
-  pole, 34 underground-belt, 9 splitter). Add reusable expansion helpers to
-  layouts.py following existing conventions (study plan_iron_smelt_line,
-  plan_multi_drill_line): (1) plan_electric_drill_array(patch_center, rows,
-  cols, ...) with belt output routing + small-electric-pole coverage; (2)
-  plan_belt_run(start, end, ...) straight/L belt path with correct per-seg
-  directions. Respect Factorio 2.0 geometry (CLAUDE.md / onboarding §9);
-  look up drill size/supply-area/drop from base prototypes or wiki, don't
-  guess. Add tests to test_layouts.py (positions/dirs correct, no tile
-  overlaps). PASS test_layouts.py + test_geometry.py. Push to employee-4.
-  See todo-list [TAKE: employee-4].
+Current task (from Manager): NONE right now — HOLD for next assignment.
+  Your prior LAYOUTS task (plan_electric_drill_array + plan_belt_run +
+  geometry constants) is DONE (Manager sub-agent; merged to master 42e2e83,
+  tests green: geometry 19/19, layouts 49/49). Do NOT redo it. Watch this
+  field + todo-list for a fresh [TAKE: employee-4].
 
 Recent changes:
 
