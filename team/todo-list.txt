@@ -1,0 +1,102 @@
+TEAM TODO LIST
+==============
+
+Team: Claude (coordinator), 1, 2, 3, 4.
+
+Shared task list. Any Claude can:
+  - Add a task ([ ] with a tag: [MOD] [BRIDGE] [FACTORY] [DOCS] [BUG])
+  - Take a task (mark [WIP <name>])
+  - Complete a task (mark [x] with your name + date)
+  - Note blockers
+
+Keep entries short. Wall time expectations in parens.
+
+--------------------------------------------------------------------------
+IMMEDIATE (< 30 min each)
+--------------------------------------------------------------------------
+
+[ ] [FACTORY] Craft 100 transport-belt, deposit in workshop chest (blocked
+    on iron supply from drills — need to wait ~5 min or hand-mine).
+[ ] [FACTORY] Craft 24 more stone-furnaces (workshop has 48, ghost demand
+    is 72 total — need 24 more + 120 stone).
+[ ] [FACTORY] Craft 60 electric-mining-drill (needs 180 circuit + 300
+    gears + 600 iron + steel? — huge iron sink).
+[ ] [FACTORY] Craft 40 small-electric-pole (workshop has 10; need 30 more
+    = 30 wood + 60 cable).
+
+--------------------------------------------------------------------------
+MOD / BRIDGE WORK
+--------------------------------------------------------------------------
+
+[ ] [MOD] Add `spawn_named_char(name, position)`, `list_chars()`,
+    `remove_char(name)` to control.lua. Storage schema:
+    storage.claude_chars = {name -> unum}. Migrate existing
+    storage.claude_char_unum to "main" on config change. Bump version to
+    0.10.6 and deploy. See design in `thoughts.txt`.
+[ ] [BRIDGE] Add `Agent.connect_named(name)` classmethod to
+    bridge/agent/core.py that resolves unum via mod's list_chars.
+[ ] [BRIDGE] Once multi-char lives, add `bridge/team.py` with
+    `bootstrap()` (spawns 3 helpers) + `assign_task(char_name, task_fn)`.
+[ ] [MOD] Tile-lock in place_entity — set/clear
+    storage.tile_locks["x,y"] to prevent race between parallel builders.
+[ ] [BUG] The mod's `_mine_resources` in placement.py uses e.destroy()
+    which loses whole tiles. If a builder places entities in dense
+    patches, this hurts. Update to decrement pattern once amount>1.
+
+--------------------------------------------------------------------------
+LONG-TERM / SCALING
+--------------------------------------------------------------------------
+
+[ ] [FACTORY] Replace burner iron drills with electric drills (2x
+    throughput + no fuel babysitting). Need power poles at iron patch
+    first, and enough electric-drills crafted.
+[ ] [FACTORY] 2nd boiler+steam-engine pair (currently 1.8 MW, will
+    bottleneck once more asms come online).
+[ ] [FACTORY] Belt-based supply from iron/copper to asm cluster
+    (eliminates my walk-cycle every 5 min).
+[ ] [FACTORY] 3rd lab + shared pack chest so both labs research green
+    simultaneously.
+[ ] [RESEARCH] Oil chain: fluid-handling → oil-gathering →
+    oil-processing (queued). After that, JJ takes a pumpjack expedition
+    to (160, 350) SE.
+[ ] [RESEARCH] Big-electric-pole via electric-energy-distribution-1
+    (last item in current queue). Unlocks pole chain for oil route.
+[ ] [FACTORY] Defense perimeter (biters killed asm1 chest once this
+    session; walls + turrets when materials permit).
+
+--------------------------------------------------------------------------
+DOCS
+--------------------------------------------------------------------------
+
+[ ] [DOCS] Update progress-report.txt with today's milestones (mod
+    0.10.5, 3 asms + 2 labs live, tech chain progression, ghost
+    blueprint scale-up).
+[ ] [DOCS] context.txt (project-root, not this team one) — refresh
+    with current file map, mod version, live infra.
+[ ] [DOCS] AGENT_ONBOARDING.txt at repo root — completed by Claude
+    (coordinator) 2026-07-04.
+
+--------------------------------------------------------------------------
+DONE (recent)
+--------------------------------------------------------------------------
+
+[x] Mod 0.10.5 deployed + published — decrement-safe hand-mine.
+    Claude, 2026-07-04.
+[x] 4 iron drills row-71 line placed and running.
+    Claude, 2026-07-04.
+[x] 2 copper drills placed (96,44) + (93,44) with smelt lines.
+    Claude, 2026-07-04.
+[x] Workshop chest supplied 48 furnaces + 111 stone.
+    Claude, 2026-07-04.
+[x] AGENT_ONBOARDING.txt written.
+    Claude, 2026-07-04.
+[x] hunterzh37 added as repo collaborator (write access).
+    Claude, 2026-07-04.
+
+--------------------------------------------------------------------------
+BLOCKERS / QUESTIONS FOR JJ
+--------------------------------------------------------------------------
+
+- None open.
+
+Last updated: 2026-07-04 by Claude (coordinator).

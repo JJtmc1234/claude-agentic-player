@@ -1,0 +1,160 @@
+TEAM CONTEXT — Manager + Employees
+==================================
+
+Hierarchy:
+
+    Human (JJ)
+        ↕  (bidirectional, 1:1)
+    Manager (single agent)
+        ↕  (1:many — Manager talks to each Employee individually)
+    Employee-1  Employee-2  Employee-3  Employee-4  (...expandable)
+
+The Human ONLY talks to Manager under normal operation. Employees DO
+NOT communicate with the Human. Manager is the sole escalation point
+for human-input decisions.
+
+The Human retains a break-glass ability to interrupt any Employee's
+work directly (Ctrl+C, in-session interrupt, force-stop). This is
+NOT normal; it's an override.
+
+Setup crew (bootstrapping this team infra — 2026-07-04):
+  - Claude (this conversation) — writing the team/ handbooks + first
+    context. Not yet formally assigned to Manager or Employee role.
+  - Configurator (a separate Claude Code session, running with cwd on
+    C:\) — helped JJ set up the initial workflow. Not yet formally
+    assigned to Manager or Employee role.
+
+Once the roles are assigned, both setup agents transition into the
+formal roster. Whoever ends up as Manager takes over Human contact;
+the other joins the Employee pool.
+
+Small shared context per agent. Each agent fills in their section
+when they change something (in-game state, position, code, or plan).
+Full project onboarding: `AGENT_ONBOARDING.txt` at repo root.
+Team handbooks (this folder):
+  - README.md — read-order for new joiners
+  - manager.md — Manager's responsibilities (human interface + review)
+  - employee-guide.md — how to be an Employee (report, receive)
+  - git-workflow.md — branch strategy + merge rules
+  - communication.md — who talks to whom, protocols
+  - edge-cases.md — every failure mode + response
+  - emergency-procedures.md — critical failure playbook
+  - supply-priorities.md — what to craft + deposit for JJ
+  - bug-log.md — open bugs (Manager writes; Employees may add)
+  - merge-log.md — merge history (Manager writes)
+
+Character system: currently only ONE character exists in-game
+(storage.claude_char_unum). Multi-character mod support is DESIGNED
+in `thoughts.txt` but NOT deployed yet. First code work: Manager
+directs an Employee to add `spawn_named_char` + `list_chars` to the
+mod (see design in thoughts.txt), bump to 0.10.6, deploy, then each
+Employee claims a name via `Agent.connect_named("<name>")`.
+
+Branches: Manager operates on `main` only. Each Employee has ONE
+working branch: `employee-1`, `employee-2`, `employee-3`,
+`employee-4`. Never push directly to `main` as an Employee. See
+`git-workflow.md`.
+
+--------------------------------------------------------------------------
+
+Manager:
+
+Role: single point of contact with the Human. Reviews Employees' work,
+merges branches, watches for drift, prompts the Human when
+human-input is needed. NOT a factory worker — does not drive a
+character or touch the game directly beyond read-only probes.
+
+Session start: acknowledge JJ, sync team state (read context.txt
+sections + todo-list.txt + bug-log.md + git log), assign initial
+tasks to Employees via SendMessage.
+
+Recent changes:
+- 2026-07-04: team/*.* infra written (this restructure to Manager +
+  Employees hierarchy).
+
+Open questions for Human:
+
+Escalations pending:
+
+--------------------------------------------------------------------------
+
+Employee-1:
+
+Suggested role: MINER — dedicated resource extraction (iron/copper/
+stone patches; hand-mine bootstrap + drill placement + refuel).
+Branch: `employee-1`.
+Character name: (assign when multi-char lives; suggest `miner`)
+Last position:
+Current task (from Manager):
+
+Recent changes:
+
+Waiting on Manager for:
+
+--------------------------------------------------------------------------
+
+Employee-2:
+
+Suggested role: COURIER — hauling loop (chest ↔ workshop ↔ asm
+input chests, refuel burners along the route, restock as items
+consumed).
+Branch: `employee-2`.
+Character name: (suggest `courier`)
+Last position:
+Current task (from Manager):
+
+Recent changes:
+
+Waiting on Manager for:
+
+--------------------------------------------------------------------------
+
+Employee-3:
+
+Suggested role: BUILDER — ghost placement. Reads JJ's entity ghosts,
+takes materials from workshop, executes placement with tile-lock
+awareness.
+Branch: `employee-3`.
+Character name: (suggest `builder`)
+Last position:
+Current task (from Manager):
+
+Recent changes:
+
+Waiting on Manager for:
+
+--------------------------------------------------------------------------
+
+Employee-4:
+
+Suggested role: SCOUT / DEFENSE — wide-map scouting (new patches,
+biter proximity, oil hunt) and defense builds (walls, turrets, ammo).
+Branch: `employee-4`.
+Character name: (suggest `scout`)
+Last position:
+Current task (from Manager):
+
+Recent changes:
+
+Waiting on Manager for:
+
+--------------------------------------------------------------------------
+CORE RULES (all agents)
+--------------------------------------------------------------------------
+
+- Update your own section on every substantive action.
+- Employees NEVER address the Human directly. All Human-facing
+  updates go through Manager.
+- Manager NEVER edits code as an implementer — Manager assigns
+  Employees to do implementation. Exception: docs (context.txt,
+  bug-log.md, merge-log.md) and merge commits.
+- Placement conflicts: never assign two Employees to place entities
+  in the same tile-region in the same batch. See tile-lock design
+  in `thoughts.txt`.
+- Movement, mining, fuel checks safe to parallelize; place_entity
+  and take_from_chest can race on shared state.
+- Workshop chest at (-30.5, 41.5) is the shared supply-drop.
+- Buffer chest from JJ at (-6.5, -32.5) — check periodically for
+  intermediate-products JJ may drop.
+
+Last updated: 2026-07-04 by Manager.
