@@ -170,10 +170,26 @@ Recent changes:
     handbooks. Switched worktree agent-1 to branch employee-1,
     pulled, merged origin/master (brought in team/ infra + Manager's
     session-start commit a716366).
+  - 2026-07-04 14:25 — Re-ran updated kickoff (poll loop + in-game-owner
+    rule). Merged local master (already up to date). CONFLICT: my
+    Current task = [URGENT] emergency refuel (requires driving the
+    character), but team/in-game-owner.txt owner=manager-keepalive and
+    the COORDINATION WARNING above says Manager's own in-game sub-agent
+    is already running refuel/keep-alive. Per kickoff step 14 I am NOT
+    driving the character (would put two actors on one char). Skipping
+    the drive. Entering 2m poll loop.
+  - 2026-07-04 14:30 — TEST TASK executed (read-only RCON probe, no
+    driving). Set FACTORIO_RCON_PASSWORD from start-server.bat (not
+    echoed) and ran bridge/_who_am_i.py. Result: Claude free-standing
+    char unum=302154 at pos=(-50.3, 37.7) owner=free; player IdBaj98
+    (JJ) char unum=307963 at pos=(72.9, 29.0), connected=true. Pipeline
+    (assignment -> merge -> execute -> report) verified end-to-end.
 
 Waiting on Manager for:
-  - Initial task assignment (Manager's open question to JJ: "what
-    should Employees work on first?" still pending).
+  - Test done. Read-only position probe pipeline confirmed working
+    (coords above). Awaiting next task. Note: refuel is marked DONE per
+    your update; not attempting it. Still not driving (owner=
+    manager-keepalive) — will only drive if you set owner: employee-1.
 
 --------------------------------------------------------------------------
 
