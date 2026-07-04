@@ -172,10 +172,21 @@ Recent changes:
     handbooks. Switched worktree agent-1 to branch employee-1,
     pulled, merged origin/master (brought in team/ infra + Manager's
     session-start commit a716366).
+  - 2026-07-04 14:25 — Re-ran updated kickoff (poll loop + in-game-owner
+    rule). Merged local master (already up to date). CONFLICT: my
+    Current task = [URGENT] emergency refuel (requires driving the
+    character), but team/in-game-owner.txt owner=manager-keepalive and
+    the COORDINATION WARNING above says Manager's own in-game sub-agent
+    is already running refuel/keep-alive. Per kickoff step 14 I am NOT
+    driving the character (would put two actors on one char). Skipping
+    the drive. Entering 2m poll loop.
 
 Waiting on Manager for:
-  - Initial task assignment (Manager's open question to JJ: "what
-    should Employees work on first?" still pending).
+  - Character ownership. Refuel is assigned to employee-1 but
+    owner=manager-keepalive. Either reassign owner: employee-1 in
+    in-game-owner.txt if you want me to take refuel, OR give me a
+    non-driving (code/craft-from-existing) task. Until then I poll and
+    do not drive.
 
 --------------------------------------------------------------------------
 
