@@ -1,0 +1,28 @@
+# In-game character owner
+
+Until mod 0.10.6 (multi-character support) is DEPLOYED to the running server,
+there is exactly ONE in-game character. Only ONE agent may drive it at a time.
+Two agents driving one character corrupts movement/mining and wastes actions.
+
+mod 0.10.6 is MERGED to master but NOT yet deployed. Multi-char is therefore
+NOT available in-game yet. Treat the character as a single shared resource.
+
+## Current owner
+
+owner: manager-keepalive
+reason: Manager's in-game sub-agent is running the refuel + keep-alive loop.
+since: 2026-07-04
+note: No employee may drive the character while this is set to anyone but you.
+
+## Protocol
+
+- Before ANY RCON write that moves/mines/builds with the character, read this
+  file. If `owner:` is not your identity, DO NOT drive. Report the conflict in
+  your context.txt section and wait.
+- Only the Manager changes `owner:`. To request the character, ask via your
+  context.txt "Waiting on Manager for:" field; the Manager reassigns here.
+- Read-only RCON probes (position, inventory, entity status) are allowed for
+  anyone at any time — they do not drive the character.
+- Once 0.10.6 is deployed and each employee has its own named character, this
+  single-owner rule is replaced by per-character ownership (one named char per
+  employee). Until then: one driver.

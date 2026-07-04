@@ -23,17 +23,23 @@ or elsewhere) to spin up an agent with the right context and role.
 
 1. Start Manager first. Wait for it to read the handbooks and post
    its Manager-section update to `team/context.txt`.
-2. Start Employees in any order. Each fills in their section and
-   posts a `[STARTED]` line to `team/todo-list.txt`.
-3. Manager sees the STARTED lines and assigns first tasks.
+2. Start Employees in any order. Each fills in their section, posts a
+   `[STARTED]` line to `team/todo-list.txt`, and then ENTERS ITS POLL
+   LOOP (`/loop 2m ...`, per the kickoff) so Manager assignments reach
+   it. An Employee that does session-start but never enters the loop
+   will sit idle forever — that was the original bug.
+3. Manager sees the STARTED lines and assigns first tasks by editing
+   each Employee's "Current task" field in context.txt.
 
 ## If JJ wants to change an Employee's role
 
-- Manager updates the "Current task" field in that Employee's
-  `context.txt` section.
-- Manager sends the Employee a SendMessage (Claude Code SDK) with
-  the new task.
-- Employee acknowledges by updating their "Recent changes" line.
+- Manager updates the "Current task (from Manager)" field in that
+  Employee's `context.txt` section (and adds a `[URGENT: employee-N]`
+  line to `todo-list.txt` if it should preempt current work).
+- The Employee's poll loop (~2-3 min) picks up the change on its next
+  cycle. There is NO direct message — SendMessage does not reach a
+  separate Claude Code session.
+- Employee acknowledges by updating its "Recent changes" line.
 
 ## If a Claude session dies mid-work
 

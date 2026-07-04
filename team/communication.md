@@ -14,7 +14,7 @@ Who talks to whom, through what channels, with what voice.
 | **team/bug-log.md** | Manager → Employees | Structured issue reports. Employees fix + push. |
 | **team/merge-log.md** | Manager (append-only) | History of merges. Read-only for Employees. |
 | **git commit messages** | Everyone → Everyone | Durable trail. Manager reads these on review. |
-| **SendMessage (Claude Code SDK)** | Manager → Employee | Direct resume of a background agent. |
+| **team/in-game-owner.txt** | Manager → Employees | Who may drive the single shared character right now. |
 | **Ctrl+C / process kill** | Human → Employee (break-glass) | Emergency override. Not normal. |
 
 ## Rules by role
@@ -32,8 +32,10 @@ Who talks to whom, through what channels, with what voice.
 - Talks BACK to Human through the conversation.
 - Sends status to JJ in-game via `bridge/say.py "<message>"` for
   updates the Human should see.
-- Assigns tasks to Employees via:
-  - SendMessage (Claude Code SDK) to resume a specific Employee.
+- Assigns tasks to Employees via files they POLL (there is NO cross-
+  session message channel — SendMessage returns "not reachable"):
+  - the Employee's "Current task (from Manager)" field in
+    team/context.txt (primary).
   - team/todo-list.txt entries with `[URGENT: employee-N]` or
     `[TAKE: employee-N]` prefixes.
 - Reviews Employee pushes. Writes to bug-log.md if a review fails.
@@ -44,7 +46,8 @@ Who talks to whom, through what channels, with what voice.
 
 - Talks to Manager. NEVER talks to Human directly.
 - Updates own context.txt section on every substantive action.
-- Reads Manager feedback from bug-log.md + SendMessage.
+- Reads Manager feedback by POLLING bug-log.md + own context.txt
+  "Current task" field (no direct messages reach a separate session).
 - Commits + pushes to own branch. Manager handles merge to `main`.
 - If Human intervenes directly (rare): stop, note in context.txt,
   wait for Manager reassign. Do NOT reply to Human unless the
@@ -74,8 +77,9 @@ Who talks to whom, through what channels, with what voice.
 ### Employee → Manager
 
 - Brief. Report action + state. Ask specific questions.
-- Use context.txt section as the primary channel; SendMessage for
-  urgent replies.
+- Use your context.txt section as the primary channel. For urgent
+  items also add a todo-list.txt line. The Manager polls; there is no
+  push channel.
 - If you're blocked, state the block in one sentence + what would
   unblock you.
 
@@ -91,8 +95,8 @@ Who talks to whom, through what channels, with what voice.
 1. Try to fix it yourself.
 2. Check `edge-cases.md` + `emergency-procedures.md` for a known
    playbook.
-3. Post to Manager (context.txt + todo-list.txt + SendMessage if
-   urgent).
+3. Post to Manager (context.txt "Waiting on Manager for:" field +
+   todo-list.txt if urgent). The Manager polls; there is no push.
 4. Manager decides whether to escalate to Human.
 
 ## Escalation ladder (for Manager)

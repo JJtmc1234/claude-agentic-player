@@ -82,7 +82,14 @@ class Placement:
     def _mine_resources(self, cx: float, cy: float, kind: str = '2x2'):
         """Mine ore/coal/stone resource tiles in the bbox; ore goes to character inv.
         Needed when placing entities (furnace, asm) inside a dense ore patch.
-        Resources are mineable_properties.minable but type='resource', not 'tree'."""
+        Resources are mineable_properties.minable but type='resource', not 'tree'.
+
+        Decrement-safe (mirrors the control.lua 0.10.4 hand-mine fix): each
+        resource entity carries an `amount` (ore remaining in the tile). We mine
+        ONE unit — insert its products and decrement `amount` — and only
+        `destroy()` the entity when it is down to its last unit (amount <= 1).
+        The old code called `e.destroy()` unconditionally, wiping a whole ore
+        tile (thousands of ore) per placement."""
         half = {'1x1': 0.5, '2x2': 1.0, '3x3': 1.5}.get(kind, 1.0)
         body = (
             f"local c = game.get_entity_by_unit_number({self.a.unit}); "
@@ -95,7 +102,11 @@ class Placement:
             "      local amt = p.amount or 1; "
             "      ci.insert{name=p.name, count=amt} "
             "    end; "
-            "    e.destroy() "
+            "    if e.amount and e.amount > 1 then "
+            "      e.amount = e.amount - 1 "
+            "    else "
+            "      e.destroy() "
+            "    end "
             "  end "
             "end"
         )

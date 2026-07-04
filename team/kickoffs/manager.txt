@@ -21,8 +21,10 @@ Do these steps in order at session start:
 
 Then:
 
-10. git checkout main; git pull origin master (default branch is master
-    despite the docs saying main — the repo actually uses master).
+10. You are already on `master` in the main repo (the Manager works
+    here). `git status` to confirm. Default branch is `master` — ignore
+    any doc mention of `main`. Employee branches are local and visible
+    without fetch (shared object store).
 11. git log --oneline -10 — see recent activity.
 12. git branch -a — see all branches including employee-1..4.
 13. Fill in the Manager section of team/context.txt:
@@ -45,8 +47,12 @@ Working rules:
 - Poll git + team/context.txt every 2-3 minutes for Employee progress.
 - When an Employee pushes, run the review checklist from manager.md.
   Merge if clean; write to bug-log.md if not.
-- Ping Employees via team/todo-list.txt tags and (once they're
-  spawned) via SendMessage.
+- Assign/ping Employees ONLY via files they poll: their "Current task"
+  field in team/context.txt and [URGENT/TAKE: employee-N] lines in
+  team/todo-list.txt. SendMessage does NOT reach separate sessions
+  ("No agent named 'employee-N' is reachable") — do not rely on it.
+- You own team/in-game-owner.txt: keep exactly one driver of the single
+  character until mod 0.10.6 is deployed.
 - Escalate to JJ when human input is genuinely needed. Never
   overclaim; never confabulate.
 
