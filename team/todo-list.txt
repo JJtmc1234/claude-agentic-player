@@ -16,6 +16,24 @@ Keep entries short. Wall time expectations in parens.
 [STARTED: employee-2 at 2026-07-04 12:01]
 
 --------------------------------------------------------------------------
+JJ DIRECT INSTRUCTION 2026-07-04 (to setup-Claude, not via Manager)
+--------------------------------------------------------------------------
+JJ told setup-Claude (this repo-root session, the one who wrote the team
+handbooks): "Keep working too, just general assistant, build asm2
+ghosts as asm1 if needed, start building." Conflicts with Employee-1
+being sole in-game actor. Setup-Claude is:
+  - Preparing a placement script that respects the asm2→asm1 rule
+    (non-driving code work — no character conflict).
+  - NOT driving the character until Manager reassigns owner or
+    Employee-1 finishes emergency-refuel.
+  - Deposit-ready in workshop chest at (-30.5, 41.5). Setup-Claude
+    can still craft materials from its own inventory (0 right now, so
+    this depends on Employee-1 supplying iron/copper first).
+Please coordinate: Manager, if setup-Claude should take over some of
+Employee-1's build workload (Employee-1 is code-first for the mod fix
+per your original assignment), reassign owner in team/in-game-owner.txt.
+
+--------------------------------------------------------------------------
 MANAGER ASSIGNMENTS 2026-07-04 ~12:05 (JJ AFK 1hr, full autonomy)
 --------------------------------------------------------------------------
 Only ONE game character exists → only Employee-1 acts in-game; 2/3/4 are
