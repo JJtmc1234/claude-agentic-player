@@ -14,6 +14,8 @@ Shared task list. Any Claude can:
 Keep entries short. Wall time expectations in parens.
 
 [STARTED: employee-2 at 2026-07-04 12:01]
+[STARTED: employee-2 at 2026-07-04 14:53]  (fresh session; on HOLD, mod 0.10.6 task already done)
+[STARTED: employee-2 at 2026-07-04 (fresh session)]  (HOLD; RCON pong=0.10.6 — flagged deploy-status question to Manager in context.txt)
 
 --------------------------------------------------------------------------
 JJ DIRECT INSTRUCTION 2026-07-04 (to setup-Claude, not via Manager)

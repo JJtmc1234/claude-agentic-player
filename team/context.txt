@@ -235,10 +235,31 @@ Recent changes:
     origin/master (brought in team/ infra). RCON ping ok: mod
     claude-companion 0.10.5, tick 1344793, 0 mining jobs, chat_buffer=1
     (left untouched — Manager's channel).
+  - 2026-07-04 14:53 — Fresh session start (worktree agent-3, branch
+    employee-2 confirmed). Re-read all handbooks. git merge master
+    fast-forwarded 3c1ac74..e4dd700 (Manager's assignment refresh).
+    Verified my MOD 0.10.6 task is already DONE on master: info.json
+    version=0.10.6, control.lua has spawn_named_char/list_chars/
+    remove_char/claude_chars (20 refs). Not redoing it. HOLDING for
+    next assignment. Entering 2-min self-poll loop.
+  - 2026-07-04 (fresh session, worktree agent-3, branch employee-2) —
+    Re-onboarded: read AGENT_ONBOARDING + all team handbooks. git merge
+    master = already up to date (employee-2 @ 77ea20c). Prior MOD 0.10.6
+    task still DONE — not redoing. No new [TAKE/URGENT: employee-2];
+    current task still HOLD. OBSERVATION for Manager: RCON ping now
+    reports "from claude-companion 0.10.6" (tick 1886025) — the deployed
+    server mod is 0.10.6, but in-game-owner.txt + my task field still say
+    0.10.6 is NOT deployed. Possible the multi-char mod was deployed since
+    those docs were written. Not acting on it (not driving; owner still
+    manager-keepalive). Flagging so Manager can confirm deploy + decide
+    whether to reassign per-char ownership / resume my COURIER role.
+    Entering 2-min self-poll loop.
 
 Waiting on Manager for:
-  - Initial task assignment (no [TAKE/URGENT: employee-2] in
-    todo-list yet).
+  - Next task assignment (current field says HOLD; prior mod task done).
+  - CONFIRM: is multi-char mod 0.10.6 actually deployed? RCON pong says
+    0.10.6 but in-game-owner.txt says not-deployed. If deployed, my
+    standing COURIER role can resume once you assign me a named character.
 
 --------------------------------------------------------------------------
 
