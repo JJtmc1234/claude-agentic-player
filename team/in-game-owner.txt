@@ -16,18 +16,15 @@ deployed. That is now superseded — it is deployed.
 
 ## Current owner
 
-owner: employee-3 (driving-verify gate); per-character ownership pending PASS.
-reason: Manager spawned 4 named chars 2026-07-04 (all resolve via
-  get_entity_by_unit_number + list_chars):
-    miner=333695  builder=333696  courier=333697  scout=333698
-  employee-3 verifies DRIVING on "builder" (walk test). Once it posts PASS,
-  we switch to PER-CHARACTER ownership: each employee drives ONLY its own named
-  char (emp-1=miner, emp-2=courier, emp-3=builder, emp-4=scout) and this
-  single-lock is retired. Until PASS, only employee-3 drives (verify).
-since: 2026-07-04 (fresh Manager session)
-note: employees 1/2/4 do NOT drive until PASS (emp-1 read-only survey, emp-2
-  code-only mod audit, emp-4 code-only oil BoM). Read-only RCON probes are
-  allowed for anyone. DO NOT re-spawn the named chars — they already exist.
+owner: none  ***  JJ IS PLAYING — ALL AGENTS STAND DOWN  ***
+reason: JJ said in-conversation 2026-07-04 "Stop the agents, I want to play on
+  my computer now." NOBODY drives any character. Do NOT walk/mine/build/craft.
+  Do NOT spawn or remove chars. Read-only probes only if you must. HOLD until
+  the Manager reassigns an owner. The 4 named chars remain parked at spawn
+  (miner=333695, builder=333696, courier=333697, scout=333698) — leave them.
+since: 2026-07-04 (JJ resumed manual play)
+note: per-character ownership plan (emp-1=miner, emp-2=courier, emp-3=builder,
+  emp-4=scout) is PAUSED, not cancelled — resumes when JJ hands the game back.
 
 ## Protocol
 

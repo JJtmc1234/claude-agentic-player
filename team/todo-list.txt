@@ -93,6 +93,13 @@ Full task detail is in your context.txt "Current task (from Manager)" field.
     tests; PASS test_layouts + test_geometry. Push employee-4. Do NOT touch
     core.py/placement.py/team.py.
 
+**************************************************************************
+*** STAND DOWN 2026-07-04 — JJ IS PLAYING ON HIS COMPUTER.              ***
+*** ALL AGENTS HOLD. No driving, building, mining, crafting, spawning.  ***
+*** in-game-owner.txt owner=none. Wait for Manager to clear this.       ***
+*** Wave-1 assignments below are PAUSED, not cancelled.                 ***
+**************************************************************************
+
 --------------------------------------------------------------------------
 MANAGER ASSIGNMENTS 2026-07-04 (fresh session) — 0.10.6 DEPLOYED, JJ ONLINE
 --------------------------------------------------------------------------

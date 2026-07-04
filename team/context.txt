@@ -192,7 +192,10 @@ Last position: (-40, 45) at spawn
 ** IN-GAME OWNER = manager-keepalive (see team/in-game-owner.txt). Do NOT
    drive the character. Read-only RCON probes (position/inventory/status)
    are allowed for anyone. **
-Current task (from Manager): BASE STATE SURVEY (READ-ONLY — do NOT drive;
+Current task (from Manager): *** STAND DOWN — JJ IS PLAYING (2026-07-04). Do
+  NOT drive/build/mine/craft; do NOT run tasks. HOLD until Manager clears. The
+  survey task below is PAUSED. ***
+  [PAUSED] BASE STATE SURVEY (READ-ONLY — do NOT drive;
   owner is employee-3 this wave). Multi-char 0.10.6 is now DEPLOYED and JJ
   says he already built the whole base — our job this session is IMPROVEMENTS
   + stocking a chest for his OIL TRIP. First I need a current picture. Probe
@@ -249,7 +252,9 @@ Worktree name mismatch (agent-3 dir / employee-2 branch): acknowledged
 Character name: courier (unum 333697, spawned @ (-36,47) by Manager
   2026-07-04). Do NOT drive yet — wait for employee-3's driving-PASS (wave 2).
 Last position: (-36, 47) at spawn
-Current task (from Manager): MOD AUDIT — de-risk multi-char driving (CODE-ONLY,
+Current task (from Manager): *** STAND DOWN — JJ IS PLAYING (2026-07-04). HOLD
+  all work until Manager clears. The mod-audit task below is PAUSED. ***
+  [PAUSED] MOD AUDIT — de-risk multi-char driving (CODE-ONLY,
   no driving, no deploy). Confirmed: 0.10.6 is deployed, list_chars resolves.
   Open question that gates the whole team: when spawn_named_char creates a
   character via create_entity, is that char's unit_number resolvable by
@@ -311,7 +316,10 @@ Branch: `employee-3`.
 Character name: builder (unum 333696, spawned @ (-37.5,44.5) by Manager
   2026-07-04). This is YOUR char — verify driving on it, then build.
 Last position: (-37.5, 44.5) at spawn
-Current task (from Manager): VERIFY MULTI-CHAR DRIVING, then BUILD (you hold
+Current task (from Manager): *** STAND DOWN — JJ IS PLAYING (2026-07-04). Do
+  NOT drive/verify/build. Driver token is REVOKED (in-game-owner owner=none).
+  HOLD until Manager clears. The verify+build task below is PAUSED. ***
+  [PAUSED] VERIFY MULTI-CHAR DRIVING, then BUILD (you hold
   the driver token this wave, owner=employee-3). Mod 0.10.6 is DEPLOYED.
   ** MANAGER ALREADY SPAWNED THE 4 NAMED CHARS — DO NOT RE-SPAWN (a second
      spawn_named_char with the same name overwrites the map + leaks the old
@@ -372,7 +380,9 @@ Branch: `employee-4`.
 Character name: scout (unum 333698, spawned @ (-34,45) by Manager 2026-07-04).
   Do NOT drive yet — wait for employee-3's driving-PASS (wave 2).
 Last position: (-34, 45) at spawn
-Current task (from Manager): OIL-TRIP SUPPLY SPEC (CODE/DOC-ONLY, no driving).
+Current task (from Manager): *** STAND DOWN — JJ IS PLAYING (2026-07-04). HOLD
+  all work until Manager clears. The oil-trip-spec task below is PAUSED. ***
+  [PAUSED] OIL-TRIP SUPPLY SPEC (CODE/DOC-ONLY, no driving).
   JJ is going on an OIL TRIP (pumpjack expedition, historically to ~(160,350)
   SE) and wants a chest stocked for it. Produce a concrete BILL OF MATERIALS
   for what a from-scratch oil setup at a remote patch needs, so we know what to
