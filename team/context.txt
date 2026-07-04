@@ -119,17 +119,28 @@ Waiting on Manager for:
 
 Employee-2:
 
-Suggested role: COURIER — hauling loop (chest ↔ workshop ↔ asm
-input chests, refuel burners along the route, restock as items
-consumed).
+Role: COURIER — hauling loop (chest ↔ workshop ↔ asm input chests,
+refuel burners along the route, restock as items consumed).
 Branch: `employee-2`.
-Character name: (suggest `courier`)
-Last position:
-Current task (from Manager):
+Worktree: C:\ClaudeTeam\worktrees\agent-3 (dir named agent-3 but I am
+Employee-2 on branch employee-2 per kickoff — flagging the name
+mismatch for Manager in case it matters).
+Character name: (blank — multi-char mod not yet deployed; suggest
+`courier`)
+Last position: (blank — only one shared char exists; not probed/moved
+mine yet)
+Current task (from Manager): awaiting Manager assignment.
 
 Recent changes:
+  - 2026-07-04 12:01 — Session start. Read onboarding + all team
+    handbooks. Checked out employee-2, fast-forward merged
+    origin/master (brought in team/ infra). RCON ping ok: mod
+    claude-companion 0.10.5, tick 1344793, 0 mining jobs, chat_buffer=1
+    (left untouched — Manager's channel).
 
 Waiting on Manager for:
+  - Initial task assignment (no [TAKE/URGENT: employee-2] in
+    todo-list yet).
 
 --------------------------------------------------------------------------
 
