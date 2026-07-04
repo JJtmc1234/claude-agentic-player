@@ -1,123 +1,80 @@
-# What I'm Doing — Live State
+# what-im-doing.txt — live status
 
-Updated on every substantive action. Paired with context.txt (stable). Sections:
-Current / Done but uncommitted / Blocked / Next concrete steps.
+Updated on every substantive action. Paired with context.txt (stable).
 
-## Current task
+## Current task (2026-06-27)
 
-PPO belt v3 (16x16) under mod 0.9.11 + output-loader fix. BC v3 reaches
-loss 0.06 (perfectly reproduces 7-action demo). Now with 3 latent bugs
-fixed, PPO has a real path to chest delivery for the first time.
+JJ wants **starter base that self-supplies**: full belt of iron (15 plate/s
+target), half belt of copper. He handles belt routes + placement; I handle
+mining/smelting scale + supply chains + tech queue.
 
-## Recent bugfixes (in order discovered)
+**Running now (background)**: Phase 1 scale-mining script — refuel all drills,
+take iron+copper plates from chests, walk to stone patch at (57, -1), hand-mine
+200 stone (mod 0.10.5 decrement-safe now). Save + copy.
 
-1. Mod 0.9.10: chain walk hardcoded 'iron-gear-wheel' recipe check → use
-   a.recipe_name. Belt/cable/circuit tasks were silently getting 0
-   chain_walk points (no asm detected → no input/output bonuses).
-2. Mod 0.9.11: chain walk start x was loader.x + 1 = -20, but the first
-   interior tile center is -19.5. The radius=0.4 search missed the
-   first belt. Fixed to +1.5.
-3. Output loader was placed as type='output' (chest→belt) when it should
-   be type='input' (belt→chest). Items couldn't enter the output chest
-   regardless of belt placement. Now setting loader.loader_type='input'
-   after create in _rebuild_16x16.py.
+## Live infrastructure state
 
-After fix 1+2, chain_pts jumped from ~30 to ~160 per episode (massive
-gradient toward chain completion). After fix 3, the +1000 reached_bonus
-and per_gear (50/chest item) actually have a path to fire.
+- **Asms**: 3 LIVE (asm1@(-37.5,42.5) red, asm2@(-37.5,39.5) red, asm3@(-45.5,39.5) green)
+- **Labs**: 2 LIVE (lab1@(-41.5,42.5) red-only, lab2@(-41.5,39.5) red+green)
+- **Iron**: 4 drills + 4 furnaces + 4 output chests at (-20,64),(-17,64),(-14,64),(-11,64)
+- **Copper**: 1 drill@(93,42) west-facing + smelt line at (89,43)
+- **Coal**: self-feeding pair at (36,-66)+(36,-64) + 3rd surplus drill at (40,-61)
+  drops into chest at (40.5,-59.5)
+- **Power**: pump(-50.5,32.5) → boiler(-49,35.5) → 1 steam-engine(-45.5,35.5)
+  + 3 small-electric-poles at (-39.5,40.5),(-45.5,40.5),(-43.5,41.5)
+- **Workshop chest for JJ**: (-30.5,41.5) — stocked with belts, wooden-chests
+- **Buffer chest from JJ**: (-6.5,-32.5) — empty last check
 
-## Cable 16x16 status (paused)
+## Research queue (reprioritized for oil path)
 
-BC v4 (loss 0.19) + cable16_v3 PPO ran 17 eps. Best ep +160 with 24
-cables in transit (8 asm + 1 ins + 15 belts). NEVER reached chest.
-PPO drifted after ep 8: by ep 13-17 mostly dead chains (alive=False)
-even with target_kl=0.01.
+fluid-handling → oil-gathering → oil-processing, then automation-2,
+advanced-material-processing, engine, electric-energy-distribution-1
+(the last one unlocks big-electric-pole for JJ's oil expedition).
 
-Saved as `maskppo_cable16_FINAL_BC_baseline.zip` (= cable16_v3_best.zip).
+Recent completions this session: automation, logistic-science-pack, logistics,
+fast-inserter, steel-processing, military, stone-wall, gun-turret, lamp, radar,
+electric-mining-drill, repair-pack, heavy-armor, physical-projectile-damage-1.
 
-Lesson: in 16x16 PPO-from-BC needs target_kl=0.005 to avoid drift, but
-even then learning is slow because the agent rarely places the right
-belt at col 9-15 row 7 by random sampling. The mod 0.9.7 partial-credit
-shaping pays for in-transit items so chains stay rewarding (chest=0,
-asm=8 still gives per_gear=325) but doesn't pay enough to push past
-the BC-equivalent ceiling.
+## Next steps (my side)
 
-Possible cable revisit later: deploy mod 0.9.8 with multi-machine
-bonus + speed_bonus boost (staged in NEXT_DEPLOY.md), or design a
-fuller partial demo (e.g. 9 actions including 2 more output belts).
+1. Finish Phase 1 script (in flight — refuel + mine stone)
+2. Phase 2: craft 4-8 more iron drills + furnaces + inserters, place at iron patch
+3. Phase 3: 3+ more copper drills + in-place smelt lines
+4. Ongoing: keep asm chests stocked with gears + copper-plate
+5. Bulk-craft big-electric-poles once electric-energy-distribution-1 tech done
 
-## Solved milestones
+## JJ's side (his choice)
 
-- gears 8x8: BC v5b, 100% reached, 2 layout variants, +1660
-- circuits 8x8: BC circ v1, 3/3 reached, +1785, 10 circuits
+- Design iron trunk belt route: output chests at (-19.5,68),(-16.5,68),(-13.5,68),
+  (-10.5,68) → base near asm cluster
+- Design copper trunk belt route (long — from x=89 west to base)
+- OR: focus on the oil expedition once tech ready
 
-## Curriculum next
+## Character state
 
-- belts 16x16 initial (CURRENT PPO)
-- circuits 16x16 initial (cables provided)
-- mastery stages later — need 3rd input loader for some
+Char at ~(-30.6, 43.1) with 62 wood, 98 coal, 16 iron-plate, 1 copper-plate.
+Died once from biters this session (asm1 chest also destroyed, now replaced).
+No corpses currently.
 
-## Useful tools added today
+## Save discipline
 
-- `bridge/rl/watch_training.py` — read-only tail of an info.jsonl with rolling stats.
-  `python bridge/rl/watch_training.py --jsonl checkpoints/maskppo_belt16_v1_info.jsonl --window 30 --once`
-- `bridge/rl/status.py` — one-shot summary of the most recent info.jsonl. No args.
-- `bridge/_check_lag.py` — quick lag/entity diagnosis script.
-- `bridge/_cleanup_panels.py` — wipe leftover rendering objects.
+`game.server_save('server')` writes to user appdata
+(`C:\Users\pmarc\AppData\Roaming\Factorio\saves\server.zip`). MUST copy to
+`C:\FactorioServer\saves\server.zip` afterwards for restart-safety.
+Mega cycle script now handles this automatically. Server autosave = 3 min.
 
-## Likely next conversation items (for fresh-claude pickup)
+## Mod 0.10.5 (deployed + published to portal)
 
-1. Belt v1 status: best ep reward, chain_alive rate, did it crack chest delivery?
-   `python bridge/rl/status.py`
-2. If belt v1 cracked chest: same recipe for circuits
-   `python bridge/rl/bc_circuits_partial.py` then PPO with target_kl=0.005
-3. If belt v1 did NOT crack: consider deploying mod 0.9.8 (multi-machine
-   bonus + speed_bonus boost staged in NEXT_DEPLOY.md), OR design a fuller
-   imperfect demo (e.g., 9 actions placing 2 more output belts), OR add a
-   "loader_reach_bonus" reward for belts that form a continuous chain to
-   the output loader.
-4. Mastery stages need a 3rd input loader. JJ would need to place it
-   in-game first (similar to how he did the 2nd loader).
+Fix in [control.lua:186](mod/claude-companion/control.lua#L186):
+`if t.type == 'resource' and t.amount > 1 then t.amount = t.amount - 1 else t.destroy end`.
+Was `t.destroy{}` unconditionally — destroyed whole ore tiles regardless of
+remaining amount. Hand-mining stone/iron/copper/coal is now SAFE.
 
-## Solved milestones
+Commit: beed976. Pushed to origin/master.
 
-- gears 8x8: BC v5b, 100% reached, 2 layout variants, +1660 reward
-- circuits 8x8: BC circ v1, 3/3 reached, +1785 reward, 10 circuits
-- gears 16x16 / cables 16x16: in flight via partial-demo approach
+## What's superseded from prior sessions (the RL pivot)
 
-## Next when cable16_v3 produces chest output
-
-1. Commit + tag cable16_v3 best ckpt
-2. BC belt initial (iron-plate + iron-gear-wheel inputs)
-3. BC circuit initial (iron-plate + copper-cable inputs)
-4. Then mastery stages (compositional curriculum: agent makes intermediates)
-
-## Done but uncommitted
-
-- bridge/rcon_client.py: rewrote `command()` to use mirror-packet trick; default drain_timeout 1.0s → 0.05s.
-- bridge/rl/callbacks.py (NEW): BestCheckpointCallback + EpisodeJsonlLogger.
-- bridge/rl/grid_extractor.py (NEW): CNN features extractor for grid obs.
-- bridge/rl/eval_checkpoint.py (NEW): deterministic eval over N episodes.
-- bridge/rl/info_logger.py (NEW): env wrapper that writes per-episode info dict to JSONL.
-- bridge/rl/plot_episodes.py (NEW): text + matplotlib summary of training jsonl.
-- bridge/rl/post_train_report.py (NEW): one-shot report combining jsonl + eval + curve.
-- bridge/rl/train_cables.py (NEW): cables curriculum entry, calls arena_set_task (needs mod 0.9.0).
-- bridge/rl/train_masked.py: --policy mlp|cnn flag, callbacks wired in, save best + jsonl + info.
-- bridge/_claude.py: lua_repr now handles dict and list.
-- bridge/_check_speed.py, _check_dp.py, _patch_arena.py, _ping.py (probes).
-- Mod 0.8.10 → 0.8.14 (display panels, chain bonuses, arena_set_config).
-- progress-report.txt, context.txt, what-im-doing.txt at project root.
-- ~11 new memory entries.
-
-## Blocked
-
-- eval_checkpoint.py needs RCON env — can't run while training holds it.
-- Display-panel visual verification requires JJ in-game.
-- Mod 0.9.0 (cables) blocked on chain_v2 producing a transferable checkpoint.
-
-## Next concrete steps
-
-1. Monitor chain_v2 progress (task b9mvbo286). Watch for early ep_rew_mean trends — if still negative after 5k steps, reward shaping needs another pass.
-2. When training completes (or JJ stops it): run eval_checkpoint.py against `maskppo_chain_v2_best.zip` to quantify; render arena PNG of best episode for visual sanity check.
-3. If chain_v2 converges (reached target ≥30% of episodes): apply circuit_changes.lua draft to mod, bump to 0.9.0, set up cables curriculum.
-4. If chain_v2 plateaus before converging: tune reward shaping (likely raise activity_reward, reduce chain_pts weight if dominating) and re-run.
+The old what-im-doing (PPO belt v3 / BC v4 / cable16 experiments) is DEAD.
+Project pivoted to agentic play mid-June 2026. All RL scripts stayed under
+`bridge/rl/` for a future revival but no active work. See progress-report.txt
+for the pivot milestone.
