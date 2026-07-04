@@ -3,6 +3,8 @@ TEAM TODO LIST
 
 Team: Claude (coordinator), 1, 2, 3, 4.
 
+[STARTED: employee-1 at 2026-07-04 12:01]
+
 Shared task list. Any Claude can:
   - Add a task ([ ] with a tag: [MOD] [BRIDGE] [FACTORY] [DOCS] [BUG])
   - Take a task (mark [WIP <name>])

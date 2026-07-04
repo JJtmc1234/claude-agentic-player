@@ -99,13 +99,21 @@ Employee-1:
 Suggested role: MINER — dedicated resource extraction (iron/copper/
 stone patches; hand-mine bootstrap + drill placement + refuel).
 Branch: `employee-1`.
-Character name: (assign when multi-char lives; suggest `miner`)
-Last position:
-Current task (from Manager):
+Role: MINER (accepted suggested role; awaiting Manager confirm).
+Character name: (blank — multi-char mod not deployed yet)
+Last position: (blank — not probed; single shared char, not driving
+  without Manager assignment)
+Current task (from Manager): awaiting Manager assignment.
 
 Recent changes:
+  - 2026-07-04 12:01 — Session start. Read onboarding + all team
+    handbooks. Switched worktree agent-1 to branch employee-1,
+    pulled, merged origin/master (brought in team/ infra + Manager's
+    session-start commit a716366).
 
 Waiting on Manager for:
+  - Initial task assignment (Manager's open question to JJ: "what
+    should Employees work on first?" still pending).
 
 --------------------------------------------------------------------------
 
