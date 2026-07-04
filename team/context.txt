@@ -86,6 +86,16 @@ Recent changes:
 - 2026-07-04: team/*.* infra written (this restructure to Manager +
   Employees hierarchy).
 - 2026-07-04: Manager session claimed; session-start probe recorded.
+- 2026-07-04 ~12:45 CHECKPOINT: power RESTORED (boiler working; drills
+  recovering ~3/16 no_fuel). 3 code merges on master + pushed: mod 0.10.6
+  multi-char (bcc2b2f, NOT deployed), bridge connect_named + placement
+  ore-decrement fix + team.py (b73f445), layouts electric-drill array +
+  belt-run + geometry constants (42e2e83). Tests green (geom 19/19,
+  layouts 49/49, placement 15/15). merge-log updated. NEW ISSUE: science
+  stalled -- green asm (-45.5,39.5) full_output but labs starved
+  (missing_science_packs = broken pack-delivery link); red asms
+  item_ingredient_shortage (iron catching up). Delegated in-game agent to
+  fix lab feeding; not yet resolved.
 - 2026-07-04 ~12:05 — JJ granted 1hr full autonomy (AFK for lunch):
   "do anything, all agents spawned, use best judgment, expand base."
 - FINDING: power is DOWN (boiler 0 coal / status 53, steam engine 0
