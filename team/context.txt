@@ -143,16 +143,24 @@ Waiting on Manager for:
 
 Employee-4:
 
-Suggested role: SCOUT / DEFENSE — wide-map scouting (new patches,
-biter proximity, oil hunt) and defense builds (walls, turrets, ammo).
+Role: SCOUT / DEFENSE — wide-map scouting (new patches, biter
+proximity, oil hunt at (160,350) SE) and defense builds (walls,
+turrets, ammo).
 Branch: `employee-4`.
-Character name: (suggest `scout`)
-Last position:
-Current task (from Manager):
+Character name: (blank — multi-char mod not deployed; only shared
+char unum 302154 exists)
+Last position: n/a (no dedicated char yet). Shared char observed at
+(-12.3, 67.0), hp 250, tick 1346361 as of 2026-07-04 12:02.
+Current task (from Manager): awaiting Manager assignment.
 
 Recent changes:
+  - 2026-07-04 12:02 — Session start. Merged origin/master into
+    employee-4 (brought in team/ infra). Server confirmed UP
+    (factorio.exe PID 50600), RCON responds, mod claude-companion,
+    tick 1346361. No dedicated character (multi-char not deployed).
 
 Waiting on Manager for:
+  - Initial task assignment.
 
 --------------------------------------------------------------------------
 CORE RULES (all agents)
