@@ -33,13 +33,27 @@ local function init_walks()         if not storage.walks         then storage.wa
 local function init_path_requests() if not storage.path_requests then storage.path_requests = {} end end
 local function init_craft_jobs()    if not storage.craft_jobs    then storage.craft_jobs    = {} end end
 local function init_arena()         if not storage.arena         then storage.arena         = {} end end
+local function init_claude_chars()  if not storage.claude_chars  then storage.claude_chars  = {} end end
 
 local function init_all()
   init_chat_log(); init_mining_jobs(); init_walks(); init_path_requests(); init_craft_jobs(); init_arena()
+  init_claude_chars()
+end
+
+-- Migration: fold the legacy single-character key into the multi-char map.
+-- Idempotent: only runs when the old key exists and the new map hasn't been
+-- populated yet. The old key is kept as an alias (not deleted) for the bridge.
+local function migrate_claude_chars()
+  if storage.claude_char_unum and not storage.claude_chars then
+    storage.claude_chars = { main = storage.claude_char_unum }
+  end
 end
 
 script.on_init(init_all)
-script.on_configuration_changed(init_all)
+script.on_configuration_changed(function(_)
+  migrate_claude_chars()   -- must run BEFORE init_all (which would create an empty map)
+  init_all()
+end)
 
 
 -- ---------- chat buffer ----------
@@ -456,7 +470,7 @@ local function ping()
   init_all()
   return {
     ok = true,
-    pong = "from claude-companion 0.10.5",
+    pong = "from claude-companion 0.10.6",
     tick = game.tick,
     chat_buffer_size = #storage.chat_log,
     mining_jobs = count_kv(storage.mining_jobs),
@@ -1111,6 +1125,67 @@ local function get_character_inventory(character_unum)
 end
 
 
+-- ---------- multi-character management (0.10.6) ----------
+
+-- Accept a position as {x=, y=}, {x, y}, or nil (defaults to spawn 0,0).
+local function coerce_position(position)
+  if type(position) ~= 'table' then return 0, 0 end
+  local px = position.x or position[1] or 0
+  local py = position.y or position[2] or 0
+  return px, py
+end
+
+-- Spawn a free-standing character and record it under `name` in the
+-- storage.claude_chars map. Returns the new character's unit_number.
+local function spawn_named_char(name, position)
+  if type(name) ~= 'string' or name == '' then
+    return { ok = false, error = 'name must be a non-empty string' }
+  end
+  init_claude_chars()
+  local s = game.surfaces['nauvis'] or game.surfaces[1]
+  if not s then return { ok = false, error = 'no surface' } end
+  local force = game.forces.player
+  local px, py = coerce_position(position)
+  local pos = s.find_non_colliding_position('character', { px, py }, 30, 0.5)
+  if not pos then
+    return { ok = false, error = 'no non-colliding position near (' .. px .. ',' .. py .. ')' }
+  end
+  local c = s.create_entity{ name = 'character', position = pos, force = force }
+  if not (c and c.valid) then
+    return { ok = false, error = 'create_entity returned nil' }
+  end
+  storage.claude_chars[name] = c.unit_number
+  return {
+    ok = true,
+    name = name,
+    unit_number = c.unit_number,
+    position = { x = c.position.x, y = c.position.y },
+  }
+end
+
+-- Return the name -> unit_number map (a fresh copy).
+local function list_chars()
+  init_claude_chars()
+  local out = {}
+  for k, v in pairs(storage.claude_chars) do out[k] = v end
+  return out
+end
+
+-- Remove a named character: destroy the entity if it still exists and clear
+-- the mapping. Idempotent (removing an unknown name is a no-op).
+local function remove_char(name)
+  init_claude_chars()
+  local unum = storage.claude_chars[name]
+  local destroyed = false
+  if unum then
+    local e = game.get_entity_by_unit_number(unum)
+    if e and e.valid then e.destroy(); destroyed = true end
+  end
+  storage.claude_chars[name] = nil
+  return { ok = true, name = name, existed = unum ~= nil, destroyed = destroyed }
+end
+
+
 -- ---------- remote interface registration ----------
 
 remote.add_interface("claude", {
@@ -1144,6 +1219,10 @@ remote.add_interface("claude", {
   analyze_ghosts = analyze_ghosts,
   find_chests_with_item = find_chests_with_item,
   get_character_inventory = get_character_inventory,
+  -- 0.10.6 additions: multi-character management
+  spawn_named_char = spawn_named_char,
+  list_chars = list_chars,
+  remove_char = remove_char,
 })
 
 
