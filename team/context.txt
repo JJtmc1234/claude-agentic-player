@@ -105,9 +105,27 @@ Recent changes:
   Emp-3 bridge connect_named + placement decrement fix + team.py;
   Emp-4 layouts.py expansion helpers.
 
-Open questions for Human: none blocking (operating on 1hr autonomy grant).
+SETUP GAP FOUND (flag for JJ): the employee WezTerm sessions are NOT
+reachable from the Manager session — SendMessage returns "No agent named
+'employee-1' is reachable", and their kickoff tells them to WAIT idle
+after session start (no polling loop). So Manager cannot wake an idle
+employee, and git-file assignments won't be seen unless JJ re-pokes each
+pane. Given JJ's 1hr full-autonomy grant, Manager is executing the work
+via its OWN sub-agents (handbook explicitly allows "Employees spawned as
+sub-agents via the Agent tool"):
+  - in-game sub-agent: emergency refuel + keep-alive + opportunistic
+    expansion (no git; sole in-game actor).
+  - 3 isolated-worktree code sub-agents: mod 0.10.6 multi-char (no
+    deploy), bridge connect_named + placement decrement fix, layouts
+    expansion helpers. Manager reviews each worktree diff + merges.
 
-Escalations pending: none (power-down being handled in-game, no restart).
+Open questions for Human:
+- Employee sessions are idle+unreachable. Want them wired to poll (or a
+  wake mechanism), or is Manager-sub-agent execution the model going fwd?
+
+Escalations pending:
+- (non-urgent) reachability gap above. Power-down is being handled by the
+  Manager's in-game sub-agent; no server restart needed.
 
 --------------------------------------------------------------------------
 
@@ -123,6 +141,11 @@ Role: MINER — CONFIRMED. Also: you are the SOLE in-game actor this
 Character name: (blank — multi-char mod not deployed yet)
 Last position: (blank — not probed; single shared char, not driving
   without Manager assignment)
+** COORDINATION WARNING (if JJ wakes this session): Manager is ALREADY
+   running an in-game sub-agent driving the character for the refuel/
+   keep-alive. Do NOT start driving the character — you'd have two actors
+   on one character. Check with Manager (via context.txt) before any
+   in-game action. **
 Current task (from Manager): [URGENT] EMERGENCY REFUEL. Manager probed
   at session start: POWER IS DOWN — boiler at (-49,35.5) has 0 coal
   (status 53/no_fuel), steam engine at 0 power, 14 of 16 mining drills
