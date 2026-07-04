@@ -1,11 +1,18 @@
 # In-game character owner
 
-Until mod 0.10.6 (multi-character support) is DEPLOYED to the running server,
-there is exactly ONE in-game character. Only ONE agent may drive it at a time.
-Two agents driving one character corrupts movement/mining and wastes actions.
+UPDATE 2026-07-04 (Manager, fresh session): mod 0.10.6 IS NOW DEPLOYED.
+Server was restarted ~14:13 with claude-companion_0.10.6.zip; RCON pong
+reports "from claude-companion 0.10.6" and remote.call('claude','list_chars')
+resolves (returns {} — no named chars spawned yet). So multi-char support is
+LIVE at the engine level. BUT no employee has spawned/claimed a named
+character yet, so operationally there is still ONE active free-standing char
+(unum 302154 @ ~(-50.3, 37.7)). Keep the single-driver rule in force until
+the Manager explicitly activates the per-character workflow (each employee
+Agent.connect_named / spawn_named_char its own char). Do NOT self-spawn a
+named char without a Manager assignment.
 
-mod 0.10.6 is MERGED to master but NOT yet deployed. Multi-char is therefore
-NOT available in-game yet. Treat the character as a single shared resource.
+Historical note (pre-restart): mod 0.10.6 was MERGED to master but not
+deployed. That is now superseded — it is deployed.
 
 ## Current owner
 

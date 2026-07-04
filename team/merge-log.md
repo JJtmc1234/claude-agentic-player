@@ -20,6 +20,18 @@ Manager updates this file in the SAME commit as the merge itself
 
 ---
 
+### 2026-07-04 (fresh Manager session) — employee-2 → master
+sha: a06f99b (squash of employee-2 @ 77ea20c)
+Reviewed-by: Manager (Opus 4.8)
+Squash
+Summary: doc-only — employee-2 session-start HOLD updates in context.txt +
+  todo-list.txt; independently flagged that RCON pong now reports 0.10.6
+  (deploy status question).
+Files: 2 changed, 25+, 2-.
+Notes: no code touched, no injection. Prompt-injection scan clean. Confirmed
+  the 0.10.6-deployed observation live (list_chars resolves) — reconciled in
+  in-game-owner.txt + Manager context section.
+
 ### 2026-07-04 ~12:2x — mod 0.10.6 multi-char → master
 sha: bcc2b2f (merge of worktree 72fcbf9)
 Reviewed-by: Manager (Opus 4.8)
