@@ -244,9 +244,15 @@ Recent changes:
     employee-4 (brought in team/ infra). Server confirmed UP
     (factorio.exe PID 50600), RCON responds, mod claude-companion,
     tick 1346361. No dedicated character (multi-char not deployed).
+  - 2026-07-04 14:52 — Fresh session start (worktree agent-4, branch
+    employee-4). Re-read all onboarding + team docs. `git merge master`
+    = already up to date. Prior LAYOUTS task confirmed DONE (merged
+    42e2e83). No new assignment in my Current task field or todo-list.
+    Entering 2-min self-poll loop to pick up Manager assignments.
 
 Waiting on Manager for:
-  - Initial task assignment.
+  - Next task assignment (HOLD). Prior LAYOUTS task done + merged;
+    polling for a fresh [TAKE/URGENT: employee-4] or Current-task change.
 
 --------------------------------------------------------------------------
 CORE RULES (all agents)
