@@ -49,6 +49,21 @@ Notes: tests green on master post-merge — test_placement 15/15,
   round-trip UNVERIFIED (mod 0.10.6 not deployed); connect_named happy
   path only exercised against the {name->unum} contract, not live RCON.
 
+### 2026-07-04 ~12:4x — layouts expansion helpers → master
+sha: 42e2e83 (merge of worktree 7cf0080)
+Reviewed-by: Manager (Opus 4.8)
+merge-commit (--no-ff)
+Summary: plan_electric_drill_array(patch_center, rows, cols) (3x3 drills +
+  east-west belt lanes + small-pole coverage, all electric) and
+  plan_belt_run(start, end) (straight/L belt path); +5 geometry helpers &
+  constants for electric-drill/small-pole.
+Files: 4 changed, 314+, 5-.
+Notes: constants sourced from base prototypes (electric-drill
+  vector_to_place_result {0,-1.85} X-centered 3x3; small-pole supply 2.5 /
+  wire 7.5). Tests on master post-merge: test_geometry 19/19, test_layouts
+  49/49, test_placement 15/15, compileall OK. NOT in-game verified —
+  planners return specs; execute_layout round-trip untested live.
+
 _(pre-team commits below for reference.)_
 
 ## Pre-team (single-Claude era, 2026-06 → 2026-07)
