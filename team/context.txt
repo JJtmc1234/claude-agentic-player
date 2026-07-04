@@ -192,16 +192,22 @@ Last position: (blank — not probed; single shared char, not driving
 ** IN-GAME OWNER = manager-keepalive (see team/in-game-owner.txt). Do NOT
    drive the character. Read-only RCON probes (position/inventory/status)
    are allowed for anyone. **
-Current task (from Manager): SMALL TEST TASK (pipeline check). Read-only, no
-  driving. Probe the in-game PLAYER character position via RCON and report
-  the coordinates in your "Recent changes" below, then note "test done" in
-  "Waiting on Manager for". This verifies the assignment -> git pull ->
-  execute -> report pipeline end-to-end; keep it small. Set
-  FACTORIO_RCON_PASSWORD from C:\FactorioServer\start-server.bat via
-  Select-String (do NOT echo the secret). Handy helpers: bridge/_who_am_i.py
-  or bridge/_scout.py, or a one-line _exec.py probe of the character position.
-  NOTE: your earlier EMERGENCY REFUEL assignment is DONE — a Manager sub-agent
-  restored power and built a boiler auto-feeder; do NOT attempt the refuel.
+Current task (from Manager): BASE STATE SURVEY (READ-ONLY — do NOT drive;
+  owner is employee-3 this wave). Multi-char 0.10.6 is now DEPLOYED and JJ
+  says he already built the whole base — our job this session is IMPROVEMENTS
+  + stocking a chest for his OIL TRIP. First I need a current picture. Probe
+  and report in your Recent changes:
+    (a) status of every asm / lab / boiler / steam-engine / iron+copper drill
+        (decode entity_status numbers to names — see AGENT_ONBOARDING §9).
+    (b) contents of the workshop chest (-30.5, 41.5) and the buffer chest
+        (-6.5, -32.5).
+    (c) any entity showing not-working (no_fuel/no_power/no_ingredients/
+        full_output) — list coords so we know what to fix.
+  Read-only RCON only (find_entities_filtered, get_inventory). Set
+  FACTORIO_RCON_PASSWORD from start-server.bat via Select-String (do NOT echo
+  the secret). When done, HOLD — I will hand you a named MINER character once
+  employee-3 confirms multi-char driving works, then you scale iron/coal for
+  the oil trip.
 
 Recent changes:
   - 2026-07-04 12:01 — Session start. Read onboarding + all team
@@ -244,10 +250,25 @@ Character name: (blank — multi-char mod not yet deployed; suggest
 `courier`)
 Last position: (blank — only one shared char exists; not probed/moved
 mine yet)
-Current task (from Manager): NONE right now — HOLD for next assignment.
-  Your prior MOD 0.10.6 multi-char task is DONE (Manager sub-agent; merged
-  to master bcc2b2f, NOT deployed). Do NOT redo it. Once the poll mechanism
-  is wired up, watch this field + todo-list for a fresh [TAKE: employee-2].
+Current task (from Manager): MOD AUDIT — de-risk multi-char driving (CODE-ONLY,
+  no driving, no deploy). Confirmed: 0.10.6 is deployed, list_chars resolves.
+  Open question that gates the whole team: when spawn_named_char creates a
+  character via create_entity, is that char's unit_number resolvable by
+  game.get_entity_by_unit_number LATER (needed by every walk/mine/craft call)?
+  control.lua:1265 warns that in Factorio 2.0 only entities registered via
+  script.register_on_entity_destroyed resolve. Steps:
+   1. Read how the ORIGINAL free-standing char is created/registered
+      (bridge/_spawn_claude.py + control.lua) — that char (unum 302154) DOES
+      resolve, so copy whatever makes it work.
+   2. Check spawn_named_char (control.lua ~1140): does it register the new char
+      the same way? If NOT, that's the bug employee-3's verify will hit.
+   3. If a gap exists: prepare a fix on branch employee-2 (bump to 0.10.7,
+      info.json + pong string, on_configuration_changed intact) that registers
+      spawned chars. Do NOT deploy — Manager reviews + deploys in a window.
+      If NO gap (already registered), say so in your section so we know verify
+      should pass. compileall must stay green.
+  This runs in parallel with employee-3's live verify — you find the cause,
+  he finds the symptom.
 
 Recent changes:
   - 2026-07-04 12:01 — Session start. Read onboarding + all team
@@ -290,10 +311,40 @@ Role THIS SESSION: BRIDGE DEV (in-game BUILDER role resumes once
 Branch: `employee-3`.
 Character name: (suggest `builder`)
 Last position:
-Current task (from Manager): NONE right now — HOLD for next assignment.
-  Your prior BRIDGE task (connect_named + placement decrement fix + team.py)
-  is DONE (Manager sub-agent; merged to master b73f445, tests green). Do NOT
-  redo it. Watch this field + todo-list for a fresh [TAKE: employee-3].
+Current task (from Manager): MULTI-CHAR BOOTSTRAP + VERIFY (GATING TASK — you
+  hold the in-game driver token this wave, owner=employee-3 in
+  in-game-owner.txt). Mod 0.10.6 is DEPLOYED (list_chars resolves, returns {}).
+  Nobody has confirmed a SPAWNED named char can actually be DRIVEN yet — that's
+  the gate for the whole team. Steps:
+   1. Spawn named chars for the roster via bridge/team.py bootstrap() or a
+      direct remote.call('claude','spawn_named_char', name, x, y): names
+      "miner","builder","courier","scout" near anchor (-40,45), fanned out so
+      they don't stack.
+   2. VERIFY DRIVING end-to-end on ONE of them: Agent.connect_named("builder"),
+      walk it ~5 tiles (walk_chunked), re-probe position, confirm it MOVED.
+      KNOWN RISK: Factorio 2.0 get_entity_by_unit_number only resolves entities
+      registered via script.register_on_entity_destroyed (see control.lua:1265).
+      If the spawned char's unum does NOT resolve / does NOT move, multi-char
+      driving is BROKEN — file a bug in bug-log.md (severity HIGH, owner
+      employee-2) and report; do NOT force it.
+   3. Report the roster {name->unum} + PASS/FAIL in your Recent changes.
+  THEN (only if PASS): as BUILDER on the "builder" char, build the MILITARY
+  SCIENCE PACK plant. JJ's EXACT spec (in-conversation): "10 assemblers, fully
+  fed, and I can plug it to labs." So:
+   - 10 assembling machines each running the military-science-pack recipe.
+   - FULLY FED: build the whole ingredient chain so all 10 run continuously —
+     sub-asms for the sub-ingredients (military-science-pack in 2.0 = piercing
+     magazine + grenade + stone-wall; VERIFY exact recipe + counts from
+     prototypes/wiki, do NOT guess), plus feeds of raw iron/copper/coal/stone-
+     brick. Size the sub-asm counts to sustain 10 output asms.
+   - Do NOT build labs / do NOT connect to labs — JJ plugs the output into labs
+     himself. Just leave the 10 asms producing + an accessible output.
+   - Watch POWER: 10 asms is a big draw; current base is ~1.8MW and may already
+     be near cap (see employee-1's survey). If power is short, flag to Manager
+     BEFORE placing all 10 — we may need another boiler+engine first.
+   This is large; if it outpaces one builder, Manager will add employee-2
+   (courier) to haul ingredients in wave 2. Coordinate tiles with employee-1's
+   survey so you don't overlap his miner work.
 
 Recent changes:
   - 2026-07-04 12:01 — Session start. Read onboarding + team handbooks.
@@ -323,11 +374,22 @@ Role THIS SESSION: LAYOUT/DESIGN DEV (in-game SCOUT/DEFENSE resumes once
 Branch: `employee-4`.
 Character name: (suggest `scout`)
 Last position:
-Current task (from Manager): NONE right now — HOLD for next assignment.
-  Your prior LAYOUTS task (plan_electric_drill_array + plan_belt_run +
-  geometry constants) is DONE (Manager sub-agent; merged to master 42e2e83,
-  tests green: geometry 19/19, layouts 49/49). Do NOT redo it. Watch this
-  field + todo-list for a fresh [TAKE: employee-4].
+Current task (from Manager): OIL-TRIP SUPPLY SPEC (CODE/DOC-ONLY, no driving).
+  JJ is going on an OIL TRIP (pumpjack expedition, historically to ~(160,350)
+  SE) and wants a chest stocked for it. Produce a concrete BILL OF MATERIALS
+  for what a from-scratch oil setup at a remote patch needs, so we know what to
+  craft + stock. Cover: pumpjacks, pipe + pipe-to-ground, storage tank, oil
+  refinery, chemical plants, offshore pump (if water needed), power out there
+  (boiler+engine+, since no solar tech yet — note the coal cost), belts, poles,
+  and the crude->processing chain. For EACH item: recipe ingredients + whether
+  we can craft it NOW vs blocked on tech (check the research state — oil chain
+  techs fluid-handling/oil-gathering/oil-processing may not be done yet; if
+  pumpjack/refinery are tech-locked, SAY so — the trip may be scouting-only
+  until tech lands). Look up recipes from prototypes/wiki, do NOT guess. Write
+  the spec to a doc (e.g. team/oil-trip-supply.md) on branch employee-4 and
+  commit. This defines what the courier stocks the chest with in wave 2. Then
+  HOLD for a named "scout" char (defense/scouting resumes once multi-char is
+  verified).
 
 Recent changes:
   - 2026-07-04 12:02 — Session start. Merged origin/master into

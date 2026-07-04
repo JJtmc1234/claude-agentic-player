@@ -16,10 +16,16 @@ deployed. That is now superseded — it is deployed.
 
 ## Current owner
 
-owner: manager-keepalive
-reason: Manager's in-game sub-agent is running the refuel + keep-alive loop.
-since: 2026-07-04
-note: No employee may drive the character while this is set to anyone but you.
+owner: employee-3
+reason: Multi-char bootstrap + verify wave. employee-3 spawns named chars and
+  verifies driving works. Once verified and each employee holds its OWN named
+  char, we switch to per-character ownership (each employee drives only its own
+  char) and this single-lock is relaxed. Until employee-3 reports PASS, only
+  employee-3 drives.
+since: 2026-07-04 (fresh Manager session)
+note: employees 1/2/4 do NOT drive this wave (employee-1 read-only survey,
+  employee-2 code-only mod audit, employee-4 code-only oil BoM). Read-only RCON
+  probes remain allowed for anyone.
 
 ## Protocol
 
