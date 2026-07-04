@@ -30,8 +30,10 @@ class Agent:
         self._fuel = None
         self._inventory = None
 
-    @classmethod
-    def connect(cls, password: Optional[str] = None) -> 'Agent':
+    @staticmethod
+    def _open_rcon(password: Optional[str] = None) -> RconClient:
+        """Resolve the RCON password (arg -> env -> start-server.bat) and return
+        a connected RconClient. Shared by connect() and connect_named()."""
         if password is None:
             password = os.environ.get('FACTORIO_RCON_PASSWORD')
             if not password:
@@ -48,6 +50,13 @@ class Agent:
         os.environ['FACTORIO_RCON_PASSWORD'] = password
         r = RconClient()
         r.connect()
+        return r
+
+    @classmethod
+    def _connect_single(cls, r: RconClient) -> 'Agent':
+        """Bind to the single character tracked in storage.claude_char_unum.
+        This is the legacy single-character path used both by connect() and as
+        the graceful fallback for connect_named()."""
         out = r.command("/silent-command rcon.print(tostring(storage.claude_char_unum))").strip()
         if out in ('nil', '', 'NO CHAR'):
             raise RuntimeError(
@@ -57,6 +66,61 @@ class Agent:
             unit = int(out)
         except ValueError:
             raise RuntimeError(f"could not parse char unum from: {out!r}")
+        return cls(r, unit)
+
+    @staticmethod
+    def _resolve_named_unit(chars: object, name: str) -> Optional[int]:
+        """Resolve `name` to an int unit_number from a list_chars mapping.
+
+        Contract: the mod's `list_chars` remote returns { name -> unum }.
+        Returns None if `chars` is not a mapping, `name` is absent, or the value
+        is not int-coercible. Pure — no I/O — so it is unit-testable.
+        """
+        if not isinstance(chars, dict):
+            return None
+        unum = chars.get(name)
+        if unum is None:
+            return None
+        try:
+            return int(unum)
+        except (TypeError, ValueError):
+            return None
+
+    @classmethod
+    def connect(cls, password: Optional[str] = None) -> 'Agent':
+        r = cls._open_rcon(password)
+        return cls._connect_single(r)
+
+    @classmethod
+    def connect_named(cls, name: str, password: Optional[str] = None) -> 'Agent':
+        """Connect to the character called `name` by resolving its unit_number
+        via the mod's `list_chars` remote interface (contract: { name -> unum }).
+
+        Degrades gracefully: if the mod does not expose `list_chars` (older mod
+        version or any RCON error), or if `name` is not present in the mapping,
+        this falls back to the legacy single-character connect path
+        (storage.claude_char_unum) and logs why to stderr.
+        """
+        r = cls._open_rcon(password)
+        try:
+            chars = call_mod(r, 'list_chars')  # contract: { name -> unum }
+        except Exception as e:
+            print(
+                f"[Agent.connect_named] list_chars unavailable ({e}); "
+                f"falling back to single-character connect for {name!r}",
+                file=sys.stderr,
+            )
+            return cls._connect_single(r)
+        unit = cls._resolve_named_unit(chars, name)
+        if unit is None:
+            available = sorted(chars) if isinstance(chars, dict) else chars
+            print(
+                f"[Agent.connect_named] character {name!r} not resolvable from "
+                f"list_chars (available: {available}); falling back to "
+                f"single-character connect",
+                file=sys.stderr,
+            )
+            return cls._connect_single(r)
         return cls(r, unit)
 
     # Context manager support

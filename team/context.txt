@@ -86,11 +86,56 @@ Recent changes:
 - 2026-07-04: team/*.* infra written (this restructure to Manager +
   Employees hierarchy).
 - 2026-07-04: Manager session claimed; session-start probe recorded.
+- 2026-07-04 ~12:45 CHECKPOINT: power RESTORED (boiler working; drills
+  recovering ~3/16 no_fuel). 3 code merges on master + pushed: mod 0.10.6
+  multi-char (bcc2b2f, NOT deployed), bridge connect_named + placement
+  ore-decrement fix + team.py (b73f445), layouts electric-drill array +
+  belt-run + geometry constants (42e2e83). Tests green (geom 19/19,
+  layouts 49/49, placement 15/15). merge-log updated. NEW ISSUE: science
+  stalled -- green asm (-45.5,39.5) full_output but labs starved
+  (missing_science_packs = broken pack-delivery link); red asms
+  item_ingredient_shortage (iron catching up). Delegated in-game agent to
+  fix lab feeding; not yet resolved.
+- 2026-07-04 ~12:05 — JJ granted 1hr full autonomy (AFK for lunch):
+  "do anything, all agents spawned, use best judgment, expand base."
+- FINDING: power is DOWN (boiler 0 coal / status 53, steam engine 0
+  power, 14/16 drills no_fuel). Base producing nothing. Assigned
+  Employee-1 [URGENT] emergency refuel. NOT restarting server (fix is
+  in-game refuel, no restart needed).
+- FINDING: ghost count exploded to 1708 (was 331): 1247 belt, 146
+  inserter, 95 pole, 72 furnace, 60 electric-drill, 34 ug-belt, 16
+  steam-engine, 11 asm-1, 9 splitter, 8 boiler, 8 burner-inserter, 2 pipe.
+- Briefly mis-spawned 4 Manager sub-agent employees on a stale roster
+  read; discovered JJ's real employees already run as separate Claude
+  Code sessions in worktrees (agent-1..4 under C:\ClaudeTeam). Stopped
+  my 4 sub-agents (one confirmed the exact worktree branch-collision).
+  Now driving the real external sessions via context.txt + todo-list.
+- Assignments (single game char → only Emp-1 in-game; rest code-only):
+  Emp-1 emergency refuel+keepalive+expand; Emp-2 multi-char mod 0.10.6;
+  Emp-3 bridge connect_named + placement decrement fix + team.py;
+  Emp-4 layouts.py expansion helpers.
+
+SETUP GAP FOUND (flag for JJ): the employee WezTerm sessions are NOT
+reachable from the Manager session — SendMessage returns "No agent named
+'employee-1' is reachable", and their kickoff tells them to WAIT idle
+after session start (no polling loop). So Manager cannot wake an idle
+employee, and git-file assignments won't be seen unless JJ re-pokes each
+pane. Given JJ's 1hr full-autonomy grant, Manager is executing the work
+via its OWN sub-agents (handbook explicitly allows "Employees spawned as
+sub-agents via the Agent tool"):
+  - in-game sub-agent: emergency refuel + keep-alive + opportunistic
+    expansion (no git; sole in-game actor).
+  - 3 isolated-worktree code sub-agents: mod 0.10.6 multi-char (no
+    deploy), bridge connect_named + placement decrement fix, layouts
+    expansion helpers. Manager reviews each worktree diff + merges.
 
 Open questions for Human:
-- What should Employees work on first? (awaiting JJ)
+- Employee sessions are idle+unreachable. Want them wired to poll (or a
+  wake mechanism), or is Manager-sub-agent execution the model going fwd?
 
-Escalations pending: none.
+Escalations pending:
+- (non-urgent) reachability gap above. Power-down is being handled by the
+  Manager's in-game sub-agent; no server restart needed.
 
 --------------------------------------------------------------------------
 
@@ -99,41 +144,81 @@ Employee-1:
 Suggested role: MINER — dedicated resource extraction (iron/copper/
 stone patches; hand-mine bootstrap + drill placement + refuel).
 Branch: `employee-1`.
-Character name: (assign when multi-char lives; suggest `miner`)
-Last position:
-Current task (from Manager):
+Role: MINER — CONFIRMED. Also: you are the SOLE in-game actor this
+  session (only one character exists; multi-char mod not deployed).
+  No other employee touches the game, so no tile-lock coordination
+  needed. Employees 2/3/4 are on code-only tasks.
+Character name: (blank — multi-char mod not deployed yet)
+Last position: (blank — not probed; single shared char, not driving
+  without Manager assignment)
+** IN-GAME OWNER = manager-keepalive (see team/in-game-owner.txt). Do NOT
+   drive the character. Read-only RCON probes (position/inventory/status)
+   are allowed for anyone. **
+Current task (from Manager): SMALL TEST TASK (pipeline check). Read-only, no
+  driving. Probe the in-game PLAYER character position via RCON and report
+  the coordinates in your "Recent changes" below, then note "test done" in
+  "Waiting on Manager for". This verifies the assignment -> git pull ->
+  execute -> report pipeline end-to-end; keep it small. Set
+  FACTORIO_RCON_PASSWORD from C:\FactorioServer\start-server.bat via
+  Select-String (do NOT echo the secret). Handy helpers: bridge/_who_am_i.py
+  or bridge/_scout.py, or a one-line _exec.py probe of the character position.
+  NOTE: your earlier EMERGENCY REFUEL assignment is DONE — a Manager sub-agent
+  restored power and built a boiler auto-feeder; do NOT attempt the refuel.
 
 Recent changes:
+  - 2026-07-04 12:01 — Session start. Read onboarding + all team
+    handbooks. Switched worktree agent-1 to branch employee-1,
+    pulled, merged origin/master (brought in team/ infra + Manager's
+    session-start commit a716366).
 
 Waiting on Manager for:
+  - Initial task assignment (Manager's open question to JJ: "what
+    should Employees work on first?" still pending).
 
 --------------------------------------------------------------------------
 
 Employee-2:
 
-Suggested role: COURIER — hauling loop (chest ↔ workshop ↔ asm
-input chests, refuel burners along the route, restock as items
-consumed).
+Role THIS SESSION: MOD DEV (not COURIER — courier is an in-game hauling
+  loop and only one character exists; Employee-1 holds the game. Your
+  standing COURIER role resumes once multi-char is deployed).
 Branch: `employee-2`.
-Character name: (suggest `courier`)
-Last position:
-Current task (from Manager):
+Worktree name mismatch (agent-3 dir / employee-2 branch): acknowledged
+  by Manager — harmless, ignore it. What matters is you're on branch
+  employee-2. Carry on.
+Character name: (blank — multi-char mod not yet deployed; suggest
+`courier`)
+Last position: (blank — only one shared char exists; not probed/moved
+mine yet)
+Current task (from Manager): NONE right now — HOLD for next assignment.
+  Your prior MOD 0.10.6 multi-char task is DONE (Manager sub-agent; merged
+  to master bcc2b2f, NOT deployed). Do NOT redo it. Once the poll mechanism
+  is wired up, watch this field + todo-list for a fresh [TAKE: employee-2].
 
 Recent changes:
+  - 2026-07-04 12:01 — Session start. Read onboarding + all team
+    handbooks. Checked out employee-2, fast-forward merged
+    origin/master (brought in team/ infra). RCON ping ok: mod
+    claude-companion 0.10.5, tick 1344793, 0 mining jobs, chat_buffer=1
+    (left untouched — Manager's channel).
 
 Waiting on Manager for:
+  - Initial task assignment (no [TAKE/URGENT: employee-2] in
+    todo-list yet).
 
 --------------------------------------------------------------------------
 
 Employee-3:
 
-Suggested role: BUILDER — ghost placement. Reads JJ's entity ghosts,
-takes materials from workshop, executes placement with tile-lock
-awareness.
+Role THIS SESSION: BRIDGE DEV (in-game BUILDER role resumes once
+  multi-char is deployed — Employee-1 holds the single character now).
 Branch: `employee-3`.
 Character name: (suggest `builder`)
 Last position:
-Current task (from Manager):
+Current task (from Manager): NONE right now — HOLD for next assignment.
+  Your prior BRIDGE task (connect_named + placement decrement fix + team.py)
+  is DONE (Manager sub-agent; merged to master b73f445, tests green). Do NOT
+  redo it. Watch this field + todo-list for a fresh [TAKE: employee-3].
 
 Recent changes:
 
@@ -143,15 +228,16 @@ Waiting on Manager for:
 
 Employee-4:
 
-Role: SCOUT / DEFENSE — wide-map scouting (new patches, biter
-proximity, oil hunt at (160,350) SE) and defense builds (walls,
-turrets, ammo).
+Role THIS SESSION: LAYOUT/DESIGN DEV (in-game SCOUT/DEFENSE resumes once
+  multi-char is deployed — Employee-1 holds the single character now).
 Branch: `employee-4`.
-Character name: (blank — multi-char mod not deployed; only shared
-char unum 302154 exists)
-Last position: n/a (no dedicated char yet). Shared char observed at
-(-12.3, 67.0), hp 250, tick 1346361 as of 2026-07-04 12:02.
-Current task (from Manager): awaiting Manager assignment.
+Character name: (suggest `scout`)
+Last position:
+Current task (from Manager): NONE right now — HOLD for next assignment.
+  Your prior LAYOUTS task (plan_electric_drill_array + plan_belt_run +
+  geometry constants) is DONE (Manager sub-agent; merged to master 42e2e83,
+  tests green: geometry 19/19, layouts 49/49). Do NOT redo it. Watch this
+  field + todo-list for a fresh [TAKE: employee-4].
 
 Recent changes:
   - 2026-07-04 12:02 — Session start. Merged origin/master into

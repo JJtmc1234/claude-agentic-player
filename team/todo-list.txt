@@ -3,6 +3,8 @@ TEAM TODO LIST
 
 Team: Claude (coordinator), 1, 2, 3, 4.
 
+[STARTED: employee-1 at 2026-07-04 12:01]
+
 Shared task list. Any Claude can:
   - Add a task ([ ] with a tag: [MOD] [BRIDGE] [FACTORY] [DOCS] [BUG])
   - Take a task (mark [WIP <name>])
@@ -10,6 +12,84 @@ Shared task list. Any Claude can:
   - Note blockers
 
 Keep entries short. Wall time expectations in parens.
+
+[STARTED: employee-2 at 2026-07-04 12:01]
+
+--------------------------------------------------------------------------
+JJ DIRECT INSTRUCTION 2026-07-04 (to setup-Claude, not via Manager)
+--------------------------------------------------------------------------
+JJ told setup-Claude (this repo-root session, the one who wrote the team
+handbooks): "Keep working too, just general assistant, build asm2
+ghosts as asm1 if needed, start building." Conflicts with Employee-1
+being sole in-game actor. Setup-Claude is:
+  - Preparing a placement script that respects the asm2→asm1 rule
+    (non-driving code work — no character conflict).
+  - NOT driving the character until Manager reassigns owner or
+    Employee-1 finishes emergency-refuel.
+  - Deposit-ready in workshop chest at (-30.5, 41.5). Setup-Claude
+    can still craft materials from its own inventory (0 right now, so
+    this depends on Employee-1 supplying iron/copper first).
+Please coordinate: Manager, if setup-Claude should take over some of
+Employee-1's build workload (Employee-1 is code-first for the mod fix
+per your original assignment), reassign owner in team/in-game-owner.txt.
+
+--------------------------------------------------------------------------
+MANAGER ASSIGNMENTS 2026-07-04 ~12:05 (JJ AFK 1hr, full autonomy)
+--------------------------------------------------------------------------
+Only ONE game character exists → only Employee-1 acts in-game; 2/3/4 are
+code-only this session (their in-game roles resume after multi-char ships).
+Full task detail is in your context.txt "Current task (from Manager)" field.
+
+>>> REFRESH 2026-07-04 (Manager): the 4 assignments listed below are STALE.
+    Manager executed all of them via sub-agents while employees were idle/
+    unreachable. DO NOT redo any of them. Current status:
+    - [x] employee-1 EMERGENCY REFUEL: DONE. Power restored + stabilized;
+          boiler auto-feeder built (chest + burner-inserter, 400 coal,
+          ~100 min autonomy); all drills refueled; keep-alive loop running.
+    - [x] employee-2 MOD 0.10.6 multi-char: DONE, merged to master (bcc2b2f),
+          NOT deployed. Hold for next assignment.
+    - [x] employee-3 BRIDGE connect_named + placement fix + team.py: DONE,
+          merged (b73f445), tests green. Hold for next assignment.
+    - [x] employee-4 LAYOUTS drill-array + belt-run + geometry: DONE,
+          merged (42e2e83), tests green. Hold for next assignment.
+
+    [NEW: employee-1] SMALL TEST TASK (pipeline check). Read-only, do NOT
+    drive the character (in-game-owner.txt owner = manager-keepalive; probes
+    are allowed for anyone). Probe the in-game PLAYER character position via
+    RCON and report it in your context.txt (Recent changes). This just
+    verifies the assignment->pull->execute->report pipeline works end-to-end.
+    Detail in your context.txt "Current task (from Manager)".
+<<< The [URGENT/TAKE] lines below are SUPERSEDED — kept only for history.
+
+[URGENT: employee-1] EMERGENCY REFUEL. Base power is DOWN — boiler
+    (-49,35.5) 0 coal, steam engine 0 power, 14/16 drills no_fuel. Follow
+    emergency-procedures.md E3. Restore boiler + refuel dead drills (coal:
+    surplus chest (40.5,-59.5), coal pair (36,-66), drill fuel slots leave
+    15+). Then keep-alive loop every ~4-5 min. Then opportunistically
+    expand (belts/poles -> workshop chest (-30.5,41.5); place affordable
+    ghosts). Report to Manager when power restored. You are sole in-game
+    actor — no tile-lock coordination needed.
+
+[TAKE: employee-2] MOD 0.10.6 multi-char (CODE-ONLY, do NOT deploy).
+    spawn_named_char / list_chars / remove_char + storage.claude_chars +
+    on_configuration_changed migration; bump info.json + pong string to
+    0.10.6. Platform-safe, idempotent, no control.lua refactor. Push
+    employee-2. Manager deploys after review. (This overrides your
+    self-picked COURIER role for this session — courier is in-game.)
+
+[TAKE: employee-3] BRIDGE (CODE-ONLY). Own: core.py, placement.py, NEW
+    team.py, NEW test_placement.py. (A) Agent.connect_named(name) via mod
+    list_chars w/ graceful fallback. (B) placement.py decrement fix (stop
+    e.destroy() losing whole ore tiles). (C) team.py scaffolding if time.
+    PASS compileall + test_geometry + test_layouts + test_placement.
+    Push employee-3. Do NOT touch layouts.py/geometry.py.
+
+[TAKE: employee-4] LAYOUTS (CODE-ONLY, no RCON). Own: layouts.py,
+    geometry.py, test_layouts.py. Add plan_electric_drill_array(...) +
+    plan_belt_run(...) for base expansion (1708 ghosts, belt/electric-drill
+    heavy). Look up drill constants from prototypes/wiki, don't guess. Add
+    tests; PASS test_layouts + test_geometry. Push employee-4. Do NOT touch
+    core.py/placement.py/team.py.
 
 --------------------------------------------------------------------------
 IMMEDIATE (< 30 min each)
