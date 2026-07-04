@@ -10,7 +10,11 @@ Manager; the Manager escalates to the Human when human-input is needed.
    route decisions, negotiate priorities. Employees see NONE of this
    traffic.
 2. **Task assignment** — decompose JJ's asks into concrete Employee
-   tasks. Prompt each Employee via SendMessage with a clear scope.
+   tasks. Assign each by editing that Employee's "Current task (from
+   Manager)" field in `team/context.txt` AND/OR adding a
+   `[URGENT: employee-N]` / `[TAKE: employee-N]` line to
+   `team/todo-list.txt`. Employees POLL these; you cannot push to them
+   (see "Reaching Employees").
 3. **Continuous review** — poll `team/context.txt` + git branches for
    Employee progress. Ask an Employee to fix simple mistakes; escalate
    the complex ones to JJ.
@@ -31,11 +35,16 @@ Manager; the Manager escalates to the Human when human-input is needed.
 
 ## Cadence
 
-- Poll `git fetch --all` every 2-3 minutes.
+- Check Employee branches every 2-3 minutes: `git diff master..employee-N`
+  and `git log --oneline master..employee-N`. Branches are LOCAL (shared
+  object store) — no fetch needed. `git fetch --all` only matters for
+  hunterzh37's origin pushes.
 - Poll `team/context.txt` for each Employee's "Recent changes" and
   "Current task" fields. If an Employee's "Recent changes" hasn't
-  advanced in >10 min while their "Current task" is set, ping them
-  in-chat (SendMessage).
+  advanced in >10 min while their "Current task" is set, re-state the
+  task in their context.txt field + a `[URGENT: employee-N]` todo line,
+  and verify the session is still in its poll loop. A dead session stops
+  committing entirely — ask JJ to relaunch that pane from its kickoff.
 - Watch `progress-report.txt` for milestone entries. If a worker
   claims a milestone but hasn't opened a mergeable branch, ask why.
 
@@ -75,8 +84,10 @@ Manager; the Manager escalates to the Human when human-input is needed.
 ## When a review fails
 
 1. Write finding to `bug-log.md` (see format there).
-2. Message the Employee via SendMessage with a specific fix request.
-3. Do NOT merge. Wait for the Employee to push a fix.
+2. Put a specific fix request in that Employee's "Current task" field in
+   `context.txt` (and a `[URGENT: employee-N]` line in `todo-list.txt`).
+   Their poll loop picks it up — you cannot message them directly.
+3. Do NOT merge. Wait for the Employee to commit a fix on its branch.
 4. If the Employee doesn't respond in 20 min while online, take the
    commit + PR to their branch as a Manager fix (rare). Note it in
    `context.txt` Manager section.
@@ -102,19 +113,44 @@ Loop JJ in immediately when:
 - Does NOT commit code directly to `main` outside of merges.
 - Does NOT overwrite Employee branches.
 
-## Prompting Employees
+## Reaching Employees
 
-Employees are spawned as sub-agents (Claude Code SDK Agent tool) or
-run as separate Claude Code sessions. Manager talks to them via:
-- **SendMessage** (Claude Code SDK) — resumes a background agent by ID.
-- **team/todo-list.txt** — task queue, `[URGENT]` tag for immediate
-  attention.
-- **Commit review comments** — via bug-log.md entries referencing the
-  branch + commit sha.
+The 5-pane design runs each Employee as a SEPARATE Claude Code session.
+Separate sessions are NOT in one another's agent registry, so
+**SendMessage does NOT work** — it returns "No agent named 'employee-N'
+is reachable". Do not rely on it. Your only channels to a running
+Employee session are files it POLLS:
+- **team/context.txt** — set the Employee's "Current task (from Manager)"
+  field. Primary assignment channel.
+- **team/todo-list.txt** — `[URGENT: employee-N]` / `[TAKE: employee-N]`
+  lines for immediate or claimable work.
+- **team/bug-log.md** — review findings referencing branch + commit sha.
+- **git** — review each branch (`git diff master..employee-N`) and merge
+  to master; Employees see your merges via `git merge master`.
 
-Employees NEVER see the Human's messages. If an Employee's work
-depends on info only the Human has, the Employee reports the block to
-Manager, and Manager asks the Human.
+Employees run a self-poll loop (~2-3 min) that re-reads the above and acts
+on changes. If an Employee is not picking up work, its session is likely
+dead or never entered the loop — ask JJ to relaunch that pane from
+`team/kickoffs/employee-N.txt`.
+
+TRADEOFF (flag to JJ if he wants push-style messaging): SendMessage only
+works if the WHOLE team is ONE Claude session with Employees spawned as
+sub-agents via the Agent tool — NOT 5 independent panes. That buys direct
+messaging but loses the independent, human-interruptible panes and the
+per-branch worktree isolation. The current design chose panes + polling.
+
+Employees NEVER see the Human's messages. If an Employee's work depends on
+info only the Human has, the Employee reports the block to the Manager,
+and the Manager asks the Human.
+
+## In-game character ownership
+
+Until mod 0.10.6 (multi-char) is DEPLOYED, there is one shared character.
+You own `team/in-game-owner.txt`. Set `owner:` to exactly one identity
+(an employee-N or your keep-alive sub-agent). Employees check it before
+driving and skip if it is not them. Reassign it deliberately; never let
+two agents drive at once. Once 0.10.6 is deployed and each Employee has a
+named character, switch to per-character ownership.
 
 ## First-time setup
 

@@ -22,8 +22,11 @@ report to the Manager. You do NOT talk to the Human directly.
 1. Read `AGENT_ONBOARDING.txt` at repo root.
 2. Read `team/README.md`, then the handbooks (context.txt, this file,
    git-workflow.md, edge-cases.md, communication.md).
-3. `git fetch --all && git checkout <your-branch> && git pull` +
-   `git merge origin/main` to bring in Manager-merged work.
+3. Confirm your branch: `git branch --show-current` (your worktree is
+   already checked out to it). Then `git merge master` to bring in the
+   latest Manager-merged work. This is a LOCAL merge — all worktrees
+   share one git object store on this machine, so no fetch/pull is
+   needed; the Manager's commits to local `master` are already visible.
 4. Fill in your section of `team/context.txt` with:
    - Your role name (miner / courier / builder / scout / other).
    - Character name if multi-char is live.
@@ -32,6 +35,35 @@ report to the Manager. You do NOT talk to the Human directly.
 5. Ping Manager (via a `[STARTED]` line in `team/todo-list.txt` or
    whatever the Manager's polling channel is) so they know you're
    online.
+
+## Poll loop (REQUIRED — this is how you receive assignments)
+
+There is NO push channel to you. A separate Claude Code session cannot
+be messaged by the Manager (SendMessage does not reach across sessions).
+You get work by POLLING. After session start, enter a self-poll loop and
+stay in it whenever you are not actively executing a task:
+
+```
+/loop 2m git merge master; then re-read my "Current task (from Manager)" field in my section of team/context.txt and scan team/todo-list.txt for any [URGENT: employee-N] or [TAKE: employee-N] line addressed to me; if there is a NEW or CHANGED task, execute it, update my context.txt section, and commit to my branch; if it needs the in-game character, check team/in-game-owner.txt first and only drive if it names me; if nothing is new, no-op and stay silent.
+```
+
+Replace `employee-N` with your identity. Interval 2-3 min is fine. The
+Manager assigns by editing your "Current task" field in `context.txt`
+and/or adding a `[URGENT/TAKE: employee-N]` line to `todo-list.txt`; the
+loop is what makes those reach you. If you finish a task and there is no
+new one, KEEP LOOPING — do not go idle and do not invent work.
+
+## In-game character — single owner (until mod 0.10.6 is deployed)
+
+There is exactly ONE in-game character right now. mod 0.10.6 (multi-char)
+is merged to `master` but NOT deployed, so per-employee characters do not
+exist yet. Two agents driving one character corrupts actions.
+
+Before ANY RCON write that moves/mines/builds the character, read
+`team/in-game-owner.txt`. Drive ONLY if its `owner:` is your identity.
+Otherwise, record the conflict in your `context.txt` and skip — do not
+drive. Read-only probes (position, inventory, status) are always allowed.
+Only the Manager reassigns the owner.
 
 ## Doing your work
 
@@ -57,8 +89,11 @@ Manager reviews every push. If a review flags an issue:
   request, write your rationale in the SAME commit that applies the
   fix (or in the bug-log.md `Notes` section).
 
-Manager may also send you a direct SendMessage (Claude Code SDK). If
-that's happening, treat it like a chat: read, acknowledge, action.
+NOTE: there is NO direct-message channel to you. SendMessage (the Claude
+Code Agent tool) only reaches sub-agents spawned inside ONE session; you
+are a SEPARATE Claude Code session, so it cannot reach you — the Manager
+sees "No agent named 'employee-N' is reachable". ALL Manager feedback
+comes through git + team files, which your poll loop must pick up.
 
 ## What NOT to do
 
