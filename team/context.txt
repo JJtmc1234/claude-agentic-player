@@ -270,16 +270,19 @@ Last position: ~(3.5, 58.2)
 Current task (from Manager): AUTOMATE + SCALE + GO ELECTRIC (JJ 2026-07-05:
   "the factory MUST grow! make them transition to electric"). You (courier, unum
   52) are still the sole active driver until the frozen panes relaunch.
-  ** MANAGER 09:2x — GREAT WORK: red science automated (asm -> lab, research
-     ticking: electric-mining-drill DONE, logistics 30%), and your FIRST
-     ELECTRIC DRILL is live. Now SCALE the win: (a) build an ARRAY of electric
-     drills on the iron + copper patches with pole coverage (use
-     layouts.plan_electric_drill_array), retire burner drills as electric
-     covers them; (b) add steam-engines to keep the growing electric load
-     powered; (c) add assemblers for iron-gear + copper-cable + electronic-
-     circuit (circuits gate more electric drills AND green science); (d) once
-     logistic-science-pack researches, start GREEN science. Keep furnaces fed
-     meanwhile. Momentum is good — keep growing. ** Build a
+  ** MANAGER 09:5x — CRITICAL UNBLOCK: the base is now FULLY coal-starved —
+     0 burner drills + 0 furnaces working. Your 3 assemblers (circuit/gear/
+     red-sci) will STARVE next because no plates are being smelted. KEY FACT:
+     electric drills do NOT fix this — stone furnaces still burn COAL, and
+     electric-furnace tech is LOCKED. So COAL DELIVERY is the permanent
+     bottleneck. #1 PRIORITY, do this before anything else:
+       AUTOMATE COAL: place 2-3 burner mining drills ON the coal patch
+       (22.5,55.5) dropping into a CHEST (or a belt), then run coal to the
+       furnaces + remaining burner drills so they stay fueled WITHOUT you
+       hauling every trip. Give the coal drills their own fuel from the patch.
+     Only AFTER coal is flowing: resume scaling (more electric drills on iron/
+     copper w/ poles, more furnaces, green science). A fed 3-assembler core
+     that stays alive beats a bigger dead one. Keep it RUNNING. ** Build a
   SELF-RUNNING, GROWING base — not a hand-babysat one. Order of leverage:
    1. STOP BABYSITTING FUEL — go toward electric. Near-term: put a couple burner
       drills ON the coal patch (22.5,55.5) dropping into a CHEST (or belt) so
