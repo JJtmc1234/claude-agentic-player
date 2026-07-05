@@ -110,6 +110,11 @@ Full task detail is in your context.txt "Current task (from Manager)" field.
 *** Role focus when driving: miner=coal/ore feed; builder=power+electric ***
 *** drills+assemblers; courier=haul+craft circuits/science; scout=find   ***
 *** bigger ore/coal patches + watch for biters. Use layouts.py helpers.  ***
+*** CRAFT ONLY UNLOCKED RECIPES (check f.recipes[n].enabled). DO NOT     ***
+*** craft assembling-machine-2/3, steel/electric furnace, fast-inserter, ***
+*** or any un-researched item — locked recipes just fail. Stick to asm1, ***
+*** stone-furnace, drills, belts/inserter, circuit/gear/cable, poles,    ***
+*** boiler/engine/pump, lab, automation-science-pack.                    ***
 **************************************************************************
 
 ##########################################################################

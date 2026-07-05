@@ -499,6 +499,16 @@ CORE RULES (all agents)
 - TREES ABSORB POLLUTION (JJ 2026-07-05): do NOT over-cut trees — less
   pollution means fewer/weaker biter attacks. Chop only the wood you truly
   need; never clear-cut a forest. Prefer clear/non-tree tiles for placements.
+- CRAFT ONLY UNLOCKED RECIPES (JJ 2026-07-05): before crafting ANYTHING,
+  confirm it is researched/enabled: game.forces.player.recipes[<name>].enabled
+  == true. NEVER attempt locked recipes — they just fail and waste cycles.
+  ENABLED now (ok to craft): assembling-machine-1, stone-furnace, burner- &
+  electric-mining-drill, transport-belt, underground-belt, splitter, inserter,
+  electronic-circuit, iron-gear-wheel, copper-cable, small-electric-pole,
+  boiler, steam-engine, offshore-pump, lab, automation-science-pack.
+  LOCKED — do NOT craft: assembling-machine-2/3, steel-furnace, electric-
+  furnace, fast-inserter, logistic-science-pack (until their tech researches).
+  No asm2, no upgraded furnaces, no "special" unresearched items.
 - CHAT NAMETAGS (JJ 2026-07-05): to ping JJ in-game, use
   `python bridge/say.py "[Role] message"` with your role tag ([Miner]=emp1,
   [Builder]=emp3, [Courier]=emp2, [Scout]=emp4, [Manager]=Manager). Ping only
