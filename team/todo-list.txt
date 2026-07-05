@@ -98,6 +98,14 @@ Full task detail is in your context.txt "Current task (from Manager)" field.
 ## 4 chars persisted (miner 50, builder 51, courier 52, scout 53) and    ##
 ## the map now auto-reveals around each char. RESUME your task.          ##
 ##                                                                       ##
+## *** DRIVE GATE LIFTED (2026-07-05, JJ-authorized) *** Your worktree   ##
+## .claude/settings.local.json now ALLOWS python bridge/_exec.py +       ##
+## bridge/say.py (PowerShell + Bash). RETRY your drive THIS cycle — the  ##
+## harness auto-approver should no longer deny it. If your SESSION had    ##
+## the old settings cached and still denies, that's a stale cache: note  ##
+## it in your section and the Manager will ask JJ to restart your pane.  ##
+## (courier/employee-2 already drove successfully — proof it works.)     ##
+##                                                                       ##
 ## JJ DIRECTIVES (2026-07-05, all employees):                            ##
 ##  1. Do NOT cut too many trees — trees absorb POLLUTION (less          ##
 ##     pollution = fewer/weaker biter attacks). Chop only what you truly ##
