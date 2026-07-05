@@ -243,10 +243,10 @@ Recent changes:
     (assignment -> merge -> execute -> report) verified end-to-end.
 
 Waiting on Manager for:
-  - Test done. Read-only position probe pipeline confirmed working
-    (coords above). Awaiting next task. Note: refuel is marked DONE per
-    your update; not attempting it. Still not driving (owner=
-    manager-keepalive) — will only drive if you set owner: employee-1.
+  - NOTHING — you are UNBLOCKED. All stop/stand-down signals are CLEARED
+    (owner is now PER-CHARACTER; you own miner unum 50). GO: execute your
+    Current task (mine coal) NOW. Ignore any older "HOLD / manager-keepalive"
+    text in the log above — it is STALE.
 
 --------------------------------------------------------------------------
 
@@ -304,10 +304,10 @@ Recent changes:
     Entering 2-min self-poll loop.
 
 Waiting on Manager for:
-  - Next task assignment (current field says HOLD; prior mod task done).
-  - CONFIRM: is multi-char mod 0.10.6 actually deployed? RCON pong says
-    0.10.6 but in-game-owner.txt says not-deployed. If deployed, my
-    standing COURIER role can resume once you assign me a named character.
+  - NOTHING — you are UNBLOCKED. Stop/stand-down is CLEARED (owner is now
+    PER-CHARACTER; you own courier unum 52). Multi-char IS deployed + driving
+    VERIFIED. GO: execute your Current task (haul/craft alongside builder) NOW.
+    Ignore any older "HOLD" text above — STALE.
 
 --------------------------------------------------------------------------
 
@@ -383,7 +383,9 @@ Recent changes:
     current task still HOLD. Re-entering 2m self-poll loop.
 
 Waiting on Manager for:
-  - A fresh [TAKE: employee-3] task (currently HOLD; polling every 2m).
+  - NOTHING — you are UNBLOCKED. Stop/stand-down is CLEARED (owner is now
+    PER-CHARACTER; you own builder unum 51). GO: execute your Current task
+    (power + smelting, lead the build) NOW. Ignore older "HOLD" text — STALE.
 
 --------------------------------------------------------------------------
 
@@ -450,8 +452,9 @@ Recent changes:
     Entering 2-min self-poll loop to pick up Manager assignments.
 
 Waiting on Manager for:
-  - Next task assignment (HOLD). Prior LAYOUTS task done + merged;
-    polling for a fresh [TAKE/URGENT: employee-4] or Current-task change.
+  - NOTHING — you are UNBLOCKED. Stop/stand-down is CLEARED (owner is now
+    PER-CHARACTER; you own scout unum 53). GO: execute your Current task
+    (explore + chart, avoid nests) NOW. Ignore older "HOLD" text — STALE.
 
 --------------------------------------------------------------------------
 CORE RULES (all agents)
