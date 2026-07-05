@@ -83,6 +83,25 @@ Observed on start:
   still NOT deployed — first code task per todo-list.
 
 Recent changes:
+- 2026-07-05 FRESH MAP — JJ loaded a new save (~07:44, factorio PID 30560,
+  mod still 0.10.6, tick ~30k, nobody connected at first). OLD BASE + BOTH
+  prior char sets are GONE (list_chars empty, no legacy unum). Actions:
+  * Scouted starting resources: coal (22.5,55.5), iron (-1.5,96.5), copper
+    (-49.5,94.5), stone (-11.5,99.5), 1906 water tiles. Nests: SE ~(225,165)
+    [biter+spitter x3], NW ~(-132,-251) [biter] — both ~275+ tiles out.
+  * Re-spawned 4 named chars near (0,60): miner=50, builder=51, courier=52,
+    scout=53. All resolve. VERIFIED DRIVING (walk-tested a char y60->y71) —
+    the multi-char gate that blocked all prior waves is now CLEARED.
+  * At JJ's request, walked each char up a distinct amount for visual ID
+    (miner up5, builder up3, courier up2, scout up1).
+  * CLEARED the stand-down; switched in-game-owner to PER-CHARACTER (emp-1=
+    miner, emp-2=courier, emp-3=builder, emp-4=scout). Posted fresh-map tasks
+    per JJ: miner->coal, builder->power+smelting, courier->haul+craft, scout->
+    explore (avoid nests). Employees were confirmed alive+polling yesterday
+    (all ack'd the stand-down) — if a pane was since closed, JJ must relaunch.
+  NOTE: I (Manager) drove chars directly today (spawn + ID walks) at JJ's
+  explicit direction; normal rule is Manager doesn't drive. Handing driving
+  back to the employees now.
 - 2026-07-04 (LATEST) FRESH MANAGER SESSION (Opus 4.8). Read full onboarding
   + all team handbooks + configurator-notes.md. Observed on start:
   * master @ e153b07 -> merged employee-2 (3 doc-only commits: session-start
@@ -186,31 +205,22 @@ Role: MINER — CONFIRMED. Also: you are the SOLE in-game actor this
   session (only one character exists; multi-char mod not deployed).
   No other employee touches the game, so no tile-lock coordination
   needed. Employees 2/3/4 are on code-only tasks.
-Character name: miner (unum 333695, spawned @ (-40,45) by Manager 2026-07-04).
-  Do NOT drive it yet — wait for employee-3 to confirm driving works (wave 2).
-Last position: (-40, 45) at spawn
+Character name: miner — unum 50 (FRESH MAP; re-spawned @ (0,60) 2026-07-05).
+  Driving VERIFIED. You OWN this char (see in-game-owner.txt) — drive it now.
+Last position: ~(0.2, 55.4)
 ** IN-GAME OWNER = manager-keepalive (see team/in-game-owner.txt). Do NOT
    drive the character. Read-only RCON probes (position/inventory/status)
    are allowed for anyone. **
-Current task (from Manager): *** STAND DOWN — JJ IS PLAYING (2026-07-04). Do
-  NOT drive/build/mine/craft; do NOT run tasks. HOLD until Manager clears. The
-  survey task below is PAUSED. ***
-  [PAUSED] BASE STATE SURVEY (READ-ONLY — do NOT drive;
-  owner is employee-3 this wave). Multi-char 0.10.6 is now DEPLOYED and JJ
-  says he already built the whole base — our job this session is IMPROVEMENTS
-  + stocking a chest for his OIL TRIP. First I need a current picture. Probe
-  and report in your Recent changes:
-    (a) status of every asm / lab / boiler / steam-engine / iron+copper drill
-        (decode entity_status numbers to names — see AGENT_ONBOARDING §9).
-    (b) contents of the workshop chest (-30.5, 41.5) and the buffer chest
-        (-6.5, -32.5).
-    (c) any entity showing not-working (no_fuel/no_power/no_ingredients/
-        full_output) — list coords so we know what to fix.
-  Read-only RCON only (find_entities_filtered, get_inventory). Set
-  FACTORIO_RCON_PASSWORD from start-server.bat via Select-String (do NOT echo
-  the secret). When done, HOLD — I will hand you a named MINER character once
-  employee-3 confirms multi-char driving works, then you scale iron/coal for
-  the oil trip.
+Current task (from Manager): MINE COAL (FRESH MAP, JJ direct 2026-07-05: "have
+  miner get us some coal"). Drive YOUR char (miner, unum 50, ~(0.2,55.4)).
+  Nearest coal patch: (22.5, 55.5) — ~22 tiles east, 330 ore tiles there.
+  Steps: walk_chunked to the coal patch, hand-mine a solid stock of coal
+  (say 100+), then bring it back toward the build cluster (~(0,60)) / deposit
+  where builder+courier are setting up so they have fuel. Keep going —
+  fuel is the bottleneck for the whole opening. Report tonnage + where you
+  dropped it. Mod is 0.10.6 (hand-mine is decrement-safe). Set
+  FACTORIO_RCON_PASSWORD from start-server.bat via Select-String (don't echo).
+  Coordinate with builder/courier so you don't fight over the same tiles.
 
 Recent changes:
   - 2026-07-04 12:01 — Session start. Read onboarding + all team
@@ -249,30 +259,23 @@ Branch: `employee-2`.
 Worktree name mismatch (agent-3 dir / employee-2 branch): acknowledged
   by Manager — harmless, ignore it. What matters is you're on branch
   employee-2. Carry on.
-Character name: courier (unum 333697, spawned @ (-36,47) by Manager
-  2026-07-04). Do NOT drive yet — wait for employee-3's driving-PASS (wave 2).
-Last position: (-36, 47) at spawn
-Current task (from Manager): *** STAND DOWN — JJ IS PLAYING (2026-07-04). HOLD
-  all work until Manager clears. The mod-audit task below is PAUSED. ***
-  [PAUSED] MOD AUDIT — de-risk multi-char driving (CODE-ONLY,
-  no driving, no deploy). Confirmed: 0.10.6 is deployed, list_chars resolves.
-  Open question that gates the whole team: when spawn_named_char creates a
-  character via create_entity, is that char's unit_number resolvable by
-  game.get_entity_by_unit_number LATER (needed by every walk/mine/craft call)?
-  control.lua:1265 warns that in Factorio 2.0 only entities registered via
-  script.register_on_entity_destroyed resolve. Steps:
-   1. Read how the ORIGINAL free-standing char is created/registered
-      (bridge/_spawn_claude.py + control.lua) — that char (unum 302154) DOES
-      resolve, so copy whatever makes it work.
-   2. Check spawn_named_char (control.lua ~1140): does it register the new char
-      the same way? If NOT, that's the bug employee-3's verify will hit.
-   3. If a gap exists: prepare a fix on branch employee-2 (bump to 0.10.7,
-      info.json + pong string, on_configuration_changed intact) that registers
-      spawned chars. Do NOT deploy — Manager reviews + deploys in a window.
-      If NO gap (already registered), say so in your section so we know verify
-      should pass. compileall must stay green.
-  This runs in parallel with employee-3's live verify — you find the cause,
-  he finds the symptom.
+Character name: courier — unum 52 (FRESH MAP; re-spawned @ (4,60) 2026-07-05).
+  Driving VERIFIED. You OWN this char (see in-game-owner.txt) — drive it now.
+Last position: ~(3.5, 58.2)
+Current task (from Manager): START PLAYING — help bootstrap the opening base
+  (FRESH MAP, JJ direct 2026-07-05: "courier and builder just start playing").
+  Drive YOUR char (courier, unum 52, ~(3.5,58.2)). This is co-op autonomy:
+  play Factorio well alongside builder (unum 51) to stand up a starter base.
+  Suggested split (coordinate with builder in your context sections so you
+  don't overlap tiles): builder takes POWER + smelting; you (courier) take
+  HAULING + crafting + feeding — move coal from miner's drop to
+  drills/furnaces, craft intermediate items (gears, first burner drills,
+  furnaces), keep machines fueled. Resource anchors: coal (22.5,55.5), iron
+  (-1.5,96.5), copper (-49.5,94.5), stone (-11.5,99.5), water plentiful.
+  Goal for now: iron+copper plates flowing and a first automated line. Use
+  best judgment; report what you build. Mod 0.10.6. Set RCON pw from
+  start-server.bat (don't echo). If blocked on materials, note it and keep
+  moving on another sub-task.
 
 Recent changes:
   - 2026-07-04 12:01 — Session start. Read onboarding + all team
@@ -313,14 +316,26 @@ Employee-3:
 Role THIS SESSION: BRIDGE DEV (in-game BUILDER role resumes once
   multi-char is deployed — Employee-1 holds the single character now).
 Branch: `employee-3`.
-Character name: builder (unum 333696, spawned @ (-37.5,44.5) by Manager
-  2026-07-04). This is YOUR char — verify driving on it, then build.
-Last position: (-37.5, 44.5) at spawn
-Current task (from Manager): *** STAND DOWN — JJ IS PLAYING (2026-07-04). Do
-  NOT drive/verify/build. Driver token is REVOKED (in-game-owner owner=none).
-  HOLD until Manager clears. The verify+build task below is PAUSED. ***
-  [PAUSED] VERIFY MULTI-CHAR DRIVING, then BUILD (you hold
-  the driver token this wave, owner=employee-3). Mod 0.10.6 is DEPLOYED.
+Character name: builder — unum 51 (FRESH MAP; re-spawned @ (2,60) 2026-07-05).
+  Driving VERIFIED (Manager walk-tested). You OWN this char — drive it now.
+Last position: ~(1.8, 57.4)
+Current task (from Manager): START PLAYING — lead the opening base build
+  (FRESH MAP, JJ direct 2026-07-05: "courier and builder just start playing").
+  Drive YOUR char (builder, unum 51, ~(1.8,57.4)). Driving is already VERIFIED
+  (Manager walk-tested) — do NOT re-verify, do NOT re-spawn chars. Your focus:
+  POWER + SMELTING. Concretely:
+   1. POWER: find the nearest water edge (1906 water tiles nearby), place an
+      offshore-pump -> boiler -> steam-engine (coal-fed). This powers everything.
+   2. SMELTING: place burner mining drills on iron (-1.5,96.5) and copper
+      (-49.5,94.5) with stone furnaces to make plates; fuel from miner's coal.
+   3. Progress toward a first automated iron line + red science when materials
+      allow. Look up recipes/offsets from prototypes/wiki, don't guess (mind the
+      drill drop-offset + inserter-direction gotchas in AGENT_ONBOARDING §9).
+  Coordinate tiles with courier (unum 52, doing hauling/crafting) via your
+  context sections. Mod 0.10.6 (deployed). Set RCON pw from start-server.bat
+  (don't echo). Report what you place + statuses. Build the base — use judgment.
+  --- (old task below, SUPERSEDED by fresh map) ---
+  [SUPERSEDED] VERIFY MULTI-CHAR DRIVING, then BUILD.  Mod 0.10.6 is DEPLOYED.
   ** MANAGER ALREADY SPAWNED THE 4 NAMED CHARS — DO NOT RE-SPAWN (a second
      spawn_named_char with the same name overwrites the map + leaks the old
      entity). ** Roster (verified resolving via get_entity_by_unit_number +
@@ -377,12 +392,25 @@ Employee-4:
 Role THIS SESSION: LAYOUT/DESIGN DEV (in-game SCOUT/DEFENSE resumes once
   multi-char is deployed — Employee-1 holds the single character now).
 Branch: `employee-4`.
-Character name: scout (unum 333698, spawned @ (-34,45) by Manager 2026-07-04).
-  Do NOT drive yet — wait for employee-3's driving-PASS (wave 2).
-Last position: (-34, 45) at spawn
-Current task (from Manager): *** STAND DOWN — JJ IS PLAYING (2026-07-04). HOLD
-  all work until Manager clears. The oil-trip-spec task below is PAUSED. ***
-  [PAUSED] OIL-TRIP SUPPLY SPEC (CODE/DOC-ONLY, no driving).
+Character name: scout — unum 53 (FRESH MAP; re-spawned @ (6,60) 2026-07-05).
+  Driving VERIFIED. You OWN this char (see in-game-owner.txt) — drive it now.
+Last position: ~(5.8, 59.5)
+Current task (from Manager): EXPLORE — scout the map (FRESH MAP, JJ direct
+  2026-07-05: "scout explore, making sure not to get too close to bug nest").
+  Drive YOUR char (scout, unum 53, ~(5.8,59.5)). Chart the surroundings and
+  report resource patches (iron/copper/coal/stone/oil/water) + terrain in your
+  Recent changes so the team knows what's out there. Use walk_chunked in
+  ~25-30 tile hops. HARD SAFETY RULE — biter/spitter nests already located,
+  STAY >=60 TILES AWAY from all of these:
+     SE cluster ~(225,165) [3 spawners: biter+spitter]
+     NW ~(-132,-251) [biter]
+  Keep exploration within ~150 tiles of origin for now; do NOT push toward the
+  SE nest cluster. If find_nearest_resource / a probe shows a spawner closer
+  than expected, back off immediately and report. scout has no weapons — avoid
+  ALL enemies, do not engage. Report new nests you discover with coords. Set
+  RCON pw from start-server.bat (don't echo).
+  --- (old task below, SUPERSEDED by fresh map) ---
+  [SUPERSEDED] OIL-TRIP SUPPLY SPEC (CODE/DOC-ONLY, no driving).
   JJ is going on an OIL TRIP (pumpjack expedition, historically to ~(160,350)
   SE) and wants a chest stocked for it. Produce a concrete BILL OF MATERIALS
   for what a from-scratch oil setup at a remote patch needs, so we know what to

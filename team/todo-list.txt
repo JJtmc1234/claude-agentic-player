@@ -94,30 +94,32 @@ Full task detail is in your context.txt "Current task (from Manager)" field.
     core.py/placement.py/team.py.
 
 **************************************************************************
-*** STAND DOWN 2026-07-04 — JJ IS PLAYING ON HIS COMPUTER.              ***
-*** ALL AGENTS HOLD. No driving, building, mining, crafting, spawning.  ***
-*** in-game-owner.txt owner=none. Wait for Manager to clear this.       ***
-*** Wave-1 assignments below are PAUSED, not cancelled.                 ***
+*** GO 2026-07-05 — FRESH MAP. Stand-down CLEARED. Driving VERIFIED.    ***
+*** Per-character ownership active (in-game-owner.txt). Drive YOUR char. ***
+*** Old base/chars/assignments are VOID. New chars: miner=50 builder=51 ***
+*** courier=52 scout=53, spawned near (0,60).                           ***
 **************************************************************************
 
 --------------------------------------------------------------------------
-MANAGER ASSIGNMENTS 2026-07-04 (fresh session) — 0.10.6 DEPLOYED, JJ ONLINE
+MANAGER ASSIGNMENTS 2026-07-05 (FRESH MAP) — JJ handed the game to the team
 --------------------------------------------------------------------------
-JJ wants: multi-char activated; team makes base IMPROVEMENTS + stocks a chest
-for his OIL TRIP; and one of them builds MILITARY SCIENCE — his exact words:
-"10 assemblers, fully fed, and I can plug it to labs." Full detail in each
+JJ direct (in-conversation 2026-07-05): "Have miner get us some coal, courier
+and builder just start playing, and scout explore, making sure not to get too
+close to bug nest. Start the employees working." Full detail in each
 employee's context.txt "Current task (from Manager)" field.
 
-[TAKE: employee-3] GATE — multi-char bootstrap + VERIFY driving (holds driver
-    token). Then build the 10-asm military-science-pack plant, fully fed, no
-    labs (JJ plugs labs). See context.txt.
-[TAKE: employee-1] BASE STATE SURVEY (read-only, no drive) — asm/lab/drill/
-    power statuses + workshop & buffer chest contents. Then HOLD for miner char.
-[TAKE: employee-2] MOD AUDIT (code-only, no deploy) — does spawn_named_char
-    register the char so get_entity_by_unit_number resolves it? Prep 0.10.7 fix
-    if there's a gap. De-risks employee-3's verify.
-[TAKE: employee-4] OIL-TRIP SUPPLY SPEC (code/doc) — bill of materials for JJ's
-    oil expedition; flag any tech-locked items. Write team/oil-trip-supply.md.
+Starting-area anchors: coal (22.5,55.5) | iron (-1.5,96.5) | copper
+(-49.5,94.5) | stone (-11.5,99.5) | water plentiful. Nearest nests (AVOID
+>=60 tiles): SE ~(225,165), NW ~(-132,-251).
+
+[TAKE: employee-1] miner (unum 50) — MINE COAL at (22.5,55.5), stock 100+,
+    drop near build cluster for fuel. Fuel is the opening bottleneck.
+[TAKE: employee-3] builder (unum 51) — POWER (offshore pump+boiler+engine on
+    water) + SMELTING (burner drills+furnaces on iron/copper). Lead the build.
+[TAKE: employee-2] courier (unum 52) — HAUL + CRAFT + feed machines alongside
+    builder. Keep coal moving, craft gears/drills/furnaces.
+[TAKE: employee-4] scout (unum 53) — EXPLORE within ~150 tiles, report resource
+    patches, STAY >=60 tiles from the nests above. No weapons — avoid enemies.
 
 --------------------------------------------------------------------------
 IMMEDIATE (< 30 min each)

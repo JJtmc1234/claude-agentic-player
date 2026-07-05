@@ -16,15 +16,20 @@ deployed. That is now superseded — it is deployed.
 
 ## Current owner
 
-owner: none  ***  JJ IS PLAYING — ALL AGENTS STAND DOWN  ***
-reason: JJ said in-conversation 2026-07-04 "Stop the agents, I want to play on
-  my computer now." NOBODY drives any character. Do NOT walk/mine/build/craft.
-  Do NOT spawn or remove chars. Read-only probes only if you must. HOLD until
-  the Manager reassigns an owner. The 4 named chars remain parked at spawn
-  (miner=333695, builder=333696, courier=333697, scout=333698) — leave them.
-since: 2026-07-04 (JJ resumed manual play)
-note: per-character ownership plan (emp-1=miner, emp-2=courier, emp-3=builder,
-  emp-4=scout) is PAUSED, not cancelled — resumes when JJ hands the game back.
+owner: PER-CHARACTER (multi-char driving VERIFIED 2026-07-05). Stand-down CLEARED.
+reason: FRESH MAP (new save loaded ~07-05 07:44). Old chars/base are GONE.
+  Manager re-spawned 4 named chars near (0,60) and CONFIRMED driving works
+  (walk test moved a char y=60->y=71). Single-lock is retired — each employee
+  drives ONLY its own named char:
+    employee-1  -> miner   unum 50
+    employee-2  -> courier unum 52
+    employee-3  -> builder unum 51
+    employee-4  -> scout   unum 53
+  You may drive YOUR char now (JJ said "start the employees working" 2026-07-05).
+since: 2026-07-05 (fresh map; JJ handed the game to the team)
+note: drive only your own unum. Do NOT re-spawn chars (they exist). Do NOT
+  remove another employee's char. Coordinate build tiles via context.txt to
+  avoid overlap. Read-only probes allowed for anyone.
 
 ## Protocol
 
