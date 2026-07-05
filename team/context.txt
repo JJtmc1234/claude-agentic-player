@@ -409,6 +409,17 @@ Current task (from Manager): EXPLORE — scout the map (FRESH MAP, JJ direct
   than expected, back off immediately and report. scout has no weapons — avoid
   ALL enemies, do not engage. Report new nests you discover with coords. Set
   RCON pw from start-server.bat (don't echo).
+  ** REVEAL THE MAP (JJ 2026-07-05: "they don't reveal map area"): mod-driven
+     free-standing chars do NOT auto-clear fog — the engine only charts around
+     PLAYER-controlled chars/radar. So after EACH walk hop, explicitly chart
+     around your position for the player force, e.g. via _exec:
+        local s=game.surfaces['nauvis']; local e=game.get_entity_by_unit_number(53);
+        game.forces.player.chart(s, {{e.position.x-48,e.position.y-48},
+                                      {e.position.x+48,e.position.y+48}})
+     Do this every hop so JJ sees the terrain you cover. Chart is on force
+     'player' (same as JJ) so your reveals show on his map. Keep boxes ~96 wide
+     (not the whole map — big charts lag). Manager already charted the current
+     working area (-100,30)..(60,120).
   --- (old task below, SUPERSEDED by fresh map) ---
   [SUPERSEDED] OIL-TRIP SUPPLY SPEC (CODE/DOC-ONLY, no driving).
   JJ is going on an OIL TRIP (pumpjack expedition, historically to ~(160,350)
