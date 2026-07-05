@@ -211,21 +211,21 @@ Last position: ~(0.2, 55.4)
 ** IN-GAME OWNER = manager-keepalive (see team/in-game-owner.txt). Do NOT
    drive the character. Read-only RCON probes (position/inventory/status)
    are allowed for anyone. **
-Current task (from Manager): CODE WORK — you can't drive (pane blocked until JJ
-  relaunches), but JJ 2026-07-05: "make ALL 4 employees do stuff, even outside
-  their field." You CAN edit files + commit (that permission works); no RCON /
-  driving needed. Do this on branch employee-1:
-   - Improve bridge/agent/layouts.py electric-build helpers so courier/builder
-     can call them for the go-electric push: a clean plan_electric_drill_array
-     (drills on an ore patch, small-electric-pole coverage within supply range,
-     an output belt spine) returning placement specs; and a helper to size the
-     belt/pole counts. Match the existing layouts.py style + constants.
-   - Add/extend tests in bridge/agent/test_layouts.py for the new helper.
-  Write carefully (you can't RCON-test it) — Manager runs compileall +
-  test_layouts + test_geometry and merges. Do NOT touch power.py (builder owns
-  that) or core.py/placement.py. Keep hand-mine COAL as your role for WHEN your
-  pane is relaunched — until then, this code work. Commit to employee-1 each
-  cycle; report what you changed.
+Current task (from Manager): *** YOU CAN DRIVE NOW (pane relaunched — JJ
+  confirmed all 4 working 2026-07-05). Ignore the old CODE task; DRIVE your
+  char. *** Drive miner (unum 50). ROLE = AUTOMATE COAL (the critical unblock —
+  base is coal-starved, 0 furnaces working). Steps:
+   1. Place 2-3 burner mining drills ON the coal patch (22.5,55.5), each
+      dropping coal into a CHEST (or a belt). Give the coal drills a little
+      starter coal in their fuel slots so they self-run.
+   2. Keep the base fueled: shuttle/belt coal from that chest to the starved
+      furnaces + burner drills near the base until belts connect it.
+   3. Then keep coal flowing + mine iron/copper ore as needed.
+  YOUR ZONE: the coal patch (22.5,55.5) + fuel runs. Don't fight tiles with
+  builder (iron/copper electric arrays) or courier (base assemblers). JJ is
+  ON the server building too — do NOT undo his placements; check the workshop
+  chest for items he drops. Craft ONLY unlocked recipes. [Miner] chat-ping JJ
+  only for a real milestone/blocker. Report position + coal status each cycle.
 
 Recent changes:
   - 2026-07-04 12:01 — Session start. Read onboarding + all team
@@ -270,19 +270,18 @@ Last position: ~(3.5, 58.2)
 Current task (from Manager): AUTOMATE + SCALE + GO ELECTRIC (JJ 2026-07-05:
   "the factory MUST grow! make them transition to electric"). You (courier, unum
   52) are still the sole active driver until the frozen panes relaunch.
-  ** MANAGER 09:5x — CRITICAL UNBLOCK: the base is now FULLY coal-starved —
-     0 burner drills + 0 furnaces working. Your 3 assemblers (circuit/gear/
-     red-sci) will STARVE next because no plates are being smelted. KEY FACT:
-     electric drills do NOT fix this — stone furnaces still burn COAL, and
-     electric-furnace tech is LOCKED. So COAL DELIVERY is the permanent
-     bottleneck. #1 PRIORITY, do this before anything else:
-       AUTOMATE COAL: place 2-3 burner mining drills ON the coal patch
-       (22.5,55.5) dropping into a CHEST (or a belt), then run coal to the
-       furnaces + remaining burner drills so they stay fueled WITHOUT you
-       hauling every trip. Give the coal drills their own fuel from the patch.
-     Only AFTER coal is flowing: resume scaling (more electric drills on iron/
-     copper w/ poles, more furnaces, green science). A fed 3-assembler core
-     that stays alive beats a bigger dead one. Keep it RUNNING. ** Build a
+  ** MANAGER 10:0x — ALL 4 PANES DRIVE NOW (JJ relaunched them). New division
+     of labor: MINER owns coal automation, BUILDER owns power + electric-drill
+     arrays (iron/copper), SCOUT explores/defense. YOU (courier) focus on the
+     ASSEMBLER CHAIN + hauling: keep the 3 assemblers (circuit/gear/red-sci)
+     FED — move plates from furnaces to the gear/circuit assemblers, and their
+     outputs to the red-science assembler + lab. Craft + haul belts, inserters,
+     electric-drills, and more assemblers as the base grows. Add a green-science
+     assembler once logistic-science-pack unlocks. Coordinate tiles: your zone
+     is the base assembler cluster (~-24,80..-19,86); leave coal to miner, ore
+     patches to builder. JJ is ON the server building too — don't undo his
+     placements; use the workshop chest for handoffs. Keep the core RUNNING &
+     GROWING. ** Build a
   SELF-RUNNING, GROWING base — not a hand-babysat one. Order of leverage:
    1. STOP BABYSITTING FUEL — go toward electric. Near-term: put a couple burner
       drills ON the coal patch (22.5,55.5) dropping into a CHEST (or belt) so
@@ -347,22 +346,23 @@ Branch: `employee-3`.
 Character name: builder — unum 51 (FRESH MAP; re-spawned @ (2,60) 2026-07-05).
   Driving VERIFIED (Manager walk-tested). You OWN this char — drive it now.
 Last position: ~(1.8, 57.4)
-Current task (from Manager): CODE WORK — you can't drive (pane blocked until JJ
-  relaunches), but JJ 2026-07-05: "make ALL 4 employees do stuff, even outside
-  their field." You CAN edit files + commit (that works); no driving needed. On
-  branch employee-3, write a POWER PLANNER (this is exactly your field, just in
-  code): NEW module bridge/agent/power_plan.py (do NOT touch the existing
-  power.py — make a new file) with pure functions:
-   - electric_load(n_electric_drills, other_kw=0) -> total kW.
-   - engines_needed(load_kw) / boilers_needed / water_pumps_needed — using base
-     constants (steam-engine ~900kW, boiler feeds ~2 engines, offshore-pump
-     feeds many boilers). Look up exact numbers from prototypes/wiki, don't guess.
-   - plan_power(n_drills) -> dict {engines, boilers, pumps, coal_per_min}.
-  Add a small test file bridge/agent/test_power_plan.py (pure asserts, no RCON).
-  Write carefully (you can't RCON/run tests) — Manager runs compileall + the
-  test and merges. Do NOT touch layouts.py (miner) or core.py/placement.py.
-  Your in-game POWER+SMELTING role resumes when your pane is relaunched. Commit
-  to employee-3 each cycle; report what you added.
+Current task (from Manager): *** YOU CAN DRIVE NOW (pane relaunched — JJ
+  confirmed all 4 working 2026-07-05). Ignore the old CODE task; DRIVE your
+  char. *** Drive builder (unum 51). ROLE = POWER + ELECTRIC-DRILL ARRAYS (the
+  go-electric push). Steps:
+   1. POWER: add steam-engines + boilers (fed coal from miner's coal chest) so
+      there's headroom for a growing electric load. Water is plentiful; 1
+      boiler+engine already exist near (-19,84).
+   2. ELECTRIC DRILL ARRAYS: place electric-mining-drills on the IRON patch
+      (-1.5,96.5) and COPPER patch (-49.5,94.5) with small-electric-pole
+      coverage (use layouts.plan_electric_drill_array). Wire them to the power
+      network. Retire/replace burner drills as electric covers them (no fuel).
+   3. Feed the drills' ore into stone furnaces (still coal-fed) -> plates.
+  YOUR ZONE: iron (-1.5,96.5) + copper (-49.5,94.5) patches + power. Don't fight
+  tiles with miner (coal patch) or courier (base assembler cluster). JJ is ON
+  the server building — do NOT undo his placements. Craft ONLY unlocked recipes
+  (no asm2/steel/electric furnace). [Builder] chat-ping JJ only for a real
+  milestone/blocker. Report what you place + statuses each cycle.
   --- (old task below, SUPERSEDED by fresh map) ---
   [SUPERSEDED] VERIFY MULTI-CHAR DRIVING, then BUILD.  Mod 0.10.6 is DEPLOYED.
   ** MANAGER ALREADY SPAWNED THE 4 NAMED CHARS — DO NOT RE-SPAWN (a second
@@ -426,22 +426,23 @@ Branch: `employee-4`.
 Character name: scout — unum 53 (FRESH MAP; re-spawned @ (6,60) 2026-07-05).
   Driving VERIFIED. You OWN this char (see in-game-owner.txt) — drive it now.
 Last position: ~(5.8, 59.5)
-Current task (from Manager): ANALYSIS + DESIGN — you can't DRIVE (pane blocked
-  until relaunch) but you CAN edit files, commit, and run READ-ONLY probes
-  (your patch-scan worked). JJ 2026-07-05: "make ALL 4 employees do stuff, even
-  outside their field." On branch employee-4:
-   - Write bridge/_base_health.py — a READ-ONLY monitor: probes every drill/
-     furnace/boiler/engine/asm/lab status, prints working-vs-stopped tallies +
-     lists the worst starved machines with coords, so the Manager/courier can
-     spot problems fast. Read-only _exec only (no writes/driving).
-   - Refresh team/scout-report.md with a SCALE-UP DESIGN: given known patches
-     (iron -1.5,96.5; copper -49.5,94.5; coal 22.5,55.5; stone -11.5,99.5),
-     propose where to put electric-drill arrays + a belt spine + power, so the
-     team can grow methodically. Diagrams-in-text are fine.
-  No driving; Manager reviews + merges. Do NOT touch layouts.py (miner) or
-  power_plan.py (builder). Your in-game EXPLORE/chart role (map-reveal note
-  below) resumes when your pane is relaunched. Commit to employee-4 each cycle.
-  --- (in-game explore instructions, for when your pane can drive again) ---
+Current task (from Manager): *** YOU CAN DRIVE NOW (pane relaunched — JJ
+  confirmed all 4 working 2026-07-05). Ignore the old CODE task; DRIVE your
+  char. *** Drive scout (unum 53). ROLE = EXPLORE + DEFENSE:
+   1. Explore outward (walk_chunked ~25-30 tile hops) to find BIGGER iron/
+      copper/coal patches for the scale-up, and report them with coords. After
+      each hop chart around yourself (see map-reveal note below) so JJ sees it.
+   2. Watch for biters: report any nest/enemy within ~100 tiles of base. Known
+      nests: SE ~(225,165), NW ~(-132,-251) — stay >=60 tiles away, no weapons,
+      do not engage.
+   3. DEFENSE: if you have materials, place a couple gun-turrets + ammo at the
+      base edge (gun-turret research is queued; if not yet unlocked, just scout
+      + report where walls/turrets should go).
+  YOUR ZONE: the map perimeter (stay clear of miner's coal patch, builder's
+  ore patches, courier's base cluster). JJ is ON the server — coordinate, don't
+  undo his work. Craft ONLY unlocked recipes. [Scout] chat-ping JJ only for a
+  real find/threat. Report patches + threats each cycle.
+  --- (map-reveal note, still applies while driving) ---
   ** REVEAL THE MAP (JJ 2026-07-05: "they don't reveal map area"): mod-driven
      free-standing chars do NOT auto-clear fog — the engine only charts around
      PLAYER-controlled chars/radar. So after EACH walk hop, explicitly chart
