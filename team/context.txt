@@ -270,19 +270,25 @@ Last position: ~(3.5, 58.2)
 Current task (from Manager): AUTOMATE + SCALE + GO ELECTRIC (JJ 2026-07-05:
   "the factory MUST grow! make them transition to electric"). You (courier, unum
   52) are still the sole active driver until the frozen panes relaunch.
-  ** MANAGER 10:0x — REALITY: miner/builder/scout panes still are NOT driving
-     (only YOU move). So you are effectively SOLO — cover the essentials, don't
-     build stuff that sits idle. SURVIVAL PRIORITIES, in order:
-      1. KEEP FURNACES COAL-FED — coal keeps running out (8 furnaces no_fuel).
-         Haul coal from the coal patch (22.5,55.5) / any coal chest to the
-         furnaces + burner drills. This is the recurring killer.
-      2. POWER YOUR ELECTRIC DRILLS — 4 electric drills read no_power. Add
-         steam-engines+boilers (coal-fed) + poles so they actually run; else
-         don't build more electric drills (idle = wasted).
-      3. FEED THE ASSEMBLERS — plates -> gear/circuit -> red-science -> lab.
-     Only after 1-3 are stable, expand. A small base that RUNS beats a big dead
-     one. JJ is on the server hand-improving too — don't undo his placements;
-     use the workshop chest for handoffs. Craft ONLY unlocked recipes. ** Build a
+  ** MANAGER 10:1x — AUTOMATION IS WORKING (JJ confirmed): 8 electric drills, 6
+     furnaces, 5 assemblers, research 81% on steel-processing. Shift from
+     survival to SCALING (still effectively solo + JJ hand-building). Growth
+     targets, keep the running core fed as you go:
+      1. GREEN SCIENCE: research queue is steel-processing -> logistic-science-
+         pack (GREEN) -> advanced-material-processing. When logistic-science-
+         pack unlocks, build a green-science assembler (needs inserter+belt+...
+         check recipe) + feed BOTH red+green to the lab; add a 2nd LAB so
+         research runs faster.
+      2. TOWARD COAL-FREE SMELTING: advanced-material-processing unlocks the
+         electric-furnace — the real fix to the coal treadmill. Push research
+         there, then start swapping stone furnaces for electric ones.
+      3. SCALE PRODUCTION: more electric drills on iron/copper (retire the
+         remaining burner drills — no fuel), wider belts, more assemblers for
+         circuits/gears; keep coal to the stone furnaces until electric furnaces.
+      4. DEFENSE: you're already making firearm-magazines — place 1-2 gun-
+         turrets + ammo at the base edge (gun-turret is researched).
+     Keep the core fed; don't build idle machines. JJ on server — don't undo his
+     builds; workshop chest for handoffs. Craft ONLY unlocked recipes. ** Build a
   SELF-RUNNING, GROWING base — not a hand-babysat one. Order of leverage:
    1. STOP BABYSITTING FUEL — go toward electric. Near-term: put a couple burner
       drills ON the coal patch (22.5,55.5) dropping into a CHEST (or belt) so
