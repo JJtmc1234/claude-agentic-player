@@ -451,12 +451,41 @@ local function process_arena_sim()
   end
 end
 
+-- ---------- auto-chart: reveal fog around each named character ----------
+-- Mod-driven free-standing characters have no connected player, so the engine
+-- never clears fog-of-war around them (only player-controlled chars + radar do).
+-- Every AUTO_CHART_INTERVAL ticks, chart a box around each character in
+-- storage.claude_chars (and the legacy single char) for the player force, so
+-- their surroundings show on the map. Gated to keep it cheap. (0.10.7)
+local AUTO_CHART_INTERVAL = 120   -- ticks between passes (~2s at 60 UPS)
+local AUTO_CHART_RADIUS = 48      -- tiles each side of the character
+
+local function process_auto_chart()
+  local force = game.forces.player
+  if not force then return end
+  local function chart_char(unum)
+    if not unum then return end
+    local c = game.get_entity_by_unit_number(unum)
+    if not (c and c.valid) then return end
+    local p = c.position
+    force.chart(c.surface, {
+      { p.x - AUTO_CHART_RADIUS, p.y - AUTO_CHART_RADIUS },
+      { p.x + AUTO_CHART_RADIUS, p.y + AUTO_CHART_RADIUS },
+    })
+  end
+  if storage.claude_chars then
+    for _, unum in pairs(storage.claude_chars) do chart_char(unum) end
+  end
+  chart_char(storage.claude_char_unum)  -- legacy single char, if any
+end
+
 script.on_event(defines.events.on_tick, function(event)
   init_mining_jobs(); init_walks(); init_path_requests(); init_craft_jobs(); init_arena()
   process_mining_jobs()
   process_walks()
   process_craft_jobs()
   process_arena_sim()
+  if event.tick % AUTO_CHART_INTERVAL == 0 then process_auto_chart() end
 end)
 
 
@@ -470,7 +499,7 @@ local function ping()
   init_all()
   return {
     ok = true,
-    pong = "from claude-companion 0.10.6",
+    pong = "from claude-companion 0.10.7",
     tick = game.tick,
     chat_buffer_size = #storage.chat_log,
     mining_jobs = count_kv(storage.mining_jobs),
