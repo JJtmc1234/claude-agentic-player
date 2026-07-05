@@ -93,6 +93,25 @@ Full task detail is in your context.txt "Current task (from Manager)" field.
     tests; PASS test_layouts + test_geometry. Push employee-4. Do NOT touch
     core.py/placement.py/team.py.
 
+**************************************************************************
+*** THE FACTORY MUST GROW (JJ 2026-07-05) — AUTOMATE, SCALE, GO ELECTRIC ***
+*** Growth is too slow. Build a SELF-RUNNING base and TRANSITION burner  ***
+*** drills -> ELECTRIC drills (no fuel, higher throughput; ends the coal ***
+*** death-spiral). Foundation first, then grow relentlessly:             ***
+***  #1 AUTOMATE RED SCIENCE: assembler(s) making automation-science-    ***
+***     pack (iron-gear+copper-plate) -> the lab, so research TICKS      ***
+***     (electric-mining-drill is now researching but needs red packs).  ***
+***  #2 PLATE FLOW + CIRCUITS: fix drill->furnace feeding, add belts,    ***
+***     build electronic-circuit production (needed for electric drills).***
+***  #3 POWER: more steam-engines (~900kW each) + poles for the drills.  ***
+***  #4 ELECTRIC: once researched + circuits exist, craft electric-      ***
+***     mining-drills, place on ore w/ pole coverage, retire burners.    ***
+***  #5 SCALE: more of everything; widen belts; head toward green sci.   ***
+*** Role focus when driving: miner=coal/ore feed; builder=power+electric ***
+*** drills+assemblers; courier=haul+craft circuits/science; scout=find   ***
+*** bigger ore/coal patches + watch for biters. Use layouts.py helpers.  ***
+**************************************************************************
+
 ##########################################################################
 ## [SERVER BACK — GO 2026-07-05] mod 0.10.7 is LIVE (ping confirms). All ##
 ## 4 chars persisted (miner 50, builder 51, courier 52, scout 53) and    ##

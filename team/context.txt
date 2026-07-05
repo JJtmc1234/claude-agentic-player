@@ -262,29 +262,30 @@ Worktree name mismatch (agent-3 dir / employee-2 branch): acknowledged
 Character name: courier — unum 52 (FRESH MAP; re-spawned @ (4,60) 2026-07-05).
   Driving VERIFIED. You OWN this char (see in-game-owner.txt) — drive it now.
 Last position: ~(3.5, 58.2)
-Current task (from Manager): SOLE ACTIVE DRIVER — keep the base ALIVE + self-
-  sustaining (the other 3 panes are frozen on cached perms; you're carrying it,
-  and doing great). Drive courier (unum 52). PRIORITY CHAIN, in order:
-   1. FUEL: coal is short — 5 drills + 3 furnaces read no_fuel. Top up the
-      no_fuel drills + furnaces + the boiler with coal so nothing dies. Coal
-      patch (22.5,55.5). Keep a coal buffer at the base.
-   2. FIX FEEDING: 10 furnaces are no_ingredients while 4 drills are
-      waiting_for_space — the drill->furnace alignment is off. Re-seat drills
-      so their drop tile lands on a furnace input (burner-drill south drop =
-      center+1.3; see AGENT_ONBOARDING §9). Get iron+copper plates actually
-      flowing.
-   3. AUTOMATE RED SCIENCE: there are 0 assemblers. Build 1 assembler making
-      automation-science-pack (recipe: iron-gear-wheel + copper-plate) and an
-      inserter feeding it into the existing lab (1 lab exists). This makes the
-      QUEUED research (automation->military->gun-turret->logistics...) self-
-      sustain instead of relying on your hand-crafted packs.
-   4. DEFENSE (when 1-3 are stable): 2-3 gun-turrets + ammo at the base edge —
-      biters may come early (JJ's warning). military/gun-turret research is
-      queued to help.
-  Do NOT over-expand — a fueled, plate-flowing core + red-science loop beats a
-  sprawling starved base. Path AROUND placed machines (you were colliding with
-  the steam engine at (-15.5,83.5)). [Courier] chat-ping JJ only for a real
-  milestone/blocker. Report progress in your section each cycle.
+Current task (from Manager): AUTOMATE + SCALE + GO ELECTRIC (JJ 2026-07-05:
+  "the factory MUST grow! make them transition to electric"). You (courier, unum
+  52) are still the sole active driver until the frozen panes relaunch. Build a
+  SELF-RUNNING, GROWING base — not a hand-babysat one. Order of leverage:
+   1. STOP BABYSITTING FUEL — go toward electric. Near-term: put a couple burner
+      drills ON the coal patch (22.5,55.5) dropping into a CHEST (or belt) so
+      coal accumulates itself; pull from there instead of hand-mining each trip.
+   2. AUTOMATE RED SCIENCE (unblocks ALL research incl. electric-mining-drill):
+      build 1-2 assemblers making automation-science-pack (iron-gear + copper-
+      plate) + inserter -> the lab. Get research actually ticking.
+   3. PLATE FLOW: fix drill->furnace feeding (many furnaces are starved); add
+      belts so plates move without you. Then build ELECTRONIC-CIRCUIT production
+      (copper-cable + iron -> circuit) — circuits are needed for electric drills
+      AND everything downstream.
+   4. POWER FOR ELECTRIC: add steam-engines (each ~900kW ~= 10 electric drills)
+      + small-electric-poles. Water is plentiful; boiler exists.
+   5. TRANSITION TO ELECTRIC: once electric-mining-drill research completes +
+      you have circuits, craft electric-mining-drills, place them on ore with
+      pole coverage, and retire burner drills. This ends the coal death-spiral.
+   6. THEN SCALE: more drills/furnaces/assemblers; widen belts (logistics
+      research queued). Keep growing.
+  Use layouts.py helpers (plan_electric_drill_array, plan_belt_run) if useful.
+  Path AROUND placed machines. [Courier] chat-ping JJ only for a real milestone
+  or hard blocker. Report progress each cycle. GROW THE FACTORY.
 
 Recent changes:
   - 2026-07-04 12:01 — Session start. Read onboarding + all team
