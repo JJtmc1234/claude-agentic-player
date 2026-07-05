@@ -270,6 +270,17 @@ Last position: ~(3.5, 58.2)
 Current task (from Manager): AUTOMATE + SCALE + GO ELECTRIC (JJ 2026-07-05:
   "the factory MUST grow! make them transition to electric"). You (courier, unum
   52) are still the sole active driver until the frozen panes relaunch.
+  ** MANAGER 10:3x URGENT — TWO BLOCKERS, fix these before anything else:
+     (A) RESEARCH IS STALLED at advanced-material-processing 0% because there is
+         NO green-science production. Green science (logistic-science-pack) is
+         UNLOCKED. BUILD IT NOW: 1 assembler set to recipe 'logistic-science-
+         pack' (ingredients = 1 inserter + 1 transport-belt, both of which you
+         already make) + an inserter loading its output into the LAB. Until this
+         exists, ALL further research is frozen. This is your #1 job right now.
+     (B) THE BASE IS BACKED UP: 7 electric drills + 5 furnaces read full_output
+         — they're producing but NOTHING is consuming/moving the output. Add
+         belts/inserters + more consuming assemblers so ore->plates->products
+         actually FLOW. Full_output = wasted production. Unclog the chain. **
   ** MANAGER 10:1x — AUTOMATION IS WORKING (JJ confirmed): 8 electric drills, 6
      furnaces, 5 assemblers, research 81% on steel-processing. Shift from
      survival to SCALING (still effectively solo). Growth targets, keep the
