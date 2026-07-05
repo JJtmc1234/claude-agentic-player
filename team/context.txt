@@ -211,16 +211,21 @@ Last position: ~(0.2, 55.4)
 ** IN-GAME OWNER = manager-keepalive (see team/in-game-owner.txt). Do NOT
    drive the character. Read-only RCON probes (position/inventory/status)
    are allowed for anyone. **
-Current task (from Manager): MINE COAL (FRESH MAP, JJ direct 2026-07-05: "have
-  miner get us some coal"). Drive YOUR char (miner, unum 50, ~(0.2,55.4)).
-  Nearest coal patch: (22.5, 55.5) — ~22 tiles east, 330 ore tiles there.
-  Steps: walk_chunked to the coal patch, hand-mine a solid stock of coal
-  (say 100+), then bring it back toward the build cluster (~(0,60)) / deposit
-  where builder+courier are setting up so they have fuel. Keep going —
-  fuel is the bottleneck for the whole opening. Report tonnage + where you
-  dropped it. Mod is 0.10.6 (hand-mine is decrement-safe). Set
-  FACTORIO_RCON_PASSWORD from start-server.bat via Select-String (don't echo).
-  Coordinate with builder/courier so you don't fight over the same tiles.
+Current task (from Manager): CODE WORK — you can't drive (pane blocked until JJ
+  relaunches), but JJ 2026-07-05: "make ALL 4 employees do stuff, even outside
+  their field." You CAN edit files + commit (that permission works); no RCON /
+  driving needed. Do this on branch employee-1:
+   - Improve bridge/agent/layouts.py electric-build helpers so courier/builder
+     can call them for the go-electric push: a clean plan_electric_drill_array
+     (drills on an ore patch, small-electric-pole coverage within supply range,
+     an output belt spine) returning placement specs; and a helper to size the
+     belt/pole counts. Match the existing layouts.py style + constants.
+   - Add/extend tests in bridge/agent/test_layouts.py for the new helper.
+  Write carefully (you can't RCON-test it) — Manager runs compileall +
+  test_layouts + test_geometry and merges. Do NOT touch power.py (builder owns
+  that) or core.py/placement.py. Keep hand-mine COAL as your role for WHEN your
+  pane is relaunched — until then, this code work. Commit to employee-1 each
+  cycle; report what you changed.
 
 Recent changes:
   - 2026-07-04 12:01 — Session start. Read onboarding + all team
@@ -339,21 +344,22 @@ Branch: `employee-3`.
 Character name: builder — unum 51 (FRESH MAP; re-spawned @ (2,60) 2026-07-05).
   Driving VERIFIED (Manager walk-tested). You OWN this char — drive it now.
 Last position: ~(1.8, 57.4)
-Current task (from Manager): START PLAYING — lead the opening base build
-  (FRESH MAP, JJ direct 2026-07-05: "courier and builder just start playing").
-  Drive YOUR char (builder, unum 51, ~(1.8,57.4)). Driving is already VERIFIED
-  (Manager walk-tested) — do NOT re-verify, do NOT re-spawn chars. Your focus:
-  POWER + SMELTING. Concretely:
-   1. POWER: find the nearest water edge (1906 water tiles nearby), place an
-      offshore-pump -> boiler -> steam-engine (coal-fed). This powers everything.
-   2. SMELTING: place burner mining drills on iron (-1.5,96.5) and copper
-      (-49.5,94.5) with stone furnaces to make plates; fuel from miner's coal.
-   3. Progress toward a first automated iron line + red science when materials
-      allow. Look up recipes/offsets from prototypes/wiki, don't guess (mind the
-      drill drop-offset + inserter-direction gotchas in AGENT_ONBOARDING §9).
-  Coordinate tiles with courier (unum 52, doing hauling/crafting) via your
-  context sections. Mod 0.10.6 (deployed). Set RCON pw from start-server.bat
-  (don't echo). Report what you place + statuses. Build the base — use judgment.
+Current task (from Manager): CODE WORK — you can't drive (pane blocked until JJ
+  relaunches), but JJ 2026-07-05: "make ALL 4 employees do stuff, even outside
+  their field." You CAN edit files + commit (that works); no driving needed. On
+  branch employee-3, write a POWER PLANNER (this is exactly your field, just in
+  code): NEW module bridge/agent/power_plan.py (do NOT touch the existing
+  power.py — make a new file) with pure functions:
+   - electric_load(n_electric_drills, other_kw=0) -> total kW.
+   - engines_needed(load_kw) / boilers_needed / water_pumps_needed — using base
+     constants (steam-engine ~900kW, boiler feeds ~2 engines, offshore-pump
+     feeds many boilers). Look up exact numbers from prototypes/wiki, don't guess.
+   - plan_power(n_drills) -> dict {engines, boilers, pumps, coal_per_min}.
+  Add a small test file bridge/agent/test_power_plan.py (pure asserts, no RCON).
+  Write carefully (you can't RCON/run tests) — Manager runs compileall + the
+  test and merges. Do NOT touch layouts.py (miner) or core.py/placement.py.
+  Your in-game POWER+SMELTING role resumes when your pane is relaunched. Commit
+  to employee-3 each cycle; report what you added.
   --- (old task below, SUPERSEDED by fresh map) ---
   [SUPERSEDED] VERIFY MULTI-CHAR DRIVING, then BUILD.  Mod 0.10.6 is DEPLOYED.
   ** MANAGER ALREADY SPAWNED THE 4 NAMED CHARS — DO NOT RE-SPAWN (a second
@@ -417,20 +423,22 @@ Branch: `employee-4`.
 Character name: scout — unum 53 (FRESH MAP; re-spawned @ (6,60) 2026-07-05).
   Driving VERIFIED. You OWN this char (see in-game-owner.txt) — drive it now.
 Last position: ~(5.8, 59.5)
-Current task (from Manager): EXPLORE — scout the map (FRESH MAP, JJ direct
-  2026-07-05: "scout explore, making sure not to get too close to bug nest").
-  Drive YOUR char (scout, unum 53, ~(5.8,59.5)). Chart the surroundings and
-  report resource patches (iron/copper/coal/stone/oil/water) + terrain in your
-  Recent changes so the team knows what's out there. Use walk_chunked in
-  ~25-30 tile hops. HARD SAFETY RULE — biter/spitter nests already located,
-  STAY >=60 TILES AWAY from all of these:
-     SE cluster ~(225,165) [3 spawners: biter+spitter]
-     NW ~(-132,-251) [biter]
-  Keep exploration within ~150 tiles of origin for now; do NOT push toward the
-  SE nest cluster. If find_nearest_resource / a probe shows a spawner closer
-  than expected, back off immediately and report. scout has no weapons — avoid
-  ALL enemies, do not engage. Report new nests you discover with coords. Set
-  RCON pw from start-server.bat (don't echo).
+Current task (from Manager): ANALYSIS + DESIGN — you can't DRIVE (pane blocked
+  until relaunch) but you CAN edit files, commit, and run READ-ONLY probes
+  (your patch-scan worked). JJ 2026-07-05: "make ALL 4 employees do stuff, even
+  outside their field." On branch employee-4:
+   - Write bridge/_base_health.py — a READ-ONLY monitor: probes every drill/
+     furnace/boiler/engine/asm/lab status, prints working-vs-stopped tallies +
+     lists the worst starved machines with coords, so the Manager/courier can
+     spot problems fast. Read-only _exec only (no writes/driving).
+   - Refresh team/scout-report.md with a SCALE-UP DESIGN: given known patches
+     (iron -1.5,96.5; copper -49.5,94.5; coal 22.5,55.5; stone -11.5,99.5),
+     propose where to put electric-drill arrays + a belt spine + power, so the
+     team can grow methodically. Diagrams-in-text are fine.
+  No driving; Manager reviews + merges. Do NOT touch layouts.py (miner) or
+  power_plan.py (builder). Your in-game EXPLORE/chart role (map-reveal note
+  below) resumes when your pane is relaunched. Commit to employee-4 each cycle.
+  --- (in-game explore instructions, for when your pane can drive again) ---
   ** REVEAL THE MAP (JJ 2026-07-05: "they don't reveal map area"): mod-driven
      free-standing chars do NOT auto-clear fog — the engine only charts around
      PLAYER-controlled chars/radar. So after EACH walk hop, explicitly chart
