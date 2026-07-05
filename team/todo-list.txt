@@ -118,6 +118,25 @@ Full task detail is in your context.txt "Current task (from Manager)" field.
 ##  - courier(52): keep hauling ore->furnaces; stop over-claiming "done".##
 ##  - scout(53): resume explore+chart once driving.                      ##
 ##                                                                       ##
+## CHAT-PING JJ WITH A NAMETAG (JJ 2026-07-05): when you need to tell JJ ##
+## something, send in-game chat via  python bridge/say.py "[Role] msg"   ##
+## with YOUR role tag: [Miner]=emp1 [Builder]=emp3 [Courier]=emp2        ##
+## [Scout]=emp4. Only ping when it's useful (blocker, milestone, need    ##
+## input) — not chatter. Manager uses [Manager].                         ##
+##                                                                       ##
+## RESEARCH QUEUED (Manager, defense-forward per biter risk): automation ##
+## -> military -> gun-turret -> logistics -> stone-wall -> logistic-      ##
+## science-pack -> steel-processing. It will NOT progress until a LAB is  ##
+## built + fed red science packs (automation-science-pack = iron-gear +   ##
+## copper-plate). BUILD A LAB + red-science assembler ASAP. Then, since   ##
+## bugs may attack early, prioritize a few gun-turrets + ammo at the base.##
+##                                                                       ##
+## [URGENT: employee-2/courier] your char is COLLIDING with the steam-   ##
+## engine at (-15.5,83.5) — JJ sees it walking into it. Cancel that walk ##
+## (remote.call('claude','cancel_walk',52)) and path AROUND it; don't    ##
+## route through your own placed entities. Use walk_chunked with a       ##
+## reachable target offset a couple tiles clear of machines.             ##
+##                                                                       ##
 ## JJ DIRECTIVES (2026-07-05, all employees):                            ##
 ##  1. Do NOT cut too many trees — trees absorb POLLUTION (less          ##
 ##     pollution = fewer/weaker biter attacks). Chop only what you truly ##

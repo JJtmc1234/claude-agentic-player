@@ -479,6 +479,10 @@ CORE RULES (all agents)
 - TREES ABSORB POLLUTION (JJ 2026-07-05): do NOT over-cut trees — less
   pollution means fewer/weaker biter attacks. Chop only the wood you truly
   need; never clear-cut a forest. Prefer clear/non-tree tiles for placements.
+- CHAT NAMETAGS (JJ 2026-07-05): to ping JJ in-game, use
+  `python bridge/say.py "[Role] message"` with your role tag ([Miner]=emp1,
+  [Builder]=emp3, [Courier]=emp2, [Scout]=emp4, [Manager]=Manager). Ping only
+  when useful (blocker / milestone / need-input), not idle chatter.
 - GAME-MECHANICS REFERENCE (JJ 2026-07-05): when unsure about a mechanic,
   read from JJ's Factorio folder C:\Users\pmarc\AppData\Roaming\Factorio
   (mods/, config, logs, script-output); base prototypes are in the Steam
