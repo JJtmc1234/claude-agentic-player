@@ -270,18 +270,19 @@ Last position: ~(3.5, 58.2)
 Current task (from Manager): AUTOMATE + SCALE + GO ELECTRIC (JJ 2026-07-05:
   "the factory MUST grow! make them transition to electric"). You (courier, unum
   52) are still the sole active driver until the frozen panes relaunch.
-  ** MANAGER 10:0x — ALL 4 PANES DRIVE NOW (JJ relaunched them). New division
-     of labor: MINER owns coal automation, BUILDER owns power + electric-drill
-     arrays (iron/copper), SCOUT explores/defense. YOU (courier) focus on the
-     ASSEMBLER CHAIN + hauling: keep the 3 assemblers (circuit/gear/red-sci)
-     FED — move plates from furnaces to the gear/circuit assemblers, and their
-     outputs to the red-science assembler + lab. Craft + haul belts, inserters,
-     electric-drills, and more assemblers as the base grows. Add a green-science
-     assembler once logistic-science-pack unlocks. Coordinate tiles: your zone
-     is the base assembler cluster (~-24,80..-19,86); leave coal to miner, ore
-     patches to builder. JJ is ON the server building too — don't undo his
-     placements; use the workshop chest for handoffs. Keep the core RUNNING &
-     GROWING. ** Build a
+  ** MANAGER 10:0x — REALITY: miner/builder/scout panes still are NOT driving
+     (only YOU move). So you are effectively SOLO — cover the essentials, don't
+     build stuff that sits idle. SURVIVAL PRIORITIES, in order:
+      1. KEEP FURNACES COAL-FED — coal keeps running out (8 furnaces no_fuel).
+         Haul coal from the coal patch (22.5,55.5) / any coal chest to the
+         furnaces + burner drills. This is the recurring killer.
+      2. POWER YOUR ELECTRIC DRILLS — 4 electric drills read no_power. Add
+         steam-engines+boilers (coal-fed) + poles so they actually run; else
+         don't build more electric drills (idle = wasted).
+      3. FEED THE ASSEMBLERS — plates -> gear/circuit -> red-science -> lab.
+     Only after 1-3 are stable, expand. A small base that RUNS beats a big dead
+     one. JJ is on the server hand-improving too — don't undo his placements;
+     use the workshop chest for handoffs. Craft ONLY unlocked recipes. ** Build a
   SELF-RUNNING, GROWING base — not a hand-babysat one. Order of leverage:
    1. STOP BABYSITTING FUEL — go toward electric. Near-term: put a couple burner
       drills ON the coal patch (22.5,55.5) dropping into a CHEST (or belt) so
