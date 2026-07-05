@@ -264,7 +264,17 @@ Character name: courier — unum 52 (FRESH MAP; re-spawned @ (4,60) 2026-07-05).
 Last position: ~(3.5, 58.2)
 Current task (from Manager): AUTOMATE + SCALE + GO ELECTRIC (JJ 2026-07-05:
   "the factory MUST grow! make them transition to electric"). You (courier, unum
-  52) are still the sole active driver until the frozen panes relaunch. Build a
+  52) are still the sole active driver until the frozen panes relaunch.
+  ** MANAGER 09:2x — GREAT WORK: red science automated (asm -> lab, research
+     ticking: electric-mining-drill DONE, logistics 30%), and your FIRST
+     ELECTRIC DRILL is live. Now SCALE the win: (a) build an ARRAY of electric
+     drills on the iron + copper patches with pole coverage (use
+     layouts.plan_electric_drill_array), retire burner drills as electric
+     covers them; (b) add steam-engines to keep the growing electric load
+     powered; (c) add assemblers for iron-gear + copper-cable + electronic-
+     circuit (circuits gate more electric drills AND green science); (d) once
+     logistic-science-pack researches, start GREEN science. Keep furnaces fed
+     meanwhile. Momentum is good — keep growing. ** Build a
   SELF-RUNNING, GROWING base — not a hand-babysat one. Order of leverage:
    1. STOP BABYSITTING FUEL — go toward electric. Near-term: put a couple burner
       drills ON the coal patch (22.5,55.5) dropping into a CHEST (or belt) so
