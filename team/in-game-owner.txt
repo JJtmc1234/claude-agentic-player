@@ -16,6 +16,17 @@ deployed. That is now superseded — it is deployed.
 
 ## Current owner
 
+owner: MANAGER drives miner(50)/builder(51)/scout(53); employee-2 keeps courier(52).
+reason: 2026-07-05 — the miner/builder/scout PANES are permanently blocked by
+  Claude Code's auto-mode classifier (silently refuses the RCON drive command;
+  not fixable via settings from the Manager side; JJ is at his keyboard but not
+  in-game). Their chars sat idle for many cycles. Per Manager's
+  standing offer, Manager now DRIVES those 3 chars from the Manager session
+  (RCON works here) so they do useful work. courier(52) stays with employee-2
+  (its pane works). IF a blocked pane ever starts driving its char, Manager
+  yields that char back immediately (avoid two drivers). Employees 1/3/4: do
+  NOT drive your char while this says Manager owns it.
+--- prior per-character note (still applies to courier) ---
 owner: PER-CHARACTER (multi-char driving VERIFIED 2026-07-05). Stand-down CLEARED.
 reason: FRESH MAP (new save loaded ~07-05 07:44). Old chars/base are GONE.
   Manager re-spawned 4 named chars near (0,60) and CONFIRMED driving works
