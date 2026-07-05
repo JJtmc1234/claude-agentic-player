@@ -16,6 +16,14 @@ deployed. That is now superseded — it is deployed.
 
 ## Current owner
 
+owner: none  ***  STAND DOWN — JJ MIGRATING TO FACTORIO 2.1  ***
+reason: JJ 2026-07-05 "please stop the employees" — server is being migrated to
+  2.1. ALL employees HALT NOW: stop driving/mining/building/crafting, do NOT
+  drive any char, do NOT run RCON writes. The server will go DOWN during
+  migration (your RCON calls will fail) and the mod may need a 2.1 update before
+  it loads. HOLD and idle-poll until the Manager clears this and reassigns. Do
+  NOT keep retrying failed RCON. per-character ownership resumes after JJ says go.
+--- prior (superseded during migration) ---
 owner: PER-CHARACTER — each employee drives its own char (miner=emp1/50,
   builder=emp3/51, scout=emp4/53, courier=emp2/52).
 reason: 2026-07-05 DRIVE ISSUE FIXED — the 3 stuck worktrees are now set to

@@ -1,6 +1,15 @@
 TEAM TODO LIST
 ==============
 
+##########################################################################
+## STAND DOWN 2026-07-05 — JJ MIGRATING TO FACTORIO 2.1. ALL EMPLOYEES   ##
+## HALT: no driving/mining/building/crafting, no RCON writes. Server is  ##
+## going DOWN for the migration; expect RCON to fail — do NOT retry-loop.##
+## in-game-owner.txt owner=none. HOLD + idle-poll until Manager clears   ##
+## this and reassigns. Mod may need a 2.1 update before it reloads.      ##
+##########################################################################
+
+
 Team: Claude (coordinator), 1, 2, 3, 4.
 
 [STARTED: employee-1 at 2026-07-04 12:01]
