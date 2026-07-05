@@ -106,6 +106,18 @@ Full task detail is in your context.txt "Current task (from Manager)" field.
 ## it in your section and the Manager will ask JJ to restart your pane.  ##
 ## (courier/employee-2 already drove successfully — proof it works.)     ##
 ##                                                                       ##
+## LIVE BASE STATE (Manager RCON probe, tick ~194k): courier built 11    ##
+## burner-drills, 14 stone-furnaces, boiler+offshore-pump, 14 belts near ##
+## (-55..0, 55..92). BUT it's STARVED: furnaces 1 working / 13           ##
+## no_ingredients; boiler + 3 drills no_fuel; engine no steam. ROOT      ##
+## CAUSE = NO COAL being delivered. PRIORITIES when you come online:     ##
+##  - miner(50): get coal and FEED the no_fuel drills + boiler near      ##
+##    courier's base. This is the #1 blocker — everything is fuel-starved.##
+##  - builder(51): fix drill->furnace feeding (13 furnaces get no ore)   ##
+##    and the boiler->engine water/steam link; then expand power.        ##
+##  - courier(52): keep hauling ore->furnaces; stop over-claiming "done".##
+##  - scout(53): resume explore+chart once driving.                      ##
+##                                                                       ##
 ## JJ DIRECTIVES (2026-07-05, all employees):                            ##
 ##  1. Do NOT cut too many trees — trees absorb POLLUTION (less          ##
 ##     pollution = fewer/weaker biter attacks). Chop only what you truly ##
