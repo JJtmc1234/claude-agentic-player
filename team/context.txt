@@ -272,16 +272,25 @@ Current task (from Manager): AUTOMATE + SCALE + GO ELECTRIC (JJ 2026-07-05:
   52) are still the sole active driver until the frozen panes relaunch.
   ** MANAGER 10:1x — AUTOMATION IS WORKING (JJ confirmed): 8 electric drills, 6
      furnaces, 5 assemblers, research 81% on steel-processing. Shift from
-     survival to SCALING (still effectively solo + JJ hand-building). Growth
-     targets, keep the running core fed as you go:
+     survival to SCALING (still effectively solo). Growth targets, keep the
+     running core fed as you go:
+      0. AUTOMATE COAL (do this ONCE — it stops the recurring starvation that
+         keeps killing the base): place 2-3 burner mining drills ON the coal
+         patch (22.5,55.5), each dropping into a shared CHEST, then belt (or
+         repeatedly haul) coal from that chest to the furnace line + boiler.
+         Self-fueling coal ends the manual coal treadmill. (Manager is also
+         hand-mining supplemental coal via the miner char.)
       1. GREEN SCIENCE: research queue is steel-processing -> logistic-science-
          pack (GREEN) -> advanced-material-processing. When logistic-science-
          pack unlocks, build a green-science assembler (needs inserter+belt+...
          check recipe) + feed BOTH red+green to the lab; add a 2nd LAB so
          research runs faster.
-      2. TOWARD COAL-FREE SMELTING: advanced-material-processing unlocks the
-         electric-furnace — the real fix to the coal treadmill. Push research
-         there, then start swapping stone furnaces for electric ones.
+      2. TOWARD COAL-FREE SMELTING: CORRECTION — advanced-material-processing
+         unlocks the STEEL furnace (2x speed but STILL burns coal). The
+         coal-free ELECTRIC furnace needs advanced-material-processing-2
+         (deeper). So steel furnaces are only a speed upgrade; keep coal
+         automated (#0) regardless, and aim research toward adv-mat-proc-2 for
+         true coal-free smelting later.
       3. SCALE PRODUCTION: more electric drills on iron/copper (retire the
          remaining burner drills — no fuel), wider belts, more assemblers for
          circuits/gears; keep coal to the stone furnaces until electric furnaces.
