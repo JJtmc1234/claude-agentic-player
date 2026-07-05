@@ -16,10 +16,19 @@ deployed. That is now superseded — it is deployed.
 
 ## Current owner
 
-owner: MANAGER drives miner(50)/builder(51)/scout(53); employee-2 keeps courier(52).
-reason: 2026-07-05 — the miner/builder/scout PANES are permanently blocked by
-  Claude Code's auto-mode classifier (silently refuses the RCON drive command;
-  not fixable via settings from the Manager side; JJ is at his keyboard but not
+owner: PER-CHARACTER — each employee drives its own char (miner=emp1/50,
+  builder=emp3/51, scout=emp4/53, courier=emp2/52).
+reason: 2026-07-05 DRIVE ISSUE FIXED — the 3 stuck worktrees are now set to
+  defaultMode bypassPermissions (JJ-authorized "yes, bypass") + already have the
+  RCON password env + python drive perms. On RELAUNCH those panes drive with no
+  approval gate. Manager's temporary takeover of miner/builder/scout is ENDED —
+  Manager no longer drives them; each pane owns its char again. (If a pane still
+  won't drive after relaunch, tell Manager.)
+--- HISTORY (superseded) ---
+owner: MANAGER drove miner(50)/builder(51)/scout(53); employee-2 kept courier(52).
+reason: 2026-07-05 — the miner/builder/scout PANES were blocked by
+  Claude Code's auto-mode classifier (silently refused the RCON drive command;
+  not fixable via settings from the Manager side; JJ at keyboard but not
   in-game). Their chars sat idle for many cycles. Per Manager's
   standing offer, Manager now DRIVES those 3 chars from the Manager session
   (RCON works here) so they do useful work. courier(52) stays with employee-2
