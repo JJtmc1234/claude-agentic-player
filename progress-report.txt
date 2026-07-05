@@ -4,6 +4,20 @@ Running record of major milestones. Newest at top.
 
 ---
 
+## 2026-07-05 — Fresh map; multi-char team live; mod 0.10.7 (auto map-reveal)
+
+- FRESH MAP loaded (~07:44). Old base/chars void. Re-spawned 4 named team
+  chars near (0,60): miner=50, builder=51, courier=52, scout=53. Multi-char
+  DRIVING VERIFIED live (walk test) — the gate that blocked prior waves.
+- mod 0.10.7 deployed + published to portal: on_tick auto-charts a 96-tile
+  box around each named char every 120 ticks (free-standing chars have no
+  connected player, so the engine never cleared fog around them). Chars
+  persisted across the save→restart; auto-chart confirmed (is_chunk_charted).
+- Per-character ownership activated; employees assigned fresh-map bootstrap
+  (miner→coal, builder→power+smelting, courier→haul/craft, scout→explore).
+  JJ rules added: don't over-cut trees (pollution), use his AppData Factorio
+  folder for mechanics reference.
+
 ## 2026-06-20 — Pivot to agentic play (Claude drives a character)
 
 - Spawned a free-standing Claude character on a fresh biter world (the old
