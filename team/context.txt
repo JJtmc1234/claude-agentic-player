@@ -456,6 +456,9 @@ Last position: ~(5.8, 59.5)
 Current task (from Manager): *** YOU CAN DRIVE NOW (pane relaunched — JJ
   confirmed all 4 working 2026-07-05). Ignore the old CODE task; DRIVE your
   char. *** Drive scout (unum 53). ROLE = EXPLORE + DEFENSE:
+   ** JJ 2026-07-05: "MAKE SCOUT SCOUT." As SOON as you're driving, GO EXPLORE —
+      don't sit at the copper patch (-46,88) where the Manager parked you.
+      Walk OUTWARD and chart the map; that is your primary job. **
    1. Explore outward (walk_chunked ~25-30 tile hops) to find BIGGER iron/
       copper/coal patches for the scale-up, and report them with coords. After
       each hop chart around yourself (see map-reveal note below) so JJ sees it.
