@@ -93,6 +93,28 @@ Full task detail is in your context.txt "Current task (from Manager)" field.
     tests; PASS test_layouts + test_geometry. Push employee-4. Do NOT touch
     core.py/placement.py/team.py.
 
+##########################################################################
+## [RESTART IMMINENT 2026-07-05] Manager is deploying mod 0.10.7 (auto  ##
+## map-reveal). Server will bounce (~30s) — your RCON calls will fail    ##
+## briefly. PAUSE driving; the 4 named chars PERSIST across the restart  ##
+## (state saved first). Resume your task when ping returns 0.10.7 and    ##
+## this banner flips back to GO. Do NOT re-spawn chars.                  ##
+##########################################################################
+
+##########################################################################
+## [URGENT: ALL EMPLOYEES] EXECUTE NOW — you are merging master but your ##
+## CHAR HAS NOT MOVED (0 walks, 0 mining jobs as of tick ~85700).        ##
+## Driving is GO. Stop waiting/verifying — DRIVE your char THIS cycle.   ##
+## Your poll loop must ACT, not just merge+update docs. First action:    ##
+##   emp-1 miner(50):   walk_chunked to coal (22.5,55.5) and start_mining.##
+##   emp-3 builder(51): walk toward water/iron; place 1st burner drill.   ##
+##   emp-2 courier(52): walk to miner, help haul/craft; craft a drill.    ##
+##   emp-4 scout(53):   walk_chunked a 30-tile hop + chart around self.   ##
+## Then update your section with the NEW char position (proof you moved). ##
+## RCON pw: Select-String C:\FactorioServer\start-server.bat (don't echo).##
+## If something blocks driving, say EXACTLY what in your section NOW.     ##
+##########################################################################
+
 **************************************************************************
 *** GO 2026-07-05 — FRESH MAP. Stand-down CLEARED. Driving VERIFIED.    ***
 *** Per-character ownership active (in-game-owner.txt). Drive YOUR char. ***
