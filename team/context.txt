@@ -375,7 +375,17 @@ Character name: builder — unum 51 (FRESH MAP; re-spawned @ (2,60) 2026-07-05).
 Last position: ~(1.8, 57.4)
 Current task (from Manager): *** YOU CAN DRIVE NOW (pane relaunched — JJ
   confirmed all 4 working 2026-07-05). Ignore the old CODE task; DRIVE your
-  char. *** Drive builder (unum 51). ROLE = POWER + ELECTRIC-DRILL ARRAYS (the
+  char. *** Drive builder (unum 51). ROLE = POWER FIRST.
+  !!! MANAGER 11:0x STOP — do NOT build more electric drills right now. The grid
+  is CRIPPLED: 356 entities read no_power with only 2 steam-engines. Every
+  electric drill you add just sits no_power and makes it WORSE. BEFORE anything
+  else, BUILD STEAM POWER at the water near (-19,84): offshore-pump -> a row of
+  BOILERS -> STEAM-ENGINES (coal-fed), + small-electric-poles to connect it,
+  until the no_power count drops toward 0 with margin. Target ~6-10 steam-
+  engines. ONLY after power is healthy, resume electric drills. Report the
+  steam-engine count + no_power each cycle. !!!
+  --- original steps (do these AFTER power is fixed) ---
+  ROLE = POWER + ELECTRIC-DRILL ARRAYS (the
   go-electric push). Steps:
    1. POWER: add steam-engines + boilers (fed coal from miner's coal chest) so
       there's headroom for a growing electric load. Water is plentiful; 1
