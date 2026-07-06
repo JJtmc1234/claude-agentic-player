@@ -2,17 +2,22 @@ TEAM TODO LIST
 ==============
 
 **************************************************************************
-*** MANAGER OVERNIGHT STATUS ~20:16: NO oil progress (0 pumpjacks after ***
-*** 1h — the 310-tile oil trek is not happening). LABS at 0 working —   ***
-*** research is stalling. IMMEDIATE:                                    ***
-***  - COURIER: FIRST keep the LABS FED (fix science->lab delivery so    ***
-***    research doesn't die) — do this before anything else.            ***
-***  - BUILDER: EXPLORE toward oil (walk W/N/NW, ~25-tile hops) to       ***
-***    GENERATE new chunks + find CLOSER crude-oil than (151,275). The   ***
-***    only known oil is 310 tiles SE near a nest; find something nearer ***
-***    + safer, chart it, report coords. This is the blue-sci gate.      ***
-***  - If no closer oil is reachable overnight, blue-sci auto is BLOCKED  ***
-***    on oil distance — that's the honest morning report for JJ.        ***
+*** MANAGER RE-ENGAGE (JJ: "you can easily reach that oil"): GO GET THE  ***
+*** OIL. It is reachable — stop treating it as blocked. This is THE #1   ***
+*** task now:                                                            ***
+***  - BUILDER: WALK to the crude-oil at ~(151,275) via walk_chunked in  ***
+***    ~30-tile hops (~9 hops). Carry: 1-2 PUMPJACKS + a small POWER kit  ***
+***    (offshore-pump + boiler + steam-engine + ~50 coal) + PIPES, since  ***
+***    there's no power grid out there. On arrival: place a pumpjack ON a ***
+***    crude-oil tile; power it with the local boiler+engine (offshore-   ***
+***    pump on nearby water -> boiler -> engine, coal-fed) + a pole.      ***
+***    GETTING CRUDE OIL auto-unlocks oil-processing. Watch for the SE    ***
+***    nest (~225,165) — approach the oil from the W/N side, stay clear.  ***
+***  - COURIER: craft/supply those items to builder (pumpjack, boiler,   ***
+***    engine, offshore-pump, pipes, coal) before/at departure; keep     ***
+***    labs fed at base meanwhile.                                       ***
+***  - Once crude oil flows: build OIL REFINERY on-site -> petroleum ->  ***
+***    (then continue the chain). Report progress each cycle. DRIVE IT.  ***
 **************************************************************************
 
 **************************************************************************
