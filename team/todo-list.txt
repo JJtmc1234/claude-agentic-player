@@ -68,11 +68,17 @@ TEAM TODO LIST
 ## a provider station enabled only when its output chest has a full wagon ##
 ## load, a requester station enabled only when base stock is low, + TRAIN ##
 ## LIMIT 1, rail signals, locomotive + cargo wagon. Start SMALL (1 route).##
-## GATE: needs 'railway' (+ maybe rail-signals/automated-rail-transport)  ##
-## researched to place these — if NOT researched, REPORT to Manager (we   ##
-## may prioritize railway research) rather than force it. Ghosts of       ##
-## unresearched entities may not place; if blocked, say so. REPORT your   ##
-## ghost layout. KEEP SCALING UP too.                                     ##
+## JJ 2026-07-05: "have them ghost the rail network" — DO IT NOW. railway ##
+## tech is NOT researched, but that's fine: ENTITY-GHOSTS can be PLACED   ##
+## without the tech (they just can't be BUILT/revived until railway is    ##
+## researched, which is JJ's follow-on). So place the plan as ghosts for  ##
+## JJ to review. METHOD (via _exec): surface.create_entity{name=          ##
+## 'entity-ghost', inner_name='straight-rail'/'rail-signal'/'train-stop'/ ##
+## 'locomotive'/'cargo-wagon'/etc., position=..., direction=..., force=   ##
+## 'player'}. Lay a small smart route (mine->base): rails + signals +     ##
+## 2 train-stops + loco + wagon, and add the circuit-control combinators  ##
+## (station enable conditions). REPORT the ghost layout + bbox so JJ can  ##
+## review. Do NOT build them real (ghosts only). KEEP SCALING UP too.     ##
 ##########################################################################
 
 
