@@ -267,7 +267,23 @@ Worktree name mismatch (agent-3 dir / employee-2 branch): acknowledged
 Character name: courier — unum 52 (FRESH MAP; re-spawned @ (4,60) 2026-07-05).
   Driving VERIFIED. You OWN this char (see in-game-owner.txt) — drive it now.
 Last position: ~(3.5, 58.2)
-Current task (from Manager): *** NEW GOAL — STOCKPILE BUILDING SUPPLIES (JJ
+Current task (from Manager): *** TOP PRIORITY — BUILD JJ'S MALL GHOSTS (JJ
+  2026-07-05 "I built a little mall, build the ghosts"). Drive courier (unum 52).
+  JJ placed 42 entity-ghosts (a mall) in the area x[-89..-33], y[75..92] (west
+  of base): 2x assembling-machine-1, 38x inserter, 2x wooden-chest. BUILD THEM:
+   - Get/craft the needed items into your inventory: 2 assembling-machine-1,
+     38 inserters (each = iron-gear + electronic-circuit + iron-plate), 2
+     wooden-chest (2 wood each). Pull from existing stockpile chests if they
+     have them; else craft (miner is supplying plates/gears/circuits/wood).
+   - Walk to the mall area (~center -60,83) and build the ghosts:
+     remote.call('claude','build_ghosts_in_range', 52, <radius>) which places
+     ghosts from your inventory — do it in passes as you move along the mall,
+     restocking inventory between passes. Report ghosts-remaining each cycle.
+   - ALSO keep the labs fed (research still stalled — if the mall you're
+     building includes the science->lab link, great; otherwise still make sure
+     red+green science reaches the labs).
+  --- prior stockpile/research task (secondary) ---
+  *** NEW GOAL — STOCKPILE BUILDING SUPPLIES (JJ
   2026-07-05). Drive courier (unum 52).
   !!! #1 FIX RESEARCH — STILL STALLED (concrete 83% for 3 cycles, BOTH labs
      idle/starved). The labs were being HAND-FED and died when you started the

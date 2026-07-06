@@ -12,10 +12,12 @@ TEAM TODO LIST
 ## the STOCKPILE, scout=help Ester. Keep red+green science + research    ##
 ## flowing.                                                              ##
 ##                                                                       ##
-## NEW GOAL 2026-07-05: STOCKPILE BUILDING SUPPLIES. courier builds a    ##
-## small mall (belts/inserters/poles/furnaces/drills/asm) -> stock in    ##
-## chests near base for JJ+Ester. miner: keep IRON+COPPER PLATES + coal   ##
-## flowing to feed the mall (plates are the bottleneck for supplies).    ##
+## TOP PRIORITY 2026-07-05: BUILD JJ'S MALL GHOSTS. JJ placed 42 ghosts  ##
+## (2 asm1, 38 inserters, 2 wooden-chest) at x[-89..-33] y[75..92].      ##
+## courier: craft the items + build the ghosts (build_ghosts_in_range).  ##
+## miner: SUPPLY iron+copper PLATES + iron-gears + electronic-circuits +  ##
+## wood so courier can craft the 38 inserters + 2 asm + 2 chests. Keep    ##
+## coal flowing. (Stockpile + keeping labs fed continue underneath.)      ##
 ##########################################################################
 
 
