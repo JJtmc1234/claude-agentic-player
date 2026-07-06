@@ -5,9 +5,14 @@ TEAM TODO LIST
 *** OVERNIGHT MISSION (JJ, 12h target): AUTOMATE BLUE SCIENCE           ***
 *** (chemical-science-pack) — produce it continuously + feed labs.      ***
 *** This is the #1 goal all night. Chain of work:                       ***
-***  1. RESEARCH oil chain -> chemical-science-pack (Manager drives the ***
-***     queue: fluid-handling->oil-gathering->oil-processing->sulfur-    ***
-***     processing/plastics/advanced-circuit->chemical-science-pack).    ***
+***  1. *** KEY INSIGHT: oil-processing (+ plastics/advanced-circuit/     ***
+***     sulfur-processing/chemical-science-pack) are TRIGGER techs — they ***
+***     UNLOCK BY DOING THINGS (getting crude oil, making plastic, etc.), ***
+***     NOT by spending science. So you CANNOT research your way to blue  ***
+***     sci — you must BUILD THE OIL CHAIN, which auto-unlocks the techs. ***
+***     fluid-handling + oil-gathering are already done (pumpjack unlocked)***
+***     Manager keeps other red+green research topped up; do NOT block on  ***
+***     research for the oil chain.                                        ***
 ***  2. OIL: charted crude-oil is FAR at ~(151,275) SE (~310 tiles) AND   ***
 ***     near the SE biter nest (~225,165) — risky + distant. BUILDER:    ***
 ***     hunt for CLOSER + SAFER crude-oil (try W/N/NW away from nests) +  ***
