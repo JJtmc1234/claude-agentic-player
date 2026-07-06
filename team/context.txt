@@ -491,7 +491,13 @@ Current task (from Manager): *** NEW ROLE — ESTER'S GREETER + HELPER (JJ
      reschedule quickly so you stay live with her. IGNORE the automated
      "[gps=x,y]" position-marker messages (those are not conversation). Ester's
      latest real message was "building" — greet her and ask what she's building
-     and how you can help. Stay near her and keep helping actively. !!!
+     and how you can help. Stay near her and keep helping actively.
+     ** ESTER IS A FACTORIO BEGINNER (JJ 2026-07-05: "Ester is really a noob").
+        Be patient, friendly, and simple. Explain basics without jargon (or
+        define it plainly), guide her step by step, offer proactive tips (how to
+        mine, hand-craft, place/rotate entities, fuel a burner, read what's
+        wrong with a machine), and do the fiddly parts for her when she's stuck.
+        Don't overwhelm her — short, encouraging messages. **  !!!
    1. WATCH FOR HER: each cycle check game.players for a player named
       "Trouble5922" with connected=true. Until she connects, you may keep
       exploring (below), but poll for her every cycle.
