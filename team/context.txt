@@ -213,7 +213,17 @@ Last position: ~(0.2, 55.4)
    are allowed for anyone. **
 Current task (from Manager): *** YOU CAN DRIVE NOW (pane relaunched — JJ
   confirmed all 4 working 2026-07-05). Ignore the old CODE task; DRIVE your
-  char. *** Drive miner (unum 50). ROLE = AUTOMATE COAL (the critical unblock —
+  char. *** Drive miner (unum 50). NEW TOP PRIORITY (JJ 2026-07-05: science is
+  waiting on JJ's MALL): HELP BUILD + SUPPLY JJ'S MALL GHOSTS (47 ghosts @
+  x[-89..-33] y[75..92]: mostly inserters + 2 asm + 2 chests). Two jobs:
+   (a) SUPPLY: keep iron+copper PLATES + iron-gears + electronic-circuits + wood
+       flowing to courier so the ~40 inserters/asm/chests can be crafted.
+   (b) HELP BUILD: if you have build items, join courier at the mall and build
+       ghosts too (remote.call 'claude','build_ghosts_in_range', 50, radius).
+  Getting this mall built UNBLOCKS RESEARCH — it's the priority. Keep coal
+  flowing underneath so furnaces keep smelting plates.
+  --- prior coal-automation role (secondary) ---
+  ROLE = AUTOMATE COAL (the critical unblock —
   base is coal-starved, 0 furnaces working). Steps:
    1. Place 2-3 burner mining drills ON the coal patch (22.5,55.5), each
       dropping coal into a CHEST (or a belt). Give the coal drills a little
@@ -279,9 +289,11 @@ Current task (from Manager): *** TOP PRIORITY — BUILD JJ'S MALL GHOSTS (JJ
      remote.call('claude','build_ghosts_in_range', 52, <radius>) which places
      ghosts from your inventory — do it in passes as you move along the mall,
      restocking inventory between passes. Report ghosts-remaining each cycle.
-   - ALSO keep the labs fed (research still stalled — if the mall you're
-     building includes the science->lab link, great; otherwise still make sure
-     red+green science reaches the labs).
+   - JJ CONFIRMED 2026-07-05: "science is waiting on the mall" — RESEARCH IS
+     GATED ON THIS MALL. Building it is THE unblock; do NOT worry about feeding
+     labs separately, just BUILD THE MALL fast. If you have inserters/asm/chests
+     in your STOCKPILE CHESTS (17+ near base), grab them to build the ghosts
+     immediately instead of crafting from scratch. MINER is helping you build.
   --- prior stockpile/research task (secondary) ---
   *** NEW GOAL — STOCKPILE BUILDING SUPPLIES (JJ
   2026-07-05). Drive courier (unum 52).
