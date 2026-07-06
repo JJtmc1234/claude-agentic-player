@@ -267,7 +267,20 @@ Worktree name mismatch (agent-3 dir / employee-2 branch): acknowledged
 Character name: courier — unum 52 (FRESH MAP; re-spawned @ (4,60) 2026-07-05).
   Driving VERIFIED. You OWN this char (see in-game-owner.txt) — drive it now.
 Last position: ~(3.5, 58.2)
-Current task (from Manager): AUTOMATE + SCALE + GO ELECTRIC (JJ 2026-07-05:
+Current task (from Manager): *** NEW GOAL — STOCKPILE BUILDING SUPPLIES (JJ
+  2026-07-05). Drive courier (unum 52). Build/run a small MALL and STOCKPILE the
+  output in chests so JJ + Ester can grab build materials. Make + stockpile:
+    transport-belt, inserter, small-electric-pole, stone-furnace,
+    burner-mining-drill (+ electric-mining-drill if you have circuits),
+    underground-belt + splitter (if unlocked), assembling-machine-1.
+  How: set up an assembler per item (fed iron/copper plates + gears + circuits
+  from the existing production), inserters loading each assembler's output into
+  a dedicated CHEST, and let the chests fill. Put the chests in an accessible
+  row near the base (walkable) so JJ/Ester can take from them. Keep the science
+  assemblers + labs running too (research must not starve). Craft ONLY unlocked
+  recipes. Report what's stocked + counts each cycle. This is the priority now.
+  --- prior task (secondary) ---
+  AUTOMATE + SCALE + GO ELECTRIC (JJ 2026-07-05:
   "the factory MUST grow! make them transition to electric"). You (courier, unum
   52) are still the sole active driver until the frozen panes relaunch.
   ** MANAGER 10:3x URGENT — TWO BLOCKERS, fix these before anything else:
