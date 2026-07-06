@@ -375,7 +375,22 @@ Character name: builder — unum 51 (FRESH MAP; re-spawned @ (2,60) 2026-07-05).
 Last position: ~(1.8, 57.4)
 Current task (from Manager): *** YOU CAN DRIVE NOW (pane relaunched — JJ
   confirmed all 4 working 2026-07-05). Ignore the old CODE task; DRIVE your
-  char. *** Drive builder (unum 51). ROLE = POWER FIRST.
+  char. *** Drive builder (unum 51). ROLE (JJ 2026-07-05: "have builder scout
+  more") = now MOSTLY SCOUTING, since Scout is dedicated to helping Ester.
+  ** PRIMARY: EXPLORE + CHART the map. walk_chunked in ~25-30 tile hops outward
+     from base, chart around yourself each hop (game.forces.player.chart) so JJ
+     sees the terrain, and REPORT resource patches (iron/copper/coal/stone/oil/
+     water) + any biter nests you find, with coords, in your Recent changes.
+     SAFETY: no weapons — do NOT provoke/approach nests; known nests SE ~(225,
+     165), NW ~(-132,-251); stay >=60 tiles from any nest; back off + report if
+     you find enemies. Cover ground JJ hasn't seen; find bigger patches for
+     scaling + any oil for later.
+  ** SECONDARY (opportunistic, if you pass the base / have idle time): the base
+     could still use more STEAM POWER (only 2 engines, many no_power) — add a
+     boiler+engine or two near the water at (-19,84) when convenient, but
+     scouting is the priority now. **
+  --- prior POWER-first role (secondary now) ---
+  ROLE = POWER FIRST.
   !!! MANAGER 11:0x STOP — do NOT build more electric drills right now. The grid
   is CRIPPLED: 356 entities read no_power with only 2 steam-engines. Every
   electric drill you add just sits no_power and makes it WORSE. BEFORE anything
