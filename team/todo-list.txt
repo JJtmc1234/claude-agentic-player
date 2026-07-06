@@ -2,6 +2,20 @@ TEAM TODO LIST
 ==============
 
 **************************************************************************
+*** MANAGER OVERNIGHT STATUS ~20:16: NO oil progress (0 pumpjacks after ***
+*** 1h — the 310-tile oil trek is not happening). LABS at 0 working —   ***
+*** research is stalling. IMMEDIATE:                                    ***
+***  - COURIER: FIRST keep the LABS FED (fix science->lab delivery so    ***
+***    research doesn't die) — do this before anything else.            ***
+***  - BUILDER: EXPLORE toward oil (walk W/N/NW, ~25-tile hops) to       ***
+***    GENERATE new chunks + find CLOSER crude-oil than (151,275). The   ***
+***    only known oil is 310 tiles SE near a nest; find something nearer ***
+***    + safer, chart it, report coords. This is the blue-sci gate.      ***
+***  - If no closer oil is reachable overnight, blue-sci auto is BLOCKED  ***
+***    on oil distance — that's the honest morning report for JJ.        ***
+**************************************************************************
+
+**************************************************************************
 *** OVERNIGHT MISSION (JJ, 12h target): AUTOMATE BLUE SCIENCE           ***
 *** (chemical-science-pack) — produce it continuously + feed labs.      ***
 *** This is the #1 goal all night. Chain of work:                       ***
