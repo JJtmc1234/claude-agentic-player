@@ -8,11 +8,15 @@ TEAM TODO LIST
 ***  1. RESEARCH oil chain -> chemical-science-pack (Manager drives the ***
 ***     queue: fluid-handling->oil-gathering->oil-processing->sulfur-    ***
 ***     processing/plastics/advanced-circuit->chemical-science-pack).    ***
-***  2. OIL: nearest charted crude-oil is FAR at ~(151,275) SE (~310     ***
-***     tiles). BUILDER: hunt for CLOSER crude-oil (any direction) +     ***
-***     chart it; report the nearest good oil field. (Still chart the    ***
-***     >2.5M iron patch too.)                                           ***
-***  3. Once oil-gathering researched: build PUMPJACKS on the oil.       ***
+***  2. OIL: charted crude-oil is FAR at ~(151,275) SE (~310 tiles) AND   ***
+***     near the SE biter nest (~225,165) — risky + distant. BUILDER:    ***
+***     hunt for CLOSER + SAFER crude-oil (try W/N/NW away from nests) +  ***
+***     chart it; report the nearest good oil field. If none closer, we   ***
+***     use (151,275) but expect a long haul. (Chart the iron patch too.)***
+***  3. **oil-gathering is RESEARCHED (as of ~19:2x) — PUMPJACKS ARE      ***
+***     BUILDABLE NOW.** courier+builder: go to the chosen oil field and  ***
+***     build PUMPJACKS on the crude-oil (need pumpjack items -> craft/   ***
+***     supply). This is the current build step.                         ***
 ***  4. Once oil-processing researched: OIL REFINERY (crude->petroleum   ***
 ***     gas) + pipes; CHEMICAL PLANTS for SULFUR (petroleum+water) +     ***
 ***     PLASTIC (petroleum+coal).                                        ***
