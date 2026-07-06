@@ -41,8 +41,21 @@ TEAM TODO LIST
 ##    -> that's the answer; latch it + light a lamp / show the signal.    ##
 ## HARD — partial progress is fine. Start simple (fixed K=2 unrolled:     ##
 ## N*(N-1)/2) to prove it, then generalize to variable K with the loop.   ##
-## REPORT your combinator layout + whether 5 choose 2 outputs 10.         ##
-## JUST KEEP GOING AND SCALING UP.                                        ##
+## [DONE-ish: courier's machine gave 80c9=3160 = a 32-bit OVERFLOW (real  ##
+##  answer ~2.3e11 > Factorio's 2.1e9 signal cap); logic works for small  ##
+##  values. Good.]                                                        ##
+##                                                                        ##
+## [NEXT CHALLENGE — COURIER, JJ 2026-07-05] Design a circuit-network     ##
+## "COMPUTER" that serves a USEFUL PURPOSE in the factory (not a toy).    ##
+## Best target = a SMART STOCK CONTROLLER for the mall: wire each mall    ##
+## producer-assembler to its OUTPUT CHEST (red/green wire); use a decider ##
+## combinator to ENABLE the assembler only while that chest holds < N of  ##
+## the item (disable when full). Result: the stockpile auto-tops-up every ##
+## item to a target level without overproducing/jamming. Alternatives if ##
+## you prefer: a low-resource ALARM (lamps go red when coal/iron/science  ##
+## stock is low), or a production-stats dashboard on lamps. Pick one,     ##
+## BUILD it so it actually controls/monitors real production, and REPORT  ##
+## what it does. Keep experimenting. KEEP SCALING UP.                     ##
 ##########################################################################
 
 
