@@ -41,9 +41,13 @@ TEAM TODO LIST
 ##    -> that's the answer; latch it + light a lamp / show the signal.    ##
 ## HARD — partial progress is fine. Start simple (fixed K=2 unrolled:     ##
 ## N*(N-1)/2) to prove it, then generalize to variable K with the loop.   ##
-## [DONE-ish: courier's machine gave 80c9=3160 = a 32-bit OVERFLOW (real  ##
-##  answer ~2.3e11 > Factorio's 2.1e9 signal cap); logic works for small  ##
-##  values. Good.]                                                        ##
+## [DIAGNOSIS (Manager, corrected): courier's machine is stuck on the     ##
+##  FIXED-K=2 version — it IGNORES the K input and always computes N*(N-1)/##
+##  2 = "N choose 2". Proof: 80cK gave 3160 = 80c2; 9cK gave 36 = 9c2.    ##
+##  COURIER: GENERALIZE IT — read the K signal from the constant          ##
+##  combinator and run the clocked loop K times (num*=(N-i), den*=(i+1),  ##
+##  i=0..K-1) so it computes real N choose K. Test: 9 choose 5 must = 126.##
+##  (Mind 32-bit signal cap ~2.1e9 for big results.)]                     ##
 ##                                                                        ##
 ## [NEXT CHALLENGE — COURIER, JJ 2026-07-05] Design a circuit-network     ##
 ## "COMPUTER" that serves a USEFUL PURPOSE in the factory (not a toy).    ##
@@ -55,7 +59,20 @@ TEAM TODO LIST
 ## you prefer: a low-resource ALARM (lamps go red when coal/iron/science  ##
 ## stock is low), or a production-stats dashboard on lamps. Pick one,     ##
 ## BUILD it so it actually controls/monitors real production, and REPORT  ##
-## what it does. Keep experimenting. KEEP SCALING UP.                     ##
+## what it does. Keep experimenting.                                      ##
+##                                                                        ##
+## [BIGGER CHALLENGE — COURIER, JJ 2026-07-05] Design an INTELLIGENT RAIL ##
+## NETWORK, and *** BUILD IT ONLY AS GHOSTS *** (place entity-ghosts / a  ##
+## blueprint plan — NO real entities — so JJ can review it first).        ##
+## Intelligent = CIRCUIT-CONTROLLED: e.g. one smart route mine->base with ##
+## a provider station enabled only when its output chest has a full wagon ##
+## load, a requester station enabled only when base stock is low, + TRAIN ##
+## LIMIT 1, rail signals, locomotive + cargo wagon. Start SMALL (1 route).##
+## GATE: needs 'railway' (+ maybe rail-signals/automated-rail-transport)  ##
+## researched to place these — if NOT researched, REPORT to Manager (we   ##
+## may prioritize railway research) rather than force it. Ghosts of       ##
+## unresearched entities may not place; if blocked, say so. REPORT your   ##
+## ghost layout. KEEP SCALING UP too.                                     ##
 ##########################################################################
 
 
