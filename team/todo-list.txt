@@ -20,6 +20,15 @@ TEAM TODO LIST
 ## (iron is the master scaling resource). scout=keep helping Ester.       ##
 ## Keep red+green science + research flowing. Bottleneck now = iron; grow ##
 ## it hardest. ("SE"/"NW" in reports = biter nests to AVOID, not targets.)##
+##                                                                        ##
+## + EXPERIMENT WITH CIRCUIT NETWORK (JJ 2026-07-05, circuit-network tech ##
+## is researched). Some of you (courier + any with spare time): try wire  ##
+## connections — connect a CHEST to an INSERTER with red/green wire and   ##
+## set a condition (e.g. enable inserter only when chest item count <N);   ##
+## try a decider/arithmetic COMBINATOR; wire a lamp to show a signal.     ##
+## Learn it hands-on + REPORT what worked (this helps smarter logistics   ##
+## as we scale). Keep it small/experimental, don't break working prod.    ##
+## JUST KEEP GOING AND SCALING UP.                                        ##
 ##########################################################################
 
 
