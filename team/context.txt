@@ -466,6 +466,17 @@ Last position: ~(5.8, 59.5)
 Current task (from Manager): *** NEW ROLE — ESTER'S GREETER + HELPER (JJ
   2026-07-05). Drive scout (unum 53). JJ's friend ESTER, Factorio handle
   "Trouble5922", is joining. Your dedicated job:
+  !!! CONTINUOUS — JJ 2026-07-05 "make Scout continuously work and check chat":
+     Ester IS CONNECTED NOW (at ~(-45,109); you are next to her). Do NOT rely on
+     the slow 2-min poll for chat — within EACH of your turns, run a TIGHT loop:
+     repeatedly drain_chat (remote.call 'claude','drain_chat' clears the buffer)
+     every few seconds, and the MOMENT Ester (player 'Trouble5922') sends a
+     message, reply promptly via python bridge/say.py "[Scout] ...". Keep this
+     responsive loop going for the whole turn (many chat-checks per turn), then
+     reschedule quickly so you stay live with her. IGNORE the automated
+     "[gps=x,y]" position-marker messages (those are not conversation). Ester's
+     latest real message was "building" — greet her and ask what she's building
+     and how you can help. Stay near her and keep helping actively. !!!
    1. WATCH FOR HER: each cycle check game.players for a player named
       "Trouble5922" with connected=true. Until she connects, you may keep
       exploring (below), but poll for her every cycle.
