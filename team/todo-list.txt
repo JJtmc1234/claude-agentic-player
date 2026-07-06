@@ -12,12 +12,14 @@ TEAM TODO LIST
 ## the STOCKPILE, scout=help Ester. Keep red+green science + research    ##
 ## flowing.                                                              ##
 ##                                                                       ##
-## TOP PRIORITY 2026-07-05: BUILD JJ'S MALL GHOSTS. JJ placed 42 ghosts  ##
-## (2 asm1, 38 inserters, 2 wooden-chest) at x[-89..-33] y[75..92].      ##
-## courier: craft the items + build the ghosts (build_ghosts_in_range).  ##
-## miner: SUPPLY iron+copper PLATES + iron-gears + electronic-circuits +  ##
-## wood so courier can craft the 38 inserters + 2 asm + 2 chests. Keep    ##
-## coal flowing. (Stockpile + keeping labs fed continue underneath.)      ##
+## GOAL 2026-07-05: MALL DONE (JJ "everything done"). NOW KEEP SCALING UP.##
+## Grow production CAPACITY: courier=more assemblers (circuits/gears/     ##
+## science) + more LABS (research speed) + wider belts + keep stockpiling.##
+## miner=scale iron+copper mining/smelting (more drills+furnaces) + coal. ##
+## builder=find the >2.5M IRON patch, then we set up a big mine there     ##
+## (iron is the master scaling resource). scout=keep helping Ester.       ##
+## Keep red+green science + research flowing. Bottleneck now = iron; grow ##
+## it hardest. ("SE"/"NW" in reports = biter nests to AVOID, not targets.)##
 ##########################################################################
 
 
