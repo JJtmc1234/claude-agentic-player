@@ -269,13 +269,17 @@ Character name: courier — unum 52 (FRESH MAP; re-spawned @ (4,60) 2026-07-05).
 Last position: ~(3.5, 58.2)
 Current task (from Manager): *** NEW GOAL — STOCKPILE BUILDING SUPPLIES (JJ
   2026-07-05). Drive courier (unum 52).
-  !!! FIRST, EVERY CYCLE: KEEP THE LABS FED — research just STALLED (concrete
-     stuck at 83%) because science stopped reaching the labs when you started
-     the mall. Research is JJ's goal #1 and must NOT starve. Make sure the
-     red-science (automation-science-pack) + green-science (logistic-science-
-     pack) assemblers are running AND their output is being inserted into the
-     labs (fix the inserter/belt if broken). Confirm the labs are WORKING before
-     you spend time on the mall. !!!
+  !!! #1 FIX RESEARCH — STILL STALLED (concrete 83% for 3 cycles, BOTH labs
+     idle/starved). The labs were being HAND-FED and died when you started the
+     mall. BUILD A PERMANENT AUTOMATED LINK so this never happens again:
+       - Confirm the automation-science-pack (red) + logistic-science-pack
+         (green) assemblers are RUNNING (fed plates/gears).
+       - Place INSERTERS that take each science-pack assembler's output and
+         insert it into the LAB(s) — a belt or direct inserter chain from the
+         science assemblers to the labs. NO more hand-carrying.
+       - Verify both labs show status=working (research % starts climbing off
+         83%) BEFORE you do anything on the mall.
+     Research is JJ's goal #1 — it must self-sustain. Do this FIRST, this cycle.!!!
   Then build/run a small MALL and STOCKPILE the
   output in chests so JJ + Ester can grab build materials. Make + stockpile:
     transport-belt, inserter, small-electric-pole, stone-furnace,
