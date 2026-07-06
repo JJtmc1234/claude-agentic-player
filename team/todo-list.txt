@@ -1,6 +1,34 @@
 TEAM TODO LIST
 ==============
 
+**************************************************************************
+*** OVERNIGHT MISSION (JJ, 12h target): AUTOMATE BLUE SCIENCE           ***
+*** (chemical-science-pack) — produce it continuously + feed labs.      ***
+*** This is the #1 goal all night. Chain of work:                       ***
+***  1. RESEARCH oil chain -> chemical-science-pack (Manager drives the ***
+***     queue: fluid-handling->oil-gathering->oil-processing->sulfur-    ***
+***     processing/plastics/advanced-circuit->chemical-science-pack).    ***
+***  2. OIL: nearest charted crude-oil is FAR at ~(151,275) SE (~310     ***
+***     tiles). BUILDER: hunt for CLOSER crude-oil (any direction) +     ***
+***     chart it; report the nearest good oil field. (Still chart the    ***
+***     >2.5M iron patch too.)                                           ***
+***  3. Once oil-gathering researched: build PUMPJACKS on the oil.       ***
+***  4. Once oil-processing researched: OIL REFINERY (crude->petroleum   ***
+***     gas) + pipes; CHEMICAL PLANTS for SULFUR (petroleum+water) +     ***
+***     PLASTIC (petroleum+coal).                                        ***
+***  5. Build ADVANCED-CIRCUIT (copper-cable+electronic-circuit+plastic) ***
+***     + ENGINE-UNIT (iron-gear+pipe+steel) production.                 ***
+***  6. BLUE SCIENCE assembler: chemical-science-pack = sulfur +         ***
+***     advanced-circuit + engine-unit -> inserter into the LABS.        ***
+*** ROLES: courier=LEAD the oil+blue-science build (as techs unlock);    ***
+*** miner=supply steel/gears/circuits/pipes/plates/copper+coal;          ***
+*** builder=find+chart closer oil then help build at the oil site;       ***
+*** scout=help Ester if online, else help the blue-science build.        ***
+*** Keep the base ALIVE + research flowing. Partial progress is fine —   ***
+*** get as far down this chain as possible in 12h. (Rail-network ghosts  ***
+*** + circuit experiments are SECONDARY tonight; blue sci first.)        ***
+**************************************************************************
+
 ##########################################################################
 ## RESUME 2026-07-05 — STAYING ON 2.0 (NO 2.1 migration). Server was     ##
 ## restarted (Manager); mod 0.10.7 live, chars persisted. Stand-down is  ##
