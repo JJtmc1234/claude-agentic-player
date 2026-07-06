@@ -28,6 +28,20 @@ TEAM TODO LIST
 ## try a decider/arithmetic COMBINATOR; wire a lamp to show a signal.     ##
 ## Learn it hands-on + REPORT what worked (this helps smarter logistics   ##
 ## as we scale). Keep it small/experimental, don't break working prod.    ##
+##                                                                        ##
+## [TRAINING CHALLENGE — COURIER] Build a circuit machine that computes   ##
+## "N choose K" (binomial coefficient, e.g. 5 choose 2 = 10). INPUT: a    ##
+## CONSTANT COMBINATOR emitting signal-N and signal-K. OUTPUT: the result ##
+## on a signal (show it on a LAMP or a 2nd combinator's output).          ##
+## MATH: C(N,K) = [N*(N-1)*...*(N-K+1)] / [K!]  (falling factorial / K!). ##
+## DESIGN SKETCH (K is variable, so you need a CLOCKED LOOP):             ##
+##  - a counter i that ticks 0,1,...,K-1 (decider combinator + feedback). ##
+##  - each tick: numerator *= (N - i);  denominator *= (i + 1).           ##
+##  - when i reaches K, divide numerator/denominator (arithmetic combin.) ##
+##    -> that's the answer; latch it + light a lamp / show the signal.    ##
+## HARD — partial progress is fine. Start simple (fixed K=2 unrolled:     ##
+## N*(N-1)/2) to prove it, then generalize to variable K with the loop.   ##
+## REPORT your combinator layout + whether 5 choose 2 outputs 10.         ##
 ## JUST KEEP GOING AND SCALING UP.                                        ##
 ##########################################################################
 
