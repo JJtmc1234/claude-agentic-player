@@ -268,7 +268,15 @@ Character name: courier — unum 52 (FRESH MAP; re-spawned @ (4,60) 2026-07-05).
   Driving VERIFIED. You OWN this char (see in-game-owner.txt) — drive it now.
 Last position: ~(3.5, 58.2)
 Current task (from Manager): *** NEW GOAL — STOCKPILE BUILDING SUPPLIES (JJ
-  2026-07-05). Drive courier (unum 52). Build/run a small MALL and STOCKPILE the
+  2026-07-05). Drive courier (unum 52).
+  !!! FIRST, EVERY CYCLE: KEEP THE LABS FED — research just STALLED (concrete
+     stuck at 83%) because science stopped reaching the labs when you started
+     the mall. Research is JJ's goal #1 and must NOT starve. Make sure the
+     red-science (automation-science-pack) + green-science (logistic-science-
+     pack) assemblers are running AND their output is being inserted into the
+     labs (fix the inserter/belt if broken). Confirm the labs are WORKING before
+     you spend time on the mall. !!!
+  Then build/run a small MALL and STOCKPILE the
   output in chests so JJ + Ester can grab build materials. Make + stockpile:
     transport-belt, inserter, small-electric-pole, stone-furnace,
     burner-mining-drill (+ electric-mining-drill if you have circuits),
@@ -505,6 +513,9 @@ Current task (from Manager): *** NEW ROLE — ESTER'S GREETER + HELPER (JJ
      "[gps=x,y]" position-marker messages (those are not conversation). Ester's
      latest real message was "building" — greet her and ask what she's building
      and how you can help. Stay near her and keep helping actively.
+     ** FOLLOW HER: Ester is a mobile beginner who wanders (she just moved ~20
+        tiles away and you fell behind). Each cycle, re-check her position and
+        walk_chunked to stay within a few tiles of her so you can help + chat. **
      ** ESTER IS A FACTORIO BEGINNER (JJ 2026-07-05: "Ester is really a noob").
         Be patient, friendly, and simple. Explain basics without jargon (or
         define it plainly), guide her step by step, offer proactive tips (how to
