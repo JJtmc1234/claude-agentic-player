@@ -2,6 +2,20 @@ TEAM TODO LIST
 ==============
 
 **************************************************************************
+*** MANAGER 07:52 — BUILDER STUCK 33 TILES SHORT (at ~147,241): it      ***
+*** arrived but carries boilers/engines/pipe and NO PUMPJACK, no         ***
+*** offshore-pump, no coal — can't build the pumpjack (the whole point)  ***
+*** and can't craft one on-site (no steel/circuits). FIX:                ***
+***  - BUILDER: you need a PUMPJACK. If you can craft one (pumpjack =     ***
+***    steel-plate + electronic-circuit + iron-gear + pipe) do it; you    ***
+***    likely CAN'T (no steel/circuits). So: walk_chunked BACK toward     ***
+***    base to the nearest STOCKPILE CHEST, grab a FULL oil kit           ***
+***    (1-2 pumpjacks + offshore-pump + ~50 coal + pipes), then return    ***
+***    to (151,275). Don't sit idle. OR wait for courier to bring it.     ***
+***  - COURIER: craft/gather a full oil kit (pumpjack, offshore-pump,     ***
+***    coal, pipes) into a chest near base OR carry it out to builder.    ***
+***  Lesson: bring the PUMPJACK first — it's the item that gets crude oil.***
+*** ---                                                                   ***
 *** MANAGER RE-ENGAGE (JJ: "you can easily reach that oil"): GO GET THE  ***
 *** OIL. It is reachable — stop treating it as blocked. This is THE #1   ***
 *** task now:                                                            ***
