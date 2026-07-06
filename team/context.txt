@@ -438,6 +438,11 @@ Current task (from Manager): *** YOU CAN DRIVE NOW (pane relaunched — JJ
      name='iron-ore', area=<box around the patch>}) do tot=tot+e.amount end.
      REPORT each iron patch's center coords + total amount in your Recent
      changes. Keep going until you find one > 2.5M; flag it clearly when found.
+     ** JJ 2026-07-05: MAKE SURE THE >2.5M IRON PATCH IS AT LEAST CHARTED.
+        When you find it, CHART the whole patch for the player force so JJ can
+        see it on the map: game.forces.player.chart(surface, {{minx,miny},
+        {maxx,maxy}}) covering the patch bounds (a bit of margin). Charting it
+        is the minimum deliverable even if you don't set up mining. **
      Also note other big patches (copper/coal/oil) + any nests in passing.
      SAFETY: no weapons — do NOT approach nests (known: SE ~(225,165), NW
      ~(-132,-251)); stay >=60 tiles away; back off + report on any enemies.

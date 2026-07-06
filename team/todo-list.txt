@@ -78,7 +78,17 @@ TEAM TODO LIST
 ## 'player'}. Lay a small smart route (mine->base): rails + signals +     ##
 ## 2 train-stops + loco + wagon, and add the circuit-control combinators  ##
 ## (station enable conditions). REPORT the ghost layout + bbox so JJ can  ##
-## review. Do NOT build them real (ghosts only). KEEP SCALING UP too.     ##
+## review. Do NOT build them real (ghosts only).                         ##
+## + JJ 2026-07-05, model it after EARN (ElderAxe's Rail Network):        ##
+##   - TRAINS AUTO-FUEL: every station (or a dedicated fuel stop) has an  ##
+##     inserter pulling coal from a fuel chest INTO the locomotive, so    ##
+##     trains never run dry. Include fuel chest + inserter ghosts.        ##
+##   - SERVICE / SUPPLY STATIONS: EARN-style depot stops where trains     ##
+##     load building supplies (belts/inserters/poles/rails) + power kit   ##
+##     (solar panels/accumulators, later nuclear) to HELP BUILD OUTPOSTS  ##
+##     — a "construction supply" train concept. Ghost a couple such stops.##
+##   - Circuit-controlled station enables + train limits as before.       ##
+## Keep it a clean, tileable EARN-like layout (ghosts). KEEP SCALING UP.  ##
 ##########################################################################
 
 
