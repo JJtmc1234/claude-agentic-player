@@ -499,7 +499,7 @@ local function ping()
   init_all()
   return {
     ok = true,
-    pong = "from claude-companion 0.11.0",
+    pong = "from claude-companion 0.11.1",
     tick = game.tick,
     chat_buffer_size = #storage.chat_log,
     mining_jobs = count_kv(storage.mining_jobs),
@@ -888,11 +888,25 @@ end
 
 -- ---------- crafting (0.5.0 additions) ----------
 
-local HAND_CRAFT_CATEGORIES = {
-  ['crafting'] = true,
-  ['advanced-crafting'] = true,
-  ['basic-crafting'] = true,
-}
+-- 2.1 change: LuaRecipePrototype.category (string) was REMOVED in favour of
+-- .categories (array), and recipe categories were reworked (basic-crafting
+-- removed, hand-crafting added). A recipe is hand-craftable iff any of its
+-- categories is one the CHARACTER can craft. Read that from the character
+-- prototype so this stays correct across mod sets (K2/SE/Bob's) instead of a
+-- hardcoded list.
+local function player_craft_categories()
+  local ch = prototypes.entity['character']
+  if ch and ch.crafting_categories then return ch.crafting_categories end
+  return { ['crafting'] = true, ['hand-crafting'] = true }  -- fallback
+end
+
+local function is_hand_craftable(recipe)
+  local allowed = player_craft_categories()
+  for _, cat in ipairs(recipe.categories or {}) do
+    if allowed[cat] then return true end
+  end
+  return false
+end
 
 local function craft(character_unum, recipe_name, count)
   init_craft_jobs()
@@ -900,8 +914,8 @@ local function craft(character_unum, recipe_name, count)
   if not c or not c.valid then return { ok = false, error = 'no character' } end
   local recipe = prototypes.recipe[recipe_name]
   if not recipe then return { ok = false, error = 'no recipe ' .. recipe_name } end
-  if not HAND_CRAFT_CATEGORIES[recipe.category] then
-    return { ok = false, error = 'recipe category ' .. recipe.category .. ' is not hand-craftable (need a machine)' }
+  if not is_hand_craftable(recipe) then
+    return { ok = false, error = 'recipe categories [' .. table.concat(recipe.categories or {}, ',') .. '] not hand-craftable (need a machine)' }
   end
   for _, ing in ipairs(recipe.ingredients) do
     if ing.type == 'fluid' then
@@ -1075,11 +1089,11 @@ local function get_recipe(recipe_name)
   end
   return {
     ok = true, name = recipe_name,
-    category = r.category,
+    categories = r.categories,
     energy = r.energy,
     ingredients = ingredients,
     products = products,
-    hand_craftable = HAND_CRAFT_CATEGORIES[r.category] or false,
+    hand_craftable = is_hand_craftable(r),
   }
 end
 
