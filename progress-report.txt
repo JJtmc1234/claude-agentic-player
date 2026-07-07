@@ -4,6 +4,20 @@ Running record of major milestones. Newest at top.
 
 ---
 
+## 2026-07-07 — BLUE SCIENCE AUTOMATED (chemical-science-pack)
+
+- FIRST BLUE PACKS PRODUCING. JJ built the full oil→blue chain himself
+  (pumpjacks→refineries→chem plants for sulfur+plastic→advanced-circuit+
+  engine-unit→4x chemical-science-pack assemblers). "Fully but very slowly
+  automated" — 1 of 4 chem-sci asms working; the other 3 are input-starved,
+  so employees are on SUPPLY (steel/circuits/cables/gears/pipes/coal).
+- Research tier advanced: with red+green+blue now available, Manager queued
+  (JJ: "queue whatever you want"): modules > bulk-inserter > mining-prod-1 >
+  adv-material-processing-2 (electric furnace) > advanced-oil-processing >
+  electric-energy-distribution-2 > processing-unit. research-speed-3 pending
+  (7-item queue cap).
+- courier char died + was respawned by employee-2 (now unum 8634).
+
 ## 2026-07-07 — OIL ONLINE; blue-science tech path unlocked
 
 - WE HAVE OIL. JJ built 9 pumpjacks (all working) + 2 oil-refineries running
