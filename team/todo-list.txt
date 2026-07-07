@@ -24,6 +24,11 @@ TEAM TODO LIST
 ##  steel feed ; builder=craft pipes + build more science asms/labs feed ;##
 ##  scout=armed escort near JJ/field, watch biters, retreat if hurt.      ##
 ## Keep base ALIVE (67 turrets, evolution ~0.27). CRAFT DON'T SPAWN.      ##
+## *** NEVER SIT IDLE (JJ 07-07 "continue working on anything"): if your  ##
+## primary task is momentarily done/blocked, KEEP WORKING — feed the base,##
+## EXPAND it (more electric drills/furnaces/assemblers/labs near home),   ##
+## craft ahead into the stockpile, or help another role. Always be doing  ##
+## something useful; don't wait on the Manager. ***                       ##
 ##########################################################################
 
 **************************************************************************
