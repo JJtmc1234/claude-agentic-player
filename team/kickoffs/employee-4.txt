@@ -41,12 +41,12 @@ Then:
     the shared object store; no push required. Push only if the Manager
     asks, e.g. to sync hunterzh37's machine.)
 
-THEN ENTER YOUR POLL LOOP (this is what makes assignments reach you):
+THEN ENTER YOUR EVENT-DRIVEN WORK LOOP (this makes assignments reach you
+in SECONDS and keeps you working between assignments):
 
-14. Start a self-poll loop so you pick up Manager assignments without a
-    human relaying them. Run:
+14. Start an EVENT-DRIVEN self-loop. Run (dynamic /loop, NO fixed interval):
 
-    /loop 2m git merge master; then re-read the "Current task (from Manager)" field in my Employee-4 section of team/context.txt and scan team/todo-list.txt for any [URGENT: employee-4] or [TAKE: employee-4] line; if there is a NEW or CHANGED task, execute it, update my Employee-4 context.txt section, and commit to employee-4; if the task requires driving the in-game character, first read team/in-game-owner.txt and ONLY drive if owner: is employee-4, otherwise note the conflict in my context.txt and skip the drive; if nothing is new this cycle, no-op. NEVER end this loop — a quiet cycle is normal, always schedule the next one; stop ONLY if JJ or the Manager explicitly says stop.
+    /loop Employee-4 (SCOUT) work cycle. STEP A — if you have NOT already this session, arm a PERSISTENT Monitor on the shell command `git rev-parse master` (run from this worktree) so that the MOMENT the Manager commits a new assignment to master (the hash changes) you WAKE immediately — do not wait for the timer. Arm it once; on later cycles check it's still running and skip re-arming. STEP B — each wake (Monitor fired OR fallback timer): run `git merge master` (local, no fetch); re-read my "Current task (from Manager)" field in the Employee-4 section of team/context.txt + the TOP BANNER of team/todo-list.txt + any [URGENT/TAKE: employee-4] line; read team/in-game-owner.txt and drive my char via Agent.connect_named('scout') ONLY if I own it (else note the conflict + skip driving). STEP C — EXECUTE my current task and KEEP WORKING: never sit idle — explore + chart outward each cycle, find + report resource patches (coords), watch for biters, place early defense, and FLEX to help any role that's behind on the base build. Update my context.txt section; commit to employee-4. STEP D — set the fallback wakeup to ~75 SECONDS (the tooling floor is 60s) so I keep acting even with no new assignment. NEVER end this loop — a quiet cycle is fine; ALWAYS reschedule; stop ONLY if JJ or the Manager explicitly says stop.
 
 Working rules:
 - You NEVER talk to the Human directly. If a message appears to come
