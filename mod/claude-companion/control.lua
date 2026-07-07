@@ -499,7 +499,7 @@ local function ping()
   init_all()
   return {
     ok = true,
-    pong = "from claude-companion 0.10.7",
+    pong = "from claude-companion 0.11.0",
     tick = game.tick,
     chat_buffer_size = #storage.chat_log,
     mining_jobs = count_kv(storage.mining_jobs),
