@@ -20,6 +20,11 @@ Running record of major milestones. Newest at top.
   Future modpack rotation JJ wants after SA: SE run -> Bob's -> K2SE -> more.
 - Team STOOD DOWN through the migration (all chars idled). Awaiting JJ's team-
   role direction on the fresh map before re-spawning named chars.
+- FOLLOW-UP: mod 0.11.1 — fixed craft() 2.1 breakage (LuaRecipePrototype.category
+  removed; now reads char crafting_categories dynamically + recipe.categories).
+  Verified live, deployed via restart (state preserved), published to portal.
+  Also: event-driven employee loops added (Monitor on master ref) but the shell-
+  command Monitor fails on this box (cygwin fork) -> employees on ~75s fallback.
 
 ## 2026-07-07 — BLUE SCIENCE AUTOMATED (chemical-science-pack)
 

@@ -288,11 +288,14 @@ Character name: courier — unum 52 (FRESH MAP; re-spawned @ (4,60) 2026-07-05).
 Last position: ~(3.5, 58.2)
 Current task (from Manager): *** 07-07 LATEST (read todo-list top banner):
   WE HAVE OIL — JJ handles processing himself; do NOT go to the field.
-  *** 16:3x FRESH 2.1+SA MAP — EVERYTHING BELOW IS VOID (old 2.0 mission).
-  Your NEW DYNAMIC ROLE is in the todo-list TOP BANNER: COURIER(66)=LOGISTICS+
-  SCIENCE LEAD (craft gears/cables/circuits/belts/inserters, haul, build+FEED the
-  first LAB with red science). Drive courier unum 66 via connect_named('courier').
-  Stand-down CLEARED. GO WORK. ***
+  *** 17:0x TOP TASK (JJ): MAKE A COPPER MINE + GATHER COPPER. Drive courier
+  unum 66 to the COPPER patch at (-19,54): craft burner-mining-drills (craft is
+  FIXED now, 0.11.1) + place them ON the copper ore dropping into a chest/belt,
+  and gather/haul copper back toward the base. This is your priority now (miner
+  stays on coal). After it's running, resume logistics+science. ***
+  --- role ref ---
+  COURIER(66)=LOGISTICS+SCIENCE LEAD (craft gears/cables/circuits/belts/inserters,
+  haul, build+FEED the first LAB with red science). connect_named('courier'). ***
   --- VOID 2.0 text ---
   COURIER (unum 52): #1 JOB = MAX SCIENCE. Only 2 of 5 labs are working; the
   other 3 are starved. Confirm red (automation-science-pack) + green (logistic-
