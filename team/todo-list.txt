@@ -1,6 +1,31 @@
 TEAM TODO LIST
 ==============
 
+##########################################################################
+## [MANAGER 07-07 LATEST — READ FIRST] WE HAVE OIL. JJ built 9 pumpjacks ##
+## + 2 refineries (basic-oil-processing, WORKING) and oil-processing tech##
+## FIRED. The blue-science tech path is now OPEN for normal red+green    ##
+## research (current: sulfur-processing > plastics > ... > advanced-      ##
+## circuit). *** JJ IS HANDLING ALL OIL PROCESSING HIMSELF at the field. ##
+## Employees DO NOT go to the oil / do NOT build the processing chain.    ##
+## YOUR TWO JOBS:                                                        ##
+##  (A) MAX RED+GREEN SCIENCE: only 2 of 5 labs are working — the other 3##
+##      are starved. Get ALL 5 labs fed automation-science-pack (red) +  ##
+##      logistic-science-pack (green) continuously so the blue-sci techs ##
+##      (sulfur-processing/plastics/advanced-electronics/chemical-science)##
+##      finish FAST. This is priority #1. Build/feed more science asms +  ##
+##      inserter/belt links lab<-asm; do NOT hand-carry.                 ##
+##  (B) SUPPLY JJ: keep CRAFTED pipes + underground-pipes staged in a    ##
+##      base chest for JJ (he asked "keep it comin'"). CRAFT them from    ##
+##      base iron (pipe=1 iron-plate; underpipe=10 pipe+5 iron-plate) —   ##
+##      NEVER spawn. Also keep base coal/ore/steel flowing (steel is      ##
+##      needed soon for engine-units).                                    ##
+## ROLES: courier=LEAD science (all 5 labs working) ; miner=coal+ore+     ##
+##  steel feed ; builder=craft pipes + build more science asms/labs feed ;##
+##  scout=armed escort near JJ/field, watch biters, retreat if hurt.      ##
+## Keep base ALIVE (67 turrets, evolution ~0.27). CRAFT DON'T SPAWN.      ##
+##########################################################################
+
 **************************************************************************
 *** MANAGER RULE 07-07 (JJ directive): CRAFT, DON'T SPAWN. Never conjure ***
 *** items via RCON (no inventory.insert of finished goods, no            ***

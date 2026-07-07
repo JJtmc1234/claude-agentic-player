@@ -58,16 +58,29 @@ JJ's target: automate chemical-science-pack (blue). Gate = crude OIL.
   assembler -> feed labs. Big remote build 260 tiles out; product haul-back
   (train, railway IS researched) or on-site is the hard part.
 
-## RIGHT NOW (in progress this session)
-- JJ live in-game at the oil (~146,289), developing it; asked for pipes +
-  underpipes and "keep it comin'".
-- Panes were all IDLE -> Manager driving. miner is HAND-CRAFTING 40 underpipes
-  + 100 pipes from 700 iron plates (taken from iron chest @ -18,81, which had
-  1328 iron). courier + builder walking to the crafting area to haul the batch
-  260 tiles to JJ. scout = armed escort at the oil (SMG + ~300 piercing).
-- Loop: 180s (3-min) ACTIVE wakeups driving the mission (craft pipes -> haul to
-  oil, scout escort, keep chars alive). Reschedule same prompt each cycle until
-  JJ says stop, then revert to 1200s base-monitor loop.
+## RIGHT NOW (in progress this session) — 07-07 UPDATE: OIL IS FLOWING
+- WE HAVE OIL. JJ built 9 pumpjacks (all working) + 2 oil-refineries (basic-oil-
+  processing, WORKING). oil-processing tech FIRED. A base storage tank @ (-15,74)
+  holds ~14.7k crude. JJ is HANDLING ALL OIL PROCESSING HIMSELF at the field
+  (~his choice, AskUserQuestion 07-07). Employees do NOT go to the field.
+- Blue-science tech path now OPEN via normal red+green research. current_research
+  = sulfur-processing; queue = sulfur-processing>plastics>explosives>battery>
+  accumulators>advanced-circuit (flagged to JJ: explosives/battery/accum delay
+  blue; suggest reorder to sulfur>plastics>advanced-electronics>chemical-sci).
+- EMPLOYEE FOCUS (reassigned 07-07): courier=MAX SCIENCE (only 2/5 labs working
+  — get all 5 fed red+green so blue techs land fast); miner=coal+ore+STEEL feed;
+  builder=craft pipes for JJ + build more science asms/lab feeds; scout=armed
+  escort near JJ at field, retreat if hurt.
+- BLUE-SCIENCE CHAIN (verified recipes): petroleum -> sulfur(30petro+30water) +
+  plastic(20petro+1coal); advanced-circuit(2plastic+4copper-cable+2elec-circuit);
+  engine-unit(1steel+1gear+2pipe, BUILDABLE NOW engine tech done); chemical-
+  science-pack(1sulfur+3adv-circuit+2engine-unit)->labs. Steel + water-at-
+  processing are the two parallel prereqs.
+- Char positions (last probe): miner -21,86 | builder -45,82 | courier 2,62 |
+  scout 135,270 | JJ -13,93. Walks idle. Panes may be idle again — watch + drive
+  as fallback only if a char is needed and its pane is dead.
+- Loop: base-monitor cadence (JJ handling the hot path himself now). Reschedule
+  each cycle until JJ says stop.
 
 ## BASE STATE (2026-07-07, fresh map)
 - ~1118 built entities, healthy. 40 stone furnaces working, 34 assemblers, 5

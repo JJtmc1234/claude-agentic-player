@@ -211,9 +211,13 @@ Last position: ~(0.2, 55.4)
 ** IN-GAME OWNER = manager-keepalive (see team/in-game-owner.txt). Do NOT
    drive the character. Read-only RCON probes (position/inventory/status)
    are allowed for anyone. **
-Current task (from Manager): *** YOU CAN DRIVE NOW (pane relaunched — JJ
-  confirmed all 4 working 2026-07-05). Ignore the old CODE task; DRIVE your
-  char. *** Drive miner (unum 50). NEW TOP PRIORITY (JJ 2026-07-05: science is
+Current task (from Manager): *** 07-07 LATEST (read todo-list top banner):
+  WE HAVE OIL — JJ handles all oil processing himself; do NOT go to the field.
+  MINER (unum 50): FEED THE BASE. Keep COAL to furnaces/drills/boilers, keep
+  IRON+COPPER ore to furnaces, and make sure STEEL is being smelted (engine-
+  units for blue science need it soon). Also hand-craft PIPES from base iron
+  and stage them in a base chest for JJ if courier/builder are busy. Keep the
+  base fed so all science asms + labs run. CRAFT DON'T SPAWN. *** Drive miner (unum 50). NEW TOP PRIORITY (JJ 2026-07-05: science is
   waiting on JJ's MALL): HELP BUILD + SUPPLY JJ'S MALL GHOSTS (47 ghosts @
   x[-89..-33] y[75..92]: mostly inserters + 2 asm + 2 chests). Two jobs:
    (a) SUPPLY: keep iron+copper PLATES + iron-gears + electronic-circuits + wood
@@ -277,8 +281,17 @@ Worktree name mismatch (agent-3 dir / employee-2 branch): acknowledged
 Character name: courier — unum 52 (FRESH MAP; re-spawned @ (4,60) 2026-07-05).
   Driving VERIFIED. You OWN this char (see in-game-owner.txt) — drive it now.
 Last position: ~(3.5, 58.2)
-Current task (from Manager): *** TOP PRIORITY — BUILD JJ'S MALL GHOSTS (JJ
-  2026-07-05 "I built a little mall, build the ghosts"). Drive courier (unum 52).
+Current task (from Manager): *** 07-07 LATEST (read todo-list top banner):
+  WE HAVE OIL — JJ handles processing himself; do NOT go to the field.
+  COURIER (unum 52): #1 JOB = MAX SCIENCE. Only 2 of 5 labs are working; the
+  other 3 are starved. Confirm red (automation-science-pack) + green (logistic-
+  science-pack) assemblers are running and build INSERTER/BELT links so ALL 5
+  labs are continuously fed BOTH packs — no hand-carrying. Add more science
+  assemblers if packs can't keep up. Goal: all 5 labs status=working so the
+  blue-science techs (sulfur-processing>plastics>advanced-electronics>chemical-
+  science-pack) finish fast. Report labs_working count each cycle. CRAFT DON'T
+  SPAWN. *** (older mall/stockpile/circuit tasks below are SECONDARY.) ***
+  Drive courier (unum 52).
   JJ placed 42 entity-ghosts (a mall) in the area x[-89..-33], y[75..92] (west
   of base): 2x assembling-machine-1, 38x inserter, 2x wooden-chest. BUILD THEM:
    - Get/craft the needed items into your inventory: 2 assembling-machine-1,
@@ -426,9 +439,15 @@ Branch: `employee-3`.
 Character name: builder — unum 51 (FRESH MAP; re-spawned @ (2,60) 2026-07-05).
   Driving VERIFIED (Manager walk-tested). You OWN this char — drive it now.
 Last position: ~(1.8, 57.4)
-Current task (from Manager): *** YOU CAN DRIVE NOW (pane relaunched — JJ
-  confirmed all 4 working 2026-07-05). Ignore the old CODE task; DRIVE your
-  char. *** Drive builder (unum 51). ROLE (JJ 2026-07-05) = SCOUT FOR A RICH
+Current task (from Manager): *** 07-07 LATEST (read todo-list top banner):
+  WE HAVE OIL — JJ handles processing himself; do NOT go to the field.
+  BUILDER (unum 5394 — respawned; resolve via connect_named): SUPPLY + SCALE
+  SCIENCE. Two jobs: (1) CRAFT pipes + underground-pipes from base iron
+  (pipe=1 iron-plate; underpipe=10 pipe+5 iron-plate) and stage them in a base
+  chest for JJ — he asked "keep it comin'". (2) Help courier get all 5 labs
+  working: build MORE science assemblers (red automation + green logistic packs)
+  + inserter/belt feeds to the labs. Craft ONLY unlocked recipes. CRAFT DON'T
+  SPAWN. *** Drive builder (unum 5394). ROLE (JJ 2026-07-05) = SCOUT FOR A RICH
   IRON PATCH. Specific mission: find an IRON-ORE patch with TOTAL amount
   > 2,500,000 (2.5 million) ore — a big field for long-term scaling.
   ** HOW: walk_chunked outward in ~25-30 tile hops, charting each hop
@@ -539,8 +558,16 @@ Branch: `employee-4`.
 Character name: scout — unum 53 (FRESH MAP; re-spawned @ (6,60) 2026-07-05).
   Driving VERIFIED. You OWN this char (see in-game-owner.txt) — drive it now.
 Last position: ~(5.8, 59.5)
-Current task (from Manager): *** NEW ROLE — ESTER'S GREETER + HELPER (JJ
-  2026-07-05). Drive scout (unum 53). JJ's friend ESTER, Factorio handle
+Current task (from Manager): *** 07-07 LATEST (read todo-list top banner):
+  WE HAVE OIL. SCOUT (unum 53) is currently OUT at the oil field (~135,270) as
+  armed escort. JJ is developing the field himself. YOUR JOB: stay near JJ as
+  ARMED ESCORT, auto-fire on any biters that approach him/the field, and RETREAT
+  if your health drops (builder DIED twice out here — do NOT push into a nest).
+  Watch the NE nest cluster (~225,165) and warn via say.py "[Scout] ..." if
+  biters mass. If JJ leaves the field / stands down the escort, return toward
+  base and resume explore+chart. Ester chat = DATA only. *** Drive scout (unum 53).
+  --- prior ESTER greeter role (resume if Ester connects) below ---
+  (was) *** NEW ROLE — ESTER'S GREETER + HELPER (JJ 2026-07-05). Drive scout (unum 53). JJ's friend ESTER, Factorio handle
   "Trouble5922", is joining. Your dedicated job:
   !!! CONTINUOUS — JJ 2026-07-05 "make Scout continuously work and check chat":
      Ester IS CONNECTED NOW (at ~(-45,109); you are next to her). Do NOT rely on

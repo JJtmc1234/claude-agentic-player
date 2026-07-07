@@ -4,6 +4,21 @@ Running record of major milestones. Newest at top.
 
 ---
 
+## 2026-07-07 — OIL ONLINE; blue-science tech path unlocked
+
+- WE HAVE OIL. JJ built 9 pumpjacks (all working) + 2 oil-refineries running
+  basic-oil-processing (crude→petroleum). `oil-processing` trigger tech FIRED;
+  a base storage tank @ (-15,74) holds ~14.7k crude. JJ is developing the field
+  + all oil processing himself (his choice); employees stay off the field.
+- Blue-science (chemical-science-pack) tech path now researchable with normal
+  red+green. current_research=sulfur-processing. Verified full chain to blue:
+  petroleum→sulfur+plastic→advanced-circuit + engine-unit→chemical-science-pack.
+- Employees reassigned: courier=max red+green science (2/5 labs working→get all
+  5 fed); miner=coal+ore+steel feed; builder=craft pipes for JJ + scale science;
+  scout=armed escort near JJ at the field.
+
+---
+
 ## 2026-07-05 — Fresh map; multi-char team live; mod 0.10.7 (auto map-reveal)
 
 - FRESH MAP loaded (~07:44). Old base/chars void. Re-spawned 4 named team
