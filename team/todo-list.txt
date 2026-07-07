@@ -2,27 +2,26 @@ TEAM TODO LIST
 ==============
 
 ##########################################################################
-## [MANAGER 07-07 LATEST — READ FIRST] WE HAVE OIL. JJ built 9 pumpjacks ##
-## + 2 refineries (basic-oil-processing, WORKING) and oil-processing tech##
-## FIRED. The blue-science tech path is now OPEN for normal red+green    ##
-## research (current: sulfur-processing > plastics > ... > advanced-      ##
-## circuit). *** JJ IS HANDLING ALL OIL PROCESSING HIMSELF at the field. ##
-## Employees DO NOT go to the oil / do NOT build the processing chain.    ##
-## YOUR TWO JOBS:                                                        ##
-##  (A) MAX RED+GREEN SCIENCE: only 2 of 5 labs are working — the other 3##
-##      are starved. Get ALL 5 labs fed automation-science-pack (red) +  ##
-##      logistic-science-pack (green) continuously so the blue-sci techs ##
-##      (sulfur-processing/plastics/advanced-electronics/chemical-science)##
-##      finish FAST. This is priority #1. Build/feed more science asms +  ##
-##      inserter/belt links lab<-asm; do NOT hand-carry.                 ##
-##  (B) SUPPLY JJ: keep CRAFTED pipes + underground-pipes staged in a    ##
-##      base chest for JJ (he asked "keep it comin'"). CRAFT them from    ##
-##      base iron (pipe=1 iron-plate; underpipe=10 pipe+5 iron-plate) —   ##
-##      NEVER spawn. Also keep base coal/ore/steel flowing (steel is      ##
-##      needed soon for engine-units).                                    ##
-## ROLES: courier=LEAD science (all 5 labs working) ; miner=coal+ore+     ##
-##  steel feed ; builder=craft pipes + build more science asms/labs feed ;##
-##  scout=armed escort near JJ/field, watch biters, retreat if hurt.      ##
+## [MANAGER 07-07 LATEST — READ FIRST] OIL + BLUE-SCIENCE TECH DONE.     ##
+## JJ built 9 pumpjacks + 2 refineries; chemical-science-pack tech is     ##
+## RESEARCHED and the whole recipe chain (sulfur/plastic/advanced-circuit/##
+## engine-unit/chem-science-pack) is UNLOCKED. *** JJ IS BUILDING THE     ##
+## ENTIRE OIL + BLUE-PACK CHAIN HIMSELF. Employees DO NOT go to the field ##
+## and DO NOT build the oil/blue-sci assemblers — that's JJ's. ***        ##
+## YOUR JOB NOW = SUPPLY JJ'S BLUE CHAIN + KEEP THE BASE RUNNING:         ##
+##  (A) SUPPLY the blue-chain INPUTS into an accessible base chest for JJ:##
+##      STEEL-PLATE (engine-units), COPPER-CABLE + ELECTRONIC-CIRCUIT     ##
+##      (advanced-circuits), IRON-GEAR-WHEEL + PIPES (engine-units), and  ##
+##      COAL (chem plants make plastic from petroleum+coal). Keep these   ##
+##      topped up — the blue chain is hungry for steel + circuits.        ##
+##      CRAFT/smelt them from base stock; NEVER spawn.                    ##
+##  (B) KEEP RED+GREEN SCIENCE RUNNING: all 5 labs are working now — keep ##
+##      them fed automation + logistic packs so any remaining research    ##
+##      keeps ticking. (Blue packs get added by JJ once he produces them.)##
+## ROLES: miner=coal+ore+SCALE STEEL smelting (steel is the tight input);##
+##  courier=stockpile circuits/cables/gears/pipes + keep labs fed;        ##
+##  builder=craft pipes + smelt/scale steel + copper-cable/circuit prod;  ##
+##  scout=armed escort near JJ, watch biters, retreat if hurt.            ##
 ## Keep base ALIVE (67 turrets, evolution ~0.27). CRAFT DON'T SPAWN.      ##
 ## *** NEVER SIT IDLE (JJ 07-07 "continue working on anything"): if your  ##
 ## primary task is momentarily done/blocked, KEEP WORKING — feed the base,##
