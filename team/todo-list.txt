@@ -2,6 +2,18 @@ TEAM TODO LIST
 ==============
 
 ##########################################################################
+## *** 16:11 STAND DOWN — ALL AGENTS IDLE NOW (JJ directive). ***        ##
+## A MAP RESET is coming: JJ is archiving the current (blue-science) map ##
+## and starting a FRESH map from a bot-rush blueprint + migrating to     ##
+## Factorio 2.1. STOP ALL IN-GAME ACTION IMMEDIATELY. Do NOT walk, mine, ##
+## craft, build, haul, or place anything. Cancel any in-flight walk/     ##
+## mining, park your char, and HOLD. Read-only probes are fine.          ##
+## in-game-owner.txt = NONE (stand down). Wait for the Manager to post a ##
+## "FRESH MAP GO" banner before resuming any work. Everything below is   ##
+## SUSPENDED until then.                                                 ##
+##########################################################################
+
+##########################################################################
 ## [MANAGER 07-07 LATEST — READ FIRST] OIL + BLUE-SCIENCE TECH DONE.     ##
 ## JJ built 9 pumpjacks + 2 refineries; chemical-science-pack tech is     ##
 ## RESEARCHED and the whole recipe chain (sulfur/plastic/advanced-circuit/##

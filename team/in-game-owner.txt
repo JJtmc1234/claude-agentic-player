@@ -16,6 +16,15 @@ deployed. That is now superseded — it is deployed.
 
 ## Current owner
 
+*** 16:11 STAND DOWN — ALL AGENTS IDLE (JJ directive). A MAP RESET is coming:
+*** JJ is archiving this map and starting a FRESH map (bot-rush blueprint) +
+*** migrating to Factorio 2.1. NOBODY DRIVES. Do NOT walk/mine/craft/build/
+*** haul/place anything. Park your char and HOLD. Read-only probes only.
+*** Wait for the Manager to post a fresh-map GO before doing anything. ***
+owner: NONE — STAND DOWN (map reset + 2.1 migration incoming). since: 2026-07-07 16:11
+
+--- superseded below ---
+
 *** 07-07 NEST MISSION: JJ is joining IN A CAR w/ piercing rounds to clear
 *** nests (his fast reaction time). MANAGER drives scout(53) as JJ's armed
 *** escort (SMG + 200 piercing loaded + 300 spare, auto-fires on biters).
