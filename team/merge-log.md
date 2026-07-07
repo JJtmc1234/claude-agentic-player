@@ -20,6 +20,18 @@ Manager updates this file in the SAME commit as the merge itself
 
 ---
 
+### 2026-07-07 12:48 — employee-3 → master (code cherry-pick)
+sha: 2b9afaa
+Reviewed-by: Manager (Opus 4.8)
+Cherry-pick (new files only; branch is 100+ commits ahead of status churn)
+Summary: bridge/agent/power_plan.py — pure RCON-free steam-power sizing helper
+  (engines/boilers/pumps/coal for an electric-drill load) + test_power_plan.py.
+Files: 2 changed, 219+.
+Notes: compile OK, 10/10 tests pass, injection-scanned clean. Took only the two
+  new files (not a full branch merge) to avoid pulling the branch's per-cycle
+  context.txt churn. employee-1 (layouts.py mods) + employee-4 (_exec.py mods +
+  _base_health.py) still pending careful review — they modify existing files.
+
 ### 2026-07-04 (fresh Manager session) — employee-2 → master
 sha: a06f99b (squash of employee-2 @ 77ea20c)
 Reviewed-by: Manager (Opus 4.8)
