@@ -213,6 +213,11 @@ Last position: ~(0.2, 55.4)
    are allowed for anyone. **
 Current task (from Manager): *** 07-07 LATEST (read todo-list top banner):
   WE HAVE OIL — JJ handles all oil processing himself; do NOT go to the field.
+  *** 16:3x FRESH 2.1+SA MAP — EVERYTHING BELOW IS VOID (old 2.0 mission).
+  Your NEW DYNAMIC ROLE is in the todo-list TOP BANNER: MINER(64)=RESOURCE LEAD
+  (mine/drill coal first, then iron/copper/stone; feed the base). Drive miner
+  unum 64 via Agent.connect_named('miner'). Stand-down CLEARED. GO WORK. ***
+  --- VOID 2.0 text ---
   MINER (unum 50): FEED THE BASE. Keep COAL to furnaces/drills/boilers, keep
   IRON+COPPER ore to furnaces, and make sure STEEL is being smelted (engine-
   units for blue science need it soon). Also hand-craft PIPES from base iron
@@ -283,6 +288,12 @@ Character name: courier — unum 52 (FRESH MAP; re-spawned @ (4,60) 2026-07-05).
 Last position: ~(3.5, 58.2)
 Current task (from Manager): *** 07-07 LATEST (read todo-list top banner):
   WE HAVE OIL — JJ handles processing himself; do NOT go to the field.
+  *** 16:3x FRESH 2.1+SA MAP — EVERYTHING BELOW IS VOID (old 2.0 mission).
+  Your NEW DYNAMIC ROLE is in the todo-list TOP BANNER: COURIER(66)=LOGISTICS+
+  SCIENCE LEAD (craft gears/cables/circuits/belts/inserters, haul, build+FEED the
+  first LAB with red science). Drive courier unum 66 via connect_named('courier').
+  Stand-down CLEARED. GO WORK. ***
+  --- VOID 2.0 text ---
   COURIER (unum 52): #1 JOB = MAX SCIENCE. Only 2 of 5 labs are working; the
   other 3 are starved. Confirm red (automation-science-pack) + green (logistic-
   science-pack) assemblers are running and build INSERTER/BELT links so ALL 5
@@ -449,6 +460,12 @@ Character name: builder — unum 51 (FRESH MAP; re-spawned @ (2,60) 2026-07-05).
 Last position: ~(1.8, 57.4)
 Current task (from Manager): *** 07-07 LATEST (read todo-list top banner):
   WE HAVE OIL — JJ handles processing himself; do NOT go to the field.
+  *** 16:3x FRESH 2.1+SA MAP — EVERYTHING BELOW IS VOID (old 2.0 mission).
+  Your NEW DYNAMIC ROLE is in the todo-list TOP BANNER: BUILDER(65)=INFRA LEAD
+  (power: offshore-pump->boiler->steam; smelting: furnaces; assembly: asms;
+  build the base from scratch). Drive builder unum 65 via connect_named('builder').
+  Stand-down CLEARED. GO WORK. ***
+  --- VOID 2.0 text ---
   BUILDER (unum 5394 — respawned; resolve via connect_named): SUPPLY + SCALE
   SCIENCE. Two jobs: (1) CRAFT pipes + underground-pipes from base iron
   (pipe=1 iron-plate; underpipe=10 pipe+5 iron-plate) and stage them in a base
@@ -574,9 +591,23 @@ Branch: `employee-4`.
 Character name: scout — unum 53 (FRESH MAP; re-spawned @ (6,60) 2026-07-05).
   Driving VERIFIED. You OWN this char (see in-game-owner.txt) — drive it now.
 Last position: ~(5.8, 59.5)
-Current task (from Manager): *** 07-07 LATEST (read todo-list top banner):
-  WE HAVE OIL. SCOUT (unum 53) is currently OUT at the oil field (~135,270) as
-  armed escort. JJ is developing the field himself. YOUR JOB: stay near JJ as
+Current task (from Manager): *** 16:3x FRESH 2.1+SA MAP — EVERYTHING BELOW IS
+  VOID (old 2.0 mission). Your NEW DYNAMIC ROLE is in the todo-list TOP BANNER:
+  SCOUT(67)=SCOUT+DEFENSE+FLEX (explore + chart, find + report resource patches,
+  watch biters, early defense, flex to help any role behind). Drive scout unum 67
+  via connect_named('scout'). Stand-down CLEARED. GO WORK. ***
+  --- VOID 2.0 text ---
+  *** (was) 16:11 URGENT REPOINT — miner+builder panes are
+  DEAD (idle 3h) and base supply COLLAPSED: blue-sci assemblers 4/working-0,
+  steel down to 1 furnace. JJ is offline so no escort is needed. SCOUT (unum 53):
+  RETURN TO BASE and COVER THE BUILDER GAP: (1) fix the furnace-output CLOG —
+  put an inserter on each clogged furnace pulling plates onto a belt/into a chest
+  so smelting resumes; (2) switch more stone-furnaces to steel-plate (steel is
+  the blue-chain bottleneck) and keep them drained. Get blue-sci assemblers
+  working again (they're starved of steel->engine-units). CRAFT DON'T SPAWN.
+  Resume escort only if JJ comes back online and heads to the field.
+  --- prior escort task ---
+  *** (was) WE HAVE OIL. SCOUT (unum 53) armed escort at the oil field (~135,270). JJ is developing the field himself. YOUR JOB: stay near JJ as
   ARMED ESCORT, auto-fire on any biters that approach him/the field, and RETREAT
   if your health drops (builder DIED twice out here — do NOT push into a nest).
   Watch the NE nest cluster (~225,165) and warn via say.py "[Scout] ..." if

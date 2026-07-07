@@ -16,12 +16,17 @@ deployed. That is now superseded — it is deployed.
 
 ## Current owner
 
-*** 16:11 STAND DOWN — ALL AGENTS IDLE (JJ directive). A MAP RESET is coming:
-*** JJ is archiving this map and starting a FRESH map (bot-rush blueprint) +
-*** migrating to Factorio 2.1. NOBODY DRIVES. Do NOT walk/mine/craft/build/
-*** haul/place anything. Park your char and HOLD. Read-only probes only.
-*** Wait for the Manager to post a fresh-map GO before doing anything. ***
-owner: NONE — STAND DOWN (map reset + 2.1 migration incoming). since: 2026-07-07 16:11
+*** 16:3x FRESH MAP GO — 2.1 + SPACE AGE IS LIVE. Stand-down CLEARED. ***
+*** New map, new chars (storage reset). Driving VERIFIED on 2.1 (walk test).
+*** Per-character ownership — DRIVE YOUR OWN CHAR NOW (resolve unum via
+*** Agent.connect_named by NAME; unums shown are current):
+***   employee-1 -> miner   unum 64
+***   employee-2 -> courier unum 66
+***   employee-3 -> builder unum 65
+***   employee-4 -> scout   unum 67
+*** Fresh Space Age nauvis start from ~(0,0), 0 infrastructure. See todo-list
+*** top banner for your NEW DYNAMIC ROLE. GO WORK. Read-only probes ok anytime.
+owner: PER-CHARACTER (2.1+SA fresh map). since: 2026-07-07 16:3x
 
 --- superseded below ---
 
