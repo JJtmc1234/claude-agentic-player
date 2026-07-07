@@ -16,6 +16,14 @@ deployed. That is now superseded — it is deployed.
 
 ## Current owner
 
+*** 07-07 NEST MISSION: JJ is joining IN A CAR w/ piercing rounds to clear
+*** nests (his fast reaction time). MANAGER drives scout(53) as JJ's armed
+*** escort (SMG + 200 piercing loaded + 300 spare, auto-fires on biters).
+*** employee-4: STAND DOWN on scout during this mission (Manager owns it).
+*** scout trails JJ toward the SE nest (~225,165) — stays BEHIND JJ (JJ's car
+*** tanks aggro), never pushes into a nest ahead of him (that's how builder
+*** died). miner/builder/courier keep working the base as normal.
+
 owner: PER-CHARACTER — RESUME. Staying on 2.0 (NO 2.1 migration). Server
   restarted; drive your own char again (miner=emp1/50, builder=emp3/51,
   scout=emp4/53, courier=emp2/52). The 2.1-migration stand-down is CLEARED.
