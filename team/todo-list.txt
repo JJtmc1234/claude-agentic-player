@@ -2,6 +2,21 @@ TEAM TODO LIST
 ==============
 
 **************************************************************************
+*** MANAGER RULE 07-07 (JJ directive): CRAFT, DON'T SPAWN. Never conjure ***
+*** items via RCON (no inventory.insert of finished goods, no            ***
+*** create_entity of buildings, no filling chests with spawned items, no ***
+*** spawned guns/ammo). ALWAYS have a character actually craft (hand-craft***
+*** begin_crafting, which consumes ingredients, or produce in assemblers) ***
+*** then physically deliver. Applies to pipes, underpipes, ammo, walls,   ***
+*** turrets, everything — even under combat/time pressure. Plan the       ***
+*** logistics; don't shortcut. (Manager already slipped on this today —   ***
+*** scout's SMG/ammo + the oil pipe chest were spawned; don't repeat.)    ***
+***  - OIL PIPING: builder/courier CRAFT pipes + underground-pipes from   ***
+***    base iron stock (pipe=1 iron-plate; underpipe=10 pipe+5 iron-plate)***
+***    and stage/haul them for JJ's oil build. Real crafted stock only.   ***
+**************************************************************************
+
+**************************************************************************
 *** MANAGER 07-07 — RESET (JJ: "fix everything, don't stop, take oil    ***
 *** over, keep expanding"). CHAR CHANGE: builder + courier DIED (builder ***
 *** at the oil near the SE nest). RESPAWNED: builder=unum 5392,          ***
