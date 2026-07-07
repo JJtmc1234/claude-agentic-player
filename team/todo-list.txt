@@ -31,6 +31,12 @@ TEAM TODO LIST
 ## and only the Manager does that). CRAFT ONLY UNLOCKED recipes           ##
 ## (f.recipes[n].enabled). Report position + what you did each cycle.      ##
 ##                                                                        ##
+## *** KNOWN BLOCKER 16:5x: mod craft() is BROKEN on 2.1 (recipe.category    ##
+## removed). FIX committed (mod 0.11.1) but NOT deployed yet (needs a server ##
+## restart, awaiting JJ). Until the restart: do NOT burn cycles retrying     ##
+## remote craft() — it will keep erroring. Do what works WITHOUT crafting:   ##
+## hand-MINE ore/coal/stone, hit rocks, walk/scout/chart, position for the   ##
+## base. Crafting resumes the moment 0.11.1 deploys. ***                     ##
 ## SCOUTED PATCHES (Manager, near spawn 0,0): COAL (39,-40, d55, big) ;   ##
 ## COPPER (-19,54, d57) ; STONE (-34,38, d51) ; IRON (60,-32, d68) ;       ##
 ## ROCK FIELD ~(5,-80) N (26 rocks -> stone/coal). Second iron+coal        ##
