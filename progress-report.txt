@@ -4,6 +4,23 @@ Running record of major milestones. Newest at top.
 
 ---
 
+## 2026-07-07 — MIGRATED TO FACTORIO 2.1 + SPACE AGE (fresh map)
+
+- Major platform change (JJ directive). Old 2.0 blue-science base ARCHIVED to
+  %APPDATA%\Factorio\saves\archive_bluesci_2026-07-07.zip (+ old server.zip kept
+  as server_2.0_pre-fresh.zip). Then wiped for a fresh start.
+- Steam updated the engine to 2.1.9. Mod bumped to 0.11.0 (factorio_version 2.1,
+  base>=2.1). Enabled the full SA mod set in the server mod-list: space-age,
+  quality, elevated-rails, and recycler (recycler is new/split-out in 2.1).
+- Generated a fresh Space Age freeplay map via `factorio --create` and started
+  the dedicated server on 2.1. VERIFIED live: ping = "from claude-companion
+  0.11.0", active_mods all 2.1.9 + companion 0.11.0, mod on_init ran clean on
+  2.1 (no load error). Fresh map: 1 surface (nauvis), 0 chars, 0 players.
+- Plan change: NO bot-rush blueprint; JJ uses his own component/science BPs.
+  Future modpack rotation JJ wants after SA: SE run -> Bob's -> K2SE -> more.
+- Team STOOD DOWN through the migration (all chars idled). Awaiting JJ's team-
+  role direction on the fresh map before re-spawning named chars.
+
 ## 2026-07-07 — BLUE SCIENCE AUTOMATED (chemical-science-pack)
 
 - FIRST BLUE PACKS PRODUCING. JJ built the full oil→blue chain himself

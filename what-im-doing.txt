@@ -58,7 +58,23 @@ JJ's target: automate chemical-science-pack (blue). Gate = crude OIL.
   assembler -> feed labs. Big remote build 260 tiles out; product haul-back
   (train, railway IS researched) or on-site is the hard part.
 
-## RIGHT NOW (in progress this session) — 07-07 UPDATE: OIL IS FLOWING
+## RIGHT NOW — 07-07 LATEST: MIGRATED TO 2.1 + SPACE AGE (fresh map, live)
+- Server is now Factorio 2.1.9 + Space Age + Quality + Elevated-rails + Recycler
+  + claude-companion 0.11.0. VERIFIED via ping ("from claude-companion 0.11.0")
+  and active_mods. Fresh SA freeplay map (nauvis, 0 chars, 0 players).
+- Old 2.0 blue-science base ARCHIVED (archive_bluesci_2026-07-07.zip; old
+  server.zip -> server_2.0_pre-fresh.zip). That base/oil/blue-sci mission is
+  HISTORY now (kept below for reference).
+- NO bot-rush BP (JJ changed his mind) — JJ uses his own component/science BPs.
+- TEAM STOOD DOWN (all chars idled, in-game-owner=NONE). Fresh map has NO named
+  chars (storage reset) — when JJ gives the GO + roles, re-spawn named chars via
+  the 07-05 procedure (spawn_named_char), then lift the stand-down.
+- Future modpack rotation JJ wants after SA: SE -> Bob's -> K2SE -> more.
+- Manager 2-min cron poll loop (job e4df6868) still running; probes now hit the
+  fresh 2.1 map.
+- NEXT: await JJ's direction for what the team does on the fresh SA map.
+
+## (HISTORY — 2.0 base, now archived) RIGHT NOW: OIL IS FLOWING
 - WE HAVE OIL. JJ built 9 pumpjacks (all working) + 2 oil-refineries (basic-oil-
   processing, WORKING). oil-processing tech FIRED. A base storage tank @ (-15,74)
   holds ~14.7k crude. JJ is HANDLING ALL OIL PROCESSING HIMSELF at the field
