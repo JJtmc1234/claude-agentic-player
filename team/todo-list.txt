@@ -31,6 +31,11 @@ TEAM TODO LIST
 ## and only the Manager does that). CRAFT ONLY UNLOCKED recipes           ##
 ## (f.recipes[n].enabled). Report position + what you did each cycle.      ##
 ##                                                                        ##
+## SCOUTED PATCHES (Manager, near spawn 0,0): COAL (39,-40, d55, big) ;   ##
+## COPPER (-19,54, d57) ; STONE (-34,38, d51) ; IRON (60,-32, d68) ;       ##
+## ROCK FIELD ~(5,-80) N (26 rocks -> stone/coal). Second iron+coal        ##
+## cluster ~40 NE of spawn too. Miner started on coal; build the base near ##
+## whichever cluster you pick and mine outward. ##
 ## SPACE AGE NOTE: this is SA — new mechanics (quality, recycler, planets  ##
 ## later). For now the nauvis opening is the same as vanilla; don't chase  ##
 ## space/planet content yet. Ask the Manager (via your section) if unsure. ##
