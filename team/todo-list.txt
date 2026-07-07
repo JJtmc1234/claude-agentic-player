@@ -2,6 +2,27 @@ TEAM TODO LIST
 ==============
 
 **************************************************************************
+*** MANAGER 07-07 — RESET (JJ: "fix everything, don't stop, take oil    ***
+*** over, keep expanding"). CHAR CHANGE: builder + courier DIED (builder ***
+*** at the oil near the SE nest). RESPAWNED: builder=unum 5392,          ***
+*** courier=unum 5393 (both @ ~0,62 at base, EMPTY inventories — re-craft***
+*** /restock before working). miner=50, scout=53 unchanged. Employees:   ***
+*** use Agent.connect_named (resolves the NEW unum automatically).       ***
+*** PRIORITIES:                                                          ***
+***  1. FIX STALLS: base has ~266 stopped/starved entities. courier+miner***
+***     unclog: keep coal->furnaces/drills, science->labs, ore->furnaces ***
+***     flowing. A running base beats a bigger stalled one.              ***
+***  2. KEEP EXPANDING the base near home (more electric drills/furnaces/ ***
+***     assemblers; the base is at 1118 entities, grow it).              ***
+***  3. OIL (Manager is taking this over — see below): 1 pumpjack at      ***
+***     (151,275) is running but DISCONNECTED (waiting_for_space, no pipe/***
+***     tank). It's 260 tiles out + next to the SE nest (killed builder). ***
+***     DANGEROUS. Do NOT send an unarmed employee back there. Manager    ***
+***     will drive the oil build carefully (defense first). Employees:    ***
+***     do NOT trek to the oil unless told.                              ***
+**************************************************************************
+
+**************************************************************************
 *** MANAGER 07:52 — BUILDER STUCK 33 TILES SHORT (at ~147,241): it      ***
 *** arrived but carries boilers/engines/pipe and NO PUMPJACK, no         ***
 *** offshore-pump, no coal — can't build the pumpjack (the whole point)  ***
