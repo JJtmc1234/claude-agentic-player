@@ -455,7 +455,15 @@ Current task (from Manager): *** 07-07 LATEST (read todo-list top banner):
   chest for JJ — he asked "keep it comin'". (2) Help courier get all 5 labs
   working: build MORE science assemblers (red automation + green logistic packs)
   + inserter/belt feeds to the labs. Craft ONLY unlocked recipes. CRAFT DON'T
-  SPAWN. *** Drive builder (unum 5394). ROLE (JJ 2026-07-05) = SCOUT FOR A RICH
+  SPAWN.
+  *** 13:0x ROOT-BLOCKER (miner escalated): FURNACES ARE CLOGGING — their output
+  plates aren't being drained, so smelting stalls and miner keeps hand-draining
+  600+ trapped plates. FIX IT PROPERLY: put an INSERTER on each clogged furnace's
+  OUTPUT pulling plates onto a BELT (or into a chest) so plates flow automatically
+  — no more hand-draining. Also SCALE STEEL: only 4 of 37 furnaces are on
+  steel-plate and steel is the blue-chain bottleneck (engine-units) — switch more
+  furnaces to steel-plate + drain them. This is priority: a self-draining furnace
+  line unclogs the whole base. *** Drive builder (unum 5394). ROLE (JJ 2026-07-05) = SCOUT FOR A RICH
   IRON PATCH. Specific mission: find an IRON-ORE patch with TOTAL amount
   > 2,500,000 (2.5 million) ore — a big field for long-term scaling.
   ** HOW: walk_chunked outward in ~25-30 tile hops, charting each hop

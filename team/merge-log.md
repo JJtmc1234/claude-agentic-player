@@ -20,6 +20,18 @@ Manager updates this file in the SAME commit as the merge itself
 
 ---
 
+### 2026-07-07 13:02 — employee-4 → master (code cherry-pick)
+sha: (see git log)
+Reviewed-by: Manager (Opus 4.8)
+Cherry-pick (single file: bridge/_exec.py)
+Summary: _exec.py auto-resolves FACTORIO_RCON_PASSWORD from start-server.bat when
+  the env var isn't set (no-op if set or bat unreadable). Simplifies every RCON
+  call — no more env-set prefix needed.
+Files: 1 changed, ~18+.
+Notes: compile OK, functional self-auth test passed (returned selfauth-ok with no
+  env var set), injection-scanned clean (reads/extracts password only). employee-4's
+  other file (_base_health.py) still pending review; employee-1 layouts.py pending.
+
 ### 2026-07-07 12:48 — employee-3 → master (code cherry-pick)
 sha: 2b9afaa
 Reviewed-by: Manager (Opus 4.8)
