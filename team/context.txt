@@ -304,7 +304,15 @@ Worktree name mismatch (agent-3 dir / employee-2 branch): acknowledged
 Character name: courier — unum 52 (FRESH MAP; re-spawned @ (4,60) 2026-07-05).
   Driving VERIFIED. You OWN this char (see in-game-owner.txt) — drive it now.
 Last position: ~(3.5, 58.2)
-Current task (from Manager): *** 07-07 LATEST (read todo-list top banner):
+Current task (from Manager): *** 13:2x BUILDER = STEEL LINE FIRST (JJ has steel
+  furnaces). (1) Row of steel furnaces near iron+coal: inserter iron-plate+coal
+  in, steel-plate out to a chest. Target ~100 steel. (2) 2-3 stone furnaces on
+  stone -> STONE-BRICK (refinery needs 10 brick each). (3) Then build the
+  REFINERY + CHEM-PLANT block next to the crude tanks @ (-10,7): refinery on
+  crude -> petroleum -> chem plants (sulfur/plastic/lubricant) -> chempack.
+  Also still owe the autopack 5-assembler line (have 3, need 5). Clean zones. ***
+--- older ---
+  *** 07-07 LATEST (read todo-list top banner):
   WE HAVE OIL — JJ handles processing himself; do NOT go to the field.
   *** 17:0x CORRECTION — JJ's SW patch (~-19,54 area) is the STARTER BASE and
   JJ ALREADY has copper + stone mines there. Do NOT build a duplicate copper
