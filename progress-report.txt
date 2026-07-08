@@ -357,3 +357,9 @@ Next: stage 2 (cables curriculum) bundled in next mod deploy per `mod/claude-com
 - Refinery #1 @ (-15.5,12.5) rotated to dir=south so its crude input faces tank (-15.5,7.5); Manager placed a pipe @ (-14.5,9.5) at the computed tank-output/refinery-input junction.
 - Crude still not flowing (status fluid_ingredient_shortage) - a tank-connection offset nuance not resolvable blind via RCON. Both Manager + miner independently hit this.
 - REMAINING (JJ, map view, ~30 sec): nudge/complete the crude pipe from a tank to each refinery's input (rotate refinery so input faces tank if needed). Then petroleum flows -> chem plants -> chempack.
+
+## 2026-07-08 - First full-auto iron-plate line live (Phase-1 automation)
+- Miner built a working end-to-end automated unit: e-drill -> ore chest -> inserter -> furnace -> inserter -> plate chest, producing iron-plate hands-off (0 employee action).
+- Cracked the congestion/placement blockers: place drills at patch EDGE so drops land on clear ground; ATOMIC chest-at-drop before ore spills; 2x2 furnace snaps to integer center (use actual .position for fueling); power pole <=3t.
+- Replicable recipe validated; scaling the line up now. This is the core of JJ's Phase-1 (full auto 30 SPM) goal working.
+- Oil chain still 90% (refineries built/powered/recipe-set); final crude pipe still needs JJ map view.
