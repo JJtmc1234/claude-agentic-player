@@ -2,16 +2,21 @@ TEAM TODO LIST
 ==============
 
 ##########################################################################
-## *** 17:2x GO ELECTRIC (JJ "we don't need burner drills"). electric-     ##
-## mining-drill is now the TOP research (~8%, only needs red science) —    ##
-## it unlocks soon. Until then: do NOT build MORE burner drills. When it   ##
-## lands, craft ELECTRIC drills (need electronic-circuits: copper-cable +  ##
-## iron) and replace burners on the ore patches, wired to power (poles +   ##
-## steam engines — expand power as you add drills). Electric drills need   ##
-## NO fuel = ends the drill refuel treadmill (that's why the stockpile     ##
-## stayed empty). PREP NOW: stockpile electronic-circuits + small-electric-##
-## poles so the swap is fast. Keep existing burners minimally fueled +     ##
-## coal to FURNACES (furnaces still burn coal) until then. ***             ##
+## *** 17:3x ELECTRIC DRILL IS UNLOCKED — DO THE SWAP (JJ "we don't need  ##
+## burner drills"). Steps, in order: (1) CRAFT electronic-circuits (0 in   ##
+## stock! = copper-cable + iron-plate) — the gate for electric drills +    ##
+## everything downstream; keep making them. (2) EXPAND POWER FIRST: only   ##
+## 1.8 MW / 2 steam engines — add BOILERS + STEAM ENGINES (+ offshore pump,##
+## coal-fed) and small-electric-poles so there's headroom BEFORE adding    ##
+## electric load. (3) CRAFT electric-mining-drills (3 gear + 3 circuit + 5 ##
+## iron-plate) + place on the iron/copper ore with POLE coverage; retire   ##
+## burner drills as electric covers them. (4) Coal still feeds FURNACES    ##
+## (stone furnaces burn coal until electric furnaces, much later). Don't   ##
+## build MORE burner drills. Do this gradually; keep the base running. ***##
+## *** 17:3x JJ IS AWAY — run the ROADMAP autonomously (small-scope only): ##
+## electric swap + keep base ALIVE (coal to furnaces, ore flowing) + fill  ##
+## the spaceship stockpile + expand + scout. NO big new redesigns or new   ##
+## directions while JJ is out; preserve working builds. Keep chars ALIVE.**##
 ## *** 17:1x TEAM PRIMARY FOCUS NOW (JJ "have em work on stockpiling"):   ##
 ## STOCKPILE BUILDING SUPPLIES. JJ is handling defense + the red-science  ##
 ## assembler + power himself, so the team's #1 job = CRAFT + STOCKPILE    ##
