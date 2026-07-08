@@ -11,10 +11,14 @@ TEAM TODO LIST
 ## belts + splitters (when unlocked), assembling-machines. Set up         ##
 ## assemblers to AUTO-produce these where you can; keep a steady buffer   ##
 ## of each. Miner keeps iron/copper/coal feeding it. This is the focus.   ##
-## *** DEPOSIT INTO CHESTS (JJ 17:2x): every crafted/gathered supply must  ##
-## go INTO a hub STOCKPILE CHEST — do NOT hoard items in your character    ##
-## inventory. Craft -> walk to hub -> put_in_chest. Empty inventories that  ##
-## roam = wasted work (scout was caught roaming empty). Keep depositing.***##
+## *** DEPOSIT INTO CHESTS BY THE SPACESHIP (JJ 17:2x "CHESTS BY          ##
+## SPACESHIP"): the STOCKPILE lives RIGHT AT THE CRASH-SITE SPACESHIP at   ##
+## (-5,-6). Put all stockpile chests THERE (a tidy row next to the ship)   ##
+## and deposit EVERY crafted/gathered supply into them — do NOT hoard in   ##
+## your character inventory. Craft -> walk to the ship (-5,-6) ->          ##
+## put_in_chest. The chests there are nearly EMPTY (only ~165 stone) — the ##
+## team must actually MAKE + DEPOSIT belts/inserters/poles/furnaces/drills/##
+## gears/cable/circuits there. Empty roaming inventories = wasted work.*** ##
 ## *** 17:0x CALM PHASED ROADMAP (JJ-endorsed). Don't rush, don't        ##
 ## constantly redesign, PRESERVE working builds, prefer small improve-    ##
 ## ments over big redesigns. Verify against live state (may differ).      ##
