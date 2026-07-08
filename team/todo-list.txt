@@ -39,10 +39,14 @@ TEAM TODO LIST
 ## 3) ROCKET RUSH: with bots building, push rocket-silo + parts -> launch  ##
 ##    -> space platform. (Supersedes the earlier "not bot rush" note.) *** ##
 ## *** 13:0x MILESTONE: CRUDE PUMPED — 7 pumpjacks @ (137,366),           ##
-## oil-processing UNLOCKED. Phase 2 is GO. JJ DECISION: REFINE AT BASE —  ##
-## bring crude home (pipe/train from the field), build refinery + chem     ##
-## plants in a BASE oil zone -> petroleum/plastic/sulfur/lubricant ->      ##
-## chempack (blue). Do NOT build the refining block out at the field. ***  ##
+## oil-processing UNLOCKED. Phase 2 is GO. JJ DECISION: REFINE AT BASE.   ##
+## JJ already PIPED crude home: 4 storage tanks @ ~(-10,7) w/ ~8200 crude  ##
+## each (~33k buffered). BUILD the refinery + chem-plant block RIGHT THERE ##
+## next to those tanks (clean oil zone). PREREQ (we have 0 steel!):        ##
+## miner smelt STEEL + STONE-BRICK; courier craft PIPE. Then:             ##
+## refinery(15 steel+10 gear+10 brick+10 circ+10 pipe) on crude ->        ##
+## chem plants -> plastic/sulfur/sulfuric-acid/lubricant -> chempack.      ##
+## Do NOT build refining out at the field. ***                            ##
 ##                                                                        ##
 ## PHASE 1 (GATE, do FIRST): TRUE FULL AUTOMATION of 30 SPM red science   ##
 ##   with ZERO employee action. The base must RUN ITSELF — no hand-hauls, ##
