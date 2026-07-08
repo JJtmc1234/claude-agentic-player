@@ -2,13 +2,16 @@ TEAM TODO LIST
 ==============
 
 ##########################################################################
-## *** 17:2x UNBLOCK FIRST — AUTOMATE COAL FEED. The stockpile stays      ##
-## empty because the team is stuck HAND-REFUELING burner drills (coal      ##
-## treadmill). FIX IT: miner+builder build a SELF-FEEDING COAL setup —     ##
-## coal drills -> belt/inserters -> automatically fuel the burner drills + ##
-## furnaces (and the boiler). Once coal auto-feeds, NOBODY hand-refuels    ##
-## and the team is FREE to craft+stockpile. This is the prerequisite to    ##
-## the stockpile actually filling. (Going electric later ends it fully.)***##
+## *** 17:2x GO ELECTRIC (JJ "we don't need burner drills"). electric-     ##
+## mining-drill is now the TOP research (~8%, only needs red science) —    ##
+## it unlocks soon. Until then: do NOT build MORE burner drills. When it   ##
+## lands, craft ELECTRIC drills (need electronic-circuits: copper-cable +  ##
+## iron) and replace burners on the ore patches, wired to power (poles +   ##
+## steam engines — expand power as you add drills). Electric drills need   ##
+## NO fuel = ends the drill refuel treadmill (that's why the stockpile     ##
+## stayed empty). PREP NOW: stockpile electronic-circuits + small-electric-##
+## poles so the swap is fast. Keep existing burners minimally fueled +     ##
+## coal to FURNACES (furnaces still burn coal) until then. ***             ##
 ## *** 17:1x TEAM PRIMARY FOCUS NOW (JJ "have em work on stockpiling"):   ##
 ## STOCKPILE BUILDING SUPPLIES. JJ is handling defense + the red-science  ##
 ## assembler + power himself, so the team's #1 job = CRAFT + STOCKPILE    ##
