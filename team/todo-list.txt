@@ -2,6 +2,22 @@ TEAM TODO LIST
 ==============
 
 ##########################################################################
+## *** 17:4x BITER ALERT (JJ "WATCH FOR BUGS, GET DEFENSE"). Biters are   ##
+## ~90-150 tiles out and approaching; JJ is REJOINING the server to fight ##
+## them directly. ALL CHARS: do NOT engage biters/nests. If a biter comes ##
+## within ~30 tiles of you or your HP drops, RETREAT toward base/away from ##
+## the threat immediately (builder died twice on the old map — stay ALIVE).##
+## Turrets need copper-PLATE (we have 0 — all copper is cable); if you can ##
+## smelt copper-plate, do it so turrets become buildable. Manager is       ##
+## crafting ammo (40 mags) on builder + will keep fixing the frozen base.  ##
+## SCOUT: pull back from the SW (nearest bug ~92t from you). ***           ##
+## *** STRATEGY (JJ 17:4x): Nauvis = LEAN STARTER only — build just enough ##
+## to tech up (red->green->blue science) + reach ROCKETS; the REAL base    ##
+## goes on VULCANUS later (abundant resources). So do NOT over-build       ##
+## Nauvis; keep it small + functional, aim at the rocket path. ***         ##
+##########################################################################
+
+##########################################################################
 ## *** 17:3x #1 GOAL (JJ): FULL AUTOMATION -> 5 FULLY-FED RED-SCIENCE      ##
 ## ASSEMBLERS that run with NO manual input. automation-science-pack =     ##
 ## 1 iron-gear-wheel + 1 copper-plate. Build the WHOLE chain BELT-FED (no  ##
