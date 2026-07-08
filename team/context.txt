@@ -466,11 +466,12 @@ Character name: builder — unum 51 (FRESH MAP; re-spawned @ (2,60) 2026-07-05).
 Last position: ~(1.8, 57.4)
 Current task (from Manager): *** 07-07 LATEST (read todo-list top banner):
   WE HAVE OIL — JJ handles processing himself; do NOT go to the field.
-  *** 17:0x PHASE 2 (see roadmap banner): once copper-plate is flowing, BUILD
-  THE SCIENCE SETUP — 2-4 LABS + 1-2 assemblers on automation-science-pack
-  (iron-gear + copper-plate) + inserter feeds so red science ticks. Also feed
-  the 5 IDLE furnaces. Keep it compact + readable; preserve existing builds.
-  Power (Phase 3) comes after. ***
+  *** 17:1x PHASE 2 — JJ IS BUILDING THE RED-SCIENCE ASSEMBLER himself (iron
+  +copper now fully automated). SUPPORT, don't duplicate: keep iron-gear +
+  copper-plate flowing to JJ's assembler, build MORE LABS (2-4) + inserter-link
+  the assembler output -> labs so research ticks + scales, and feed any idle
+  furnaces. Coordinate with JJ's build; preserve it. Then help the (0,0) hub +
+  stockpile. Power (Phase 3) is JJ's for now. ***
   *** 16:3x FRESH 2.1+SA MAP — EVERYTHING BELOW IS VOID (old 2.0 mission).
   Your NEW DYNAMIC ROLE is in the todo-list TOP BANNER: BUILDER(65)=INFRA LEAD
   (power: offshore-pump->boiler->steam; smelting: furnaces; assembly: asms;
@@ -602,11 +603,11 @@ Branch: `employee-4`.
 Character name: scout — unum 53 (FRESH MAP; re-spawned @ (6,60) 2026-07-05).
   Driving VERIFIED. You OWN this char (see in-game-owner.txt) — drive it now.
 Last position: ~(5.8, 59.5)
-Current task (from Manager): *** 17:0x DEFENSE NOW (JJ: attacks expected soon).
-  Priority: go to the (0,0) HUB (near the crash-site spaceship) and set up
-  DEFENSE — craft/place gun-turrets + firearm-magazine ammo (and walls if
-  available) covering the hub edge facing pollution/nests. gun-turret + ammo are early-craftable. Keep some
-  charting but DEFENSE first this phase. Report turret+ammo count each cycle. ***
+Current task (from Manager): *** 17:1x DEFENSE CANCELLED — JJ handles defense
+  himself ("I can make defense"). Resume SCOUT+FLEX: chart charted-bound areas,
+  report only CHARTED resource finds, watch for biters near the hub (warn if any
+  approach), and FLEX to help the (0,0) hub build or the SW->hub copper belt when
+  idle. No turret-building needed. ***
   *** 16:3x FRESH 2.1+SA MAP — EVERYTHING BELOW IS
   VOID (old 2.0 mission). Your NEW DYNAMIC ROLE is in the todo-list TOP BANNER:
   SCOUT(67)=SCOUT+DEFENSE+FLEX (explore + chart, find + report resource patches,

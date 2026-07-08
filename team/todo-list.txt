@@ -13,10 +13,10 @@ TEAM TODO LIST
 ##   haul/belt IRON+COAL in from the NE patches and COPPER from JJ's SW    ##
 ##   mine (both "not far"). KEEP the team's existing NE iron drills+        ##
 ##   furnaces (preserve builds) — they smelt plates that get moved to the  ##
-##   (0,0) hub. Don't duplicate JJ's SW copper/stone mines. (2) ATTACKS    ##
-##   EXPECTED                                                              ##
-##   SOON — DEFENSE moves up: scout builds gun-turrets + ammo (+ walls if  ##
-##   available) at the NE base perimeter NOW. (3) JJ is establishing basic ##
+##   (0,0) hub. Don't duplicate JJ's SW copper/stone mines. (2) DEFENSE =  ##
+##   JJ HANDLES IT (JJ 17:1x "I can make defense"). Team does NOT need to   ##
+##   build turrets — scout resumes scouting/charting + FLEX to help the hub ##
+##   build / copper belt. (3) JJ is establishing basic                     ##
 ##   POWER himself — builder need not rush power; focus smelting + science.##
 ## (4) ONLY MENTION CHARTED THINGS in reports (don't surface patches/coords##
 ##   the player hasn't discovered on the map; RCON sees fog-hidden stuff — ##
