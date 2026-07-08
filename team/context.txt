@@ -304,7 +304,14 @@ Worktree name mismatch (agent-3 dir / employee-2 branch): acknowledged
 Character name: courier — unum 52 (FRESH MAP; re-spawned @ (4,60) 2026-07-05).
   Driving VERIFIED. You OWN this char (see in-game-owner.txt) — drive it now.
 Last position: ~(3.5, 58.2)
-Current task (from Manager): *** 14:1x OIL IS JJ-BLOCKED (crude pipe needs map
+Current task (from Manager): *** 15:1x GO — do NOT grind the refinery pipe
+  (power's already done; the crude PIPE is JJ-gated, map view needed — both
+  Manager + miner confirmed fluidbox ports unreadable blind). Instead build an
+  AUTO COPPER-PLATE line using the miner's PROVEN recipe (see emp1: drill at
+  patch EDGE -> ATOMIC chest-at-drop -> furnace FIRST then inserters -> plate
+  chest; power pole <=3t; scale only near existing power). Copper is needed for
+  circuits/chempack downstream. Then remote-feed copper plate to the hub. ***
+  *** 14:1x OIL IS JJ-BLOCKED (crude pipe needs map
   view) — so advance PHASE-1 AUTOMATION in parallel (your ask). Two jobs:
   (1) UNJAM the coal belt: it has ~800 coal backed up with no inserters pulling
   off — add inserters from the coal belt into boilers + furnaces so coal flows
