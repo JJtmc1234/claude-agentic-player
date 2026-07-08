@@ -351,3 +351,9 @@ Next: stage 2 (cables curriculum) bundled in next mod deploy per `mod/claude-com
 - Phase 1 parallel: 12 electric drills auto-mining + ~100 belts placed + hub steam scaled to 12 engines.
 - Strategy note (JJ): ROCKET RUSH, not bot rush -- do NOT detour into a roboport/bot logistics network; stay belt-based and push the rocket/platform path.
 - Next: refinery + chem plants -> petroleum/plastic/sulfur/lubricant -> chempack -> rocket-silo research.
+
+## 2026-07-08 - Oil chain: refineries built, crude pipe is the last human step
+- 3 oil-refineries placed + powered + recipe=basic-oil-processing near crude tanks (y=7.5 row, 25k crude each).
+- Refinery #1 @ (-15.5,12.5) rotated to dir=south so its crude input faces tank (-15.5,7.5); Manager placed a pipe @ (-14.5,9.5) at the computed tank-output/refinery-input junction.
+- Crude still not flowing (status fluid_ingredient_shortage) - a tank-connection offset nuance not resolvable blind via RCON. Both Manager + miner independently hit this.
+- REMAINING (JJ, map view, ~30 sec): nudge/complete the crude pipe from a tank to each refinery's input (rotate refinery so input faces tank if needed). Then petroleum flows -> chem plants -> chempack.
