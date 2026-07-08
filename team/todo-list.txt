@@ -6,8 +6,11 @@ TEAM TODO LIST
 ## ALL finite red+green(+military) techs are RESEARCHED (40+ done). The   ##
 ## ONLY remaining lab research is INFINITE repeatables (proj-damage-N,    ##
 ## weapon-speed-N, stronger-explosives-N, research-speed-N, defender).    ##
-## Manager keeps the queue topped with these so labs stay busy — DON'T    ##
-## flag "queue low" unless it hits 0; the infinite techs auto-refill.     ##
+## FINAL: research is DONE for the night. Labs IDLE is the ACCEPTED       ##
+## ceiling — every remaining tech needs MILITARY sci (off rocket-path,    ##
+## do NOT build it overnight) or BLUE/oil (JJ's build). Stop flagging     ##
+## "research at 0" / "queue low" — it's expected. Do NOT keep re-queuing  ##
+## military techs; they sit at 0% with no mil-sci. Just keep base ALIVE.  ##
 ## *** oil-processing is NOT lab-researchable — it is TRIGGER-gated       ##
 ## (mine-entity crude-oil). It auto-unlocks the instant crude is first    ##
 ## mined, i.e. when JJ's PUMPJACK runs. So the oil gate is HARD-held for  ##
