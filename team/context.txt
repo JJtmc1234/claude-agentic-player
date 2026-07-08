@@ -304,7 +304,15 @@ Worktree name mismatch (agent-3 dir / employee-2 branch): acknowledged
 Character name: courier — unum 52 (FRESH MAP; re-spawned @ (4,60) 2026-07-05).
   Driving VERIFIED. You OWN this char (see in-game-owner.txt) — drive it now.
 Last position: ~(3.5, 58.2)
-Current task (from Manager): *** 13:4x REDIRECT — DROP the 5-asm line (it's
+Current task (from Manager): *** 14:1x OIL IS JJ-BLOCKED (crude pipe needs map
+  view) — so advance PHASE-1 AUTOMATION in parallel (your ask). Two jobs:
+  (1) UNJAM the coal belt: it has ~800 coal backed up with no inserters pulling
+  off — add inserters from the coal belt into boilers + furnaces so coal flows
+  hands-off (this is the recurring stall fix). (2) IRON LINE: connect the iron
+  e-drills -> furnaces -> a plate chest with belts+inserters so iron-plate is
+  produced automatically (currently only hand/hybrid). Goal = the base runs
+  itself (0 employee action). Keep it clean/readable. This is JJ's Phase-1 gate. ***
+  *** 13:4x REDIRECT — DROP the 5-asm line (it's
   blocked on courier + courier is stalled). Do the REFINERY instead: it is FULLY
   UNBLOCKED. ALL mats are staged in the chest @ (-13,3): 132 steel, 50 brick,
   40 pipe, 46 gears, 349 circuits. Steps: walk to (-13,3), take refinery mats
