@@ -3,8 +3,10 @@ TEAM TODO LIST
 
 ##########################################################################
 ## *** 17:3x ELECTRIC DRILL IS UNLOCKED — DO THE SWAP (JJ "we don't need  ##
-## burner drills"). Steps, in order: (1) CRAFT electronic-circuits (0 in   ##
-## stock! = copper-cable + iron-plate) — the gate for electric drills +    ##
+## burner drills"). NOT copper-blocked: ~264 copper-cable IS stockpiled,   ##
+## so CRAFT electronic-circuits NOW (copper-cable + iron-plate) -> electric ##
+## drills. Steps, in order: (1) CRAFT electronic-circuits (copper-cable is  ##
+## available; keep iron flowing) — the gate for electric drills +          ##
 ## everything downstream; keep making them. (2) EXPAND POWER FIRST: only   ##
 ## 1.8 MW / 2 steam engines — add BOILERS + STEAM ENGINES (+ offshore pump,##
 ## coal-fed) and small-electric-poles so there's headroom BEFORE adding    ##
