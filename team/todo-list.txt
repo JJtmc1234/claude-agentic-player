@@ -2,6 +2,25 @@ TEAM TODO LIST
 ==============
 
 ##########################################################################
+## *** 02:1x (07-08, Manager) OVERNIGHT CEILING — READ THIS FIRST.        ##
+## ALL finite red+green(+military) techs are RESEARCHED (40+ done). The   ##
+## ONLY remaining lab research is INFINITE repeatables (proj-damage-N,    ##
+## weapon-speed-N, stronger-explosives-N, research-speed-N, defender).    ##
+## Manager keeps the queue topped with these so labs stay busy — DON'T    ##
+## flag "queue low" unless it hits 0; the infinite techs auto-refill.     ##
+## *** oil-processing is NOT lab-researchable — it is TRIGGER-gated       ##
+## (mine-entity crude-oil). It auto-unlocks the instant crude is first    ##
+## mined, i.e. when JJ's PUMPJACK runs. So the oil gate is HARD-held for  ##
+## JJ (the human oil build) — do not try to queue oil-processing.         ##
+## steel-axe is ALSO trigger-gated (craft 50 steel-plate) — a cheap       ##
+## OPTIONAL win (faster hand-mining) if the miner has spare steel.        ##
+## BASE: self-sustaining via the remote maintenance loop. KEEP IT ALIVE   ##
+## (iron/coal/copper hauls, drill fuel, furnace drain, lab feed). No new  ##
+## build directions overnight. When JJ is back: the oil build is step 1.  ##
+## Scout pane (emp4) is DEAD — flag JJ to relaunch. ***                   ##
+##########################################################################
+
+##########################################################################
 ## *** 17:4x BITER ALERT (JJ "WATCH FOR BUGS, GET DEFENSE"). Biters are   ##
 ## ~90-150 tiles out and approaching; JJ is REJOINING the server to fight ##
 ## them directly. ALL CHARS: do NOT engage biters/nests. If a biter comes ##
