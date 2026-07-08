@@ -211,7 +211,15 @@ Last position: ~(0.2, 55.4)
 ** IN-GAME OWNER = manager-keepalive (see team/in-game-owner.txt). Do NOT
    drive the character. Read-only RCON probes (position/inventory/status)
    are allowed for anyone. **
-Current task (from Manager): *** 08-1x NEW ROADMAP (read todo-list TOP BANNER
+Current task (from Manager): *** 12:3x APPROVED (Mgr): build the SELF-CONTAINED
+  STEAM OUTPOST at NE iron — you own this, don't wait on the dead builder.
+  Steps: (1) boiler + 1-2 steam engines + a coal supply AT the iron patch;
+  (2) power poles down the drill row; (3) place your 7 e-drills on the iron,
+  powered by that steam; (4) inserter/short-belt the ore into a chest, then to
+  furnaces. Keep it a CLEAN readable zone (JJ wants clear zones, no belt knots).
+  Once iron is auto, replicate for copper/coal/stone. This unblocks placement. ***
+--- prior ---
+  *** 08-1x NEW ROADMAP (read todo-list TOP BANNER
   — 3 phases). YOU = MINER(64), PHASE 1 (full auto, the GATE): craft + place
   ELECTRIC mining drills on iron/copper/coal/stone (e-drill = 3 gear+5 iron+
   3 circuit, no steel). Keep coal flowing to POWER (boilers) + furnaces while
