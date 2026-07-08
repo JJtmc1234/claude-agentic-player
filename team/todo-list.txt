@@ -89,10 +89,16 @@ TEAM TODO LIST
 ## add inserters/belts so drill ore -> furnace, and clear full outputs.    ##
 ## A running 8-furnace base beats a stalled 16. Then continue the electric ##
 ## swap (electric drills end the drill-fuel half of this). ***             ##
-## *** 17:3x JJ IS AWAY — run the ROADMAP autonomously (small-scope only): ##
-## electric swap + keep base ALIVE (coal to furnaces, ore flowing) + fill  ##
-## the spaceship stockpile + expand + scout. NO big new redesigns or new   ##
-## directions while JJ is out; preserve working builds. Keep chars ALIVE.**##
+## *** 19:0x JJ LOGGED OFF FOR THE NIGHT — OVERNIGHT AUTONOMOUS RUN.      ##
+## Keep MOVING on the rocket path, small-scope only, NO new directions/    ##
+## redesigns: (1) KEEP THE BASE ALIVE — coal to furnaces is the recurring  ##
+## killer; keep the coal chest/furnaces fed so it never fully stalls.      ##
+## (2) Hold/grow red-sci semi-auto (toward 5 asm / 30 SPM). (3) When GREEN ##
+## unlocks, build 1-2 green (logistic-science-pack) assemblers + feed the  ##
+## lab. (4) Then start the OIL/BLUE chain (pumpjack->refinery->chem) — the ##
+## deep rocket gate. Keep chars ALIVE (retreat from any biter; don't       ##
+## engage nests). Preserve working builds. Partial progress is fine —      ##
+## get as far toward the rocket as possible overnight. ***                 ##
 ## *** 17:1x TEAM PRIMARY FOCUS NOW (JJ "have em work on stockpiling"):   ##
 ## STOCKPILE BUILDING SUPPLIES. JJ is handling defense + the red-science  ##
 ## assembler + power himself, so the team's #1 job = CRAFT + STOCKPILE    ##
