@@ -22,10 +22,13 @@ TEAM TODO LIST
 ##########################################################################
 
 ##########################################################################
-## *** 17:3x #1 GOAL (JJ): FULL AUTOMATION -> 5 FULLY-FED RED-SCIENCE      ##
-## ASSEMBLERS that run with NO manual input. automation-science-pack =     ##
-## 1 iron-gear-wheel + 1 copper-plate. Build the WHOLE chain BELT-FED (no  ##
-## hand-feeding — that's why it keeps stalling):                           ##
+## *** 18:3x #1 GOAL (JJ): 30 SPM RED SCIENCE, self-running. = 5 asm-1 on  ##
+## automation-science-pack (6 packs/min each = 30) + ~1 asm on iron-gear-  ##
+## wheel feeding them. Supply needed/min: ~60 iron-plate + 30 copper-plate.##
+## automation-science-pack = 1 iron-gear-wheel + 1 copper-plate. Build the ##
+## WHOLE chain BELT-FED (no hand-feeding — that's why it keeps stalling):  ##
+## NOTE: coal feed is currently MANUAL (hand-loaded furnaces, will re-     ##
+## stall) — the durable COAL BELT is the foundation, do it first.          ##
 ##  1. COAL BELT: coal drills -> belt -> inserters fueling every FURNACE   ##
 ##     (+ burner drills). This unstalls smelting (only 1/16 furnaces work  ##
 ##     now b/c coal isn't reaching them). Do this FIRST.                   ##

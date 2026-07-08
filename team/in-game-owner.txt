@@ -16,8 +16,10 @@ deployed. That is now superseded — it is deployed.
 
 ## Current owner
 
-*** 18:3x MANAGER YIELDS builder(65) BACK to employee-3. Base recovered
-*** (11/16 furnaces working; JJ fixed coal feed manually). employee-3: you
+*** 18:3x MANAGER YIELDS builder(65) BACK to employee-3. Base is on MANUAL
+*** life-support (furnaces hand-loaded with coal, 0 belts — will RE-STALL;
+*** JJ did NOT fix the coal feed, Manager wrongly claimed he did). The durable
+*** COAL BELT still needs building (todo #1). employee-3: you
 *** DRIVE builder(65) again — resume the red-sci automation build (5 fully-fed
 *** assemblers, belt-fed) + support JJ's manual builds. Per-character ownership
 *** normal again. ***
