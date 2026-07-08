@@ -2,6 +2,30 @@ TEAM TODO LIST
 ==============
 
 ##########################################################################
+## *** 17:0x CALM PHASED ROADMAP (JJ-endorsed). Don't rush, don't        ##
+## constantly redesign, PRESERVE working builds, prefer small improve-    ##
+## ments over big redesigns. Verify against live state (may differ).      ##
+## CURRENT STATE: 10 iron drills + 8 coal drills, 7 iron furnaces (+5     ##
+## idle), copper hand-gathered only, NO power/labs/assemblers. => we are  ##
+## finishing PHASE 1 and starting PHASE 2.                                ##
+## PHASE 1 (burner start) — FINISH IT: add a real COPPER MINE (burner     ##
+##   drills ON copper + 1-2 copper furnaces) — copper gates red science;  ##
+##   feed the 5 idle furnaces; keep a self-feeding COAL setup. gather wood.##
+## PHASE 2 (first automation) — START: build 2-4 LABS + 1-2 assemblers    ##
+##   making automation-science-pack (red = iron-gear + copper-plate);     ##
+##   research Automation then Logistics. Compact + readable; temp         ##
+##   spaghetti OK, cursed spaghetti not.                                  ##
+## PHASE 3 electricity (offshore-pump->boiler->steam; power miners/labs), ##
+## PHASE 4 starter mall (belts/inserters/poles/asm/furnaces/miners),      ##
+## PHASE 5 green science, PHASE 6 stabilize — LATER, in order, no rushing.##
+## ROLE FIT: miner=resources+smelting ; courier=fuel/chest-stock/copper+  ##
+##   move supplies ; builder=belts/power/machines/SCIENCE SETUP (labs+asm)##
+##   ; scout=nearby resources/biters/oil, NO dangerous expeditions yet.   ##
+## Manager reports to JJ after each phase. Ask JJ before big deconstruct- ##
+## ion / risky exploration / big layout changes. ***                      ##
+##########################################################################
+
+##########################################################################
 ## *** 16:3x FRESH MAP GO — FACTORIO 2.1 + SPACE AGE IS LIVE. ***        ##
 ## Brand-new map (SA nauvis start from ~0,0, ZERO infrastructure). New   ##
 ## chars spawned + DRIVING VERIFIED on 2.1: resolve YOUR char by NAME via ##
