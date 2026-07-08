@@ -304,7 +304,11 @@ Worktree name mismatch (agent-3 dir / employee-2 branch): acknowledged
 Character name: courier — unum 52 (FRESH MAP; re-spawned @ (4,60) 2026-07-05).
   Driving VERIFIED. You OWN this char (see in-game-owner.txt) — drive it now.
 Last position: ~(3.5, 58.2)
-Current task (from Manager): *** 13:2x BUILDER = STEEL LINE FIRST (JJ has steel
+Current task (from Manager): *** 13:3x DON'T WAIT ON STEEL FURNACES — a steel
+  furnace costs 6 steel to craft (circular, we have 0). Smelt the FIRST steel in
+  the STONE furnaces you already have (iron-plate -> steel-plate, slower is fine).
+  Drop in JJ's steel furnaces later as a speed upgrade if he places them.
+  *** 13:2x BUILDER = STEEL LINE FIRST (JJ has steel
   furnaces). (1) Row of steel furnaces near iron+coal: inserter iron-plate+coal
   in, steel-plate out to a chest. Target ~100 steel. (2) 2-3 stone furnaces on
   stone -> STONE-BRICK (refinery needs 10 brick each). (3) Then build the
