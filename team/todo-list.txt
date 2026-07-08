@@ -2,6 +2,15 @@ TEAM TODO LIST
 ==============
 
 ##########################################################################
+## *** 14:0x MGR: 2 oil-refineries are now CRAFTED and sit in the staging ##
+## chest @ (-13,3) (recipe = basic-oil-processing, SA name). I tried to    ##
+## place them via RCON but the only clear spot found had NO power within   ##
+## 12 tiles -> reverted (mined back to chest) rather than leave unpowered  ##
+## junk. REMAINING: place a refinery in a POWERED spot ADJACENT to the     ##
+## crude tanks (-16..-7, 7), set recipe basic-oil-processing, PIPE crude   ##
+## from a tank to its input, wire power. Needs map view (JJ or a pane).    ##
+## All other chempack mats staged in same chest. ***                      ##
+##########################################################################
 ## *** 13:1x UPDATE — RECOVERED. Miner producing STEEL (80, ramping 100+),##
 ## 10 furnaces smelting, steel chest @ (-12.5,3.5) for courier's refinery.##
 ## Oil field CHARTED + SECURED (nest cleared). Research on sulfur-proc.    ##
