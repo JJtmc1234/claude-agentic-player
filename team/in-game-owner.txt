@@ -1,5 +1,20 @@
 # In-game character owner
 
+##########################################################################
+## *** 12:2x (07-08, Manager) AUTHORITATIVE — OVERRIDES EVERYTHING BELOW.##
+## owner: PER-CHARACTER. Each employee DRIVES ITS OWN named char, NOW:    ##
+##   employee-1 -> miner   unum 64                                        ##
+##   employee-2 -> courier unum 66                                        ##
+##   employee-3 -> builder unum 65                                        ##
+##   employee-4 -> scout   unum 67                                        ##
+## There is NO manager-keepalive / do-not-drive lock. Manager is NOT      ##
+## driving any employee char. DRIVE YOUR OWN CHAR — go execute your       ##
+## Phase-1 role from the todo-list top banner (electric drills, belts,    ##
+## power, 5 autopack assemblers = full auto 30 SPM, 0 employee action).   ##
+## ALL text below this box is stale history — IGNORE it for ownership.    ##
+## Only the Manager changes this; if you see a conflict, THIS BOX WINS.  ##
+##########################################################################
+
 UPDATE 2026-07-04 (Manager, fresh session): mod 0.10.6 IS NOW DEPLOYED.
 Server was restarted ~14:13 with claude-companion_0.10.6.zip; RCON pong
 reports "from claude-companion 0.10.6" and remote.call('claude','list_chars')
