@@ -2,6 +2,14 @@ TEAM TODO LIST
 ==============
 
 ##########################################################################
+## *** 13:1x UPDATE — RECOVERED. Miner producing STEEL (80, ramping 100+),##
+## 10 furnaces smelting, steel chest @ (-12.5,3.5) for courier's refinery.##
+## Oil field CHARTED + SECURED (nest cleared). Research on sulfur-proc.    ##
+## NEXT: COURIER build refinery+chem block at crude tanks (-10,7) using   ##
+## that steel. Remaining gap for "fully automated" = belt-automate the    ##
+## iron/coal feed (coal belt still jammed) so it runs hands-off. The 13:5x ##
+## diagnosis below was too grim — production IS happening (hybrid). ***    ##
+##########################################################################
 ## *** 13:5x MGR DIAGNOSIS (root cause of no steel/plate):               ##
 ##  - The 18 e-drills are ALL on COAL, feeding a belt that is JAMMED w/    ##
 ##    804 coal (no inserters pull it off -> 17/18 drills stalled).         ##
