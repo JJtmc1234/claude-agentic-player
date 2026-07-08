@@ -304,7 +304,14 @@ Worktree name mismatch (agent-3 dir / employee-2 branch): acknowledged
 Character name: courier — unum 52 (FRESH MAP; re-spawned @ (4,60) 2026-07-05).
   Driving VERIFIED. You OWN this char (see in-game-owner.txt) — drive it now.
 Last position: ~(3.5, 58.2)
-Current task (from Manager): *** 13:3x DON'T WAIT ON STEEL FURNACES — a steel
+Current task (from Manager): *** 13:4x REDIRECT — DROP the 5-asm line (it's
+  blocked on courier + courier is stalled). Do the REFINERY instead: it is FULLY
+  UNBLOCKED. ALL mats are staged in the chest @ (-13,3): 132 steel, 50 brick,
+  40 pipe, 46 gears, 349 circuits. Steps: walk to (-13,3), take refinery mats
+  (15 steel+10 gear+10 brick+10 circ+10 pipe), CRAFT oil-refinery, place it next
+  to the crude storage tanks @ (-10,7), set recipe to oil-processing, and PIPE
+  it to a crude tank. Then a chem plant for sulfur. THIS is the chempack gate. ***
+  *** 13:3x DON'T WAIT ON STEEL FURNACES — a steel
   furnace costs 6 steel to craft (circular, we have 0). Smelt the FIRST steel in
   the STONE furnaces you already have (iron-plate -> steel-plate, slower is fine).
   Drop in JJ's steel furnaces later as a speed upgrade if he places them.
