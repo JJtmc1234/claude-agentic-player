@@ -16,12 +16,11 @@ deployed. That is now superseded — it is deployed.
 
 ## Current owner
 
-*** 17:4x MANAGER TAKES builder(65) — JJ authorized Manager to step in and
-*** build the coal feed + red-sci automation (base frozen, panes couldn't
-*** execute the belt build). employee-3: STAND DOWN on builder(65) — do NOT
-*** drive it until this clears. miner(64)/courier(66)/scout(67) keep working
-*** their roles (feed ore/coal, haul, scout). Manager yields builder back when
-*** the automation runs. ***
+*** 18:3x MANAGER YIELDS builder(65) BACK to employee-3. Base recovered
+*** (11/16 furnaces working; JJ fixed coal feed manually). employee-3: you
+*** DRIVE builder(65) again — resume the red-sci automation build (5 fully-fed
+*** assemblers, belt-fed) + support JJ's manual builds. Per-character ownership
+*** normal again. ***
 
 *** 16:3x FRESH MAP GO — 2.1 + SPACE AGE IS LIVE. Stand-down CLEARED. ***
 *** New map, new chars (storage reset). Driving VERIFIED on 2.1 (walk test).
