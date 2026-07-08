@@ -99,10 +99,13 @@ TEAM TODO LIST
 ## deep rocket gate. Keep chars ALIVE (retreat from any biter; don't       ##
 ## engage nests). Preserve working builds. Partial progress is fine —      ##
 ## get as far toward the rocket as possible overnight.                     ##
-## *** 19:2x ADD LABS — science is OVER-producing (122 red+green packs     ##
-## piled up) but only 1 LAB consuming them = research bottleneck. BUILD    ##
-## 2-3 MORE LABS next to the first + feed them from the pack pile. This is ##
-## free research speed (packs already exist). builder: priority. ***       ##
+## *** 19:3x SCALE GREEN SCIENCE — THE research bottleneck now. Labs are   ##
+## done (5), and 161 RED is buffered, but GREEN is starved (only 1 green   ##
+## assembler) so green-tier research (automation-2 etc.) stalls. BUILD 2-3 ##
+## MORE green (logistic-science-pack) assemblers = 1 inserter + 1 transport##
+## -belt each; keep them fed inserters+belts (both easy to craft) with     ##
+## power+pole coverage; inserter their output to the labs. This unblocks   ##
+## the whole rocket-path research. builder/courier: priority. ***          ##
 ## *** 17:1x TEAM PRIMARY FOCUS NOW (JJ "have em work on stockpiling"):   ##
 ## STOCKPILE BUILDING SUPPLIES. JJ is handling defense + the red-science  ##
 ## assembler + power himself, so the team's #1 job = CRAFT + STOCKPILE    ##
