@@ -2,19 +2,25 @@ TEAM TODO LIST
 ==============
 
 ##########################################################################
-## *** 17:3x #1 SINGLE FOCUS — BUILD THE COAL+ORE BELT AUTOMATION.        ##
-## The base has STALLED 3x because coal + ore are HAND-fed and keep        ##
-## running out (right now: 8 furnaces no-fuel, 6 no-ore, 0 coal buffered, ##
-## even though 10 coal drills + iron drills are mining fine). STOP hand-   ##
-## feeding. BUILD IT ONCE: (a) a transport-belt from the COAL drills past  ##
-## the furnace line + a burner/normal INSERTER loading COAL into each      ##
-## furnace (and into the burner drills' fuel); (b) a belt/inserter moving  ##
-## IRON ORE from the iron drills INTO the furnaces. Result: furnaces stay  ##
-## fueled + fed automatically and STOP stalling. miner+builder OWN this;   ##
-## courier hauls belts/inserters/coal to them. PAUSE electric swap +       ##
-## stockpile + scouting extras until furnaces read mostly 'working' again. ##
-## This ONE build ends the recurring death-spiral. Report furnace working  ##
-## count each cycle. ***                                                   ##
+## *** 17:3x #1 GOAL (JJ): FULL AUTOMATION -> 5 FULLY-FED RED-SCIENCE      ##
+## ASSEMBLERS that run with NO manual input. automation-science-pack =     ##
+## 1 iron-gear-wheel + 1 copper-plate. Build the WHOLE chain BELT-FED (no  ##
+## hand-feeding — that's why it keeps stalling):                           ##
+##  1. COAL BELT: coal drills -> belt -> inserters fueling every FURNACE   ##
+##     (+ burner drills). This unstalls smelting (only 1/16 furnaces work  ##
+##     now b/c coal isn't reaching them). Do this FIRST.                   ##
+##  2. IRON: iron drills -> furnaces -> iron-plate on a belt.              ##
+##  3. COPPER: copper-plate on a belt (SW outpost / the 264 copper-cable   ##
+##     -> or smelt copper); get it to the assembler line.                  ##
+##  4. GEARS: 1-2 assemblers making iron-gear-wheel from the iron belt.    ##
+##  5. RED SCI: 5 assembling-machines on 'automation-science-pack', each   ##
+##     inserter-fed gear + copper-plate from belts; output -> belt/inserter##
+##     -> the LAB(s).                                                      ##
+## GOAL DONE = 5 red-sci assemblers reading 'working' + labs researching   ##
+## with NOBODY hand-feeding. PAUSE electric swap + scouting extras until   ##
+## this runs. miner=ore+coal feed; builder=lead the assembler+belt build;  ##
+## courier=copper + haul belts/inserters/gears; scout=flex help. Report    ##
+## #furnaces working + #red-sci assemblers working each cycle. ***         ##
 ##########################################################################
 
 ##########################################################################

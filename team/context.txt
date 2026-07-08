@@ -466,6 +466,14 @@ Character name: builder — unum 51 (FRESH MAP; re-spawned @ (2,60) 2026-07-05).
 Last position: ~(1.8, 57.4)
 Current task (from Manager): *** 07-07 LATEST (read todo-list top banner):
   WE HAVE OIL — JJ handles processing himself; do NOT go to the field.
+  *** 17:3x DROP ELECTRIC — FIX THE STALLED BASE FIRST. Only 1 of 16 furnaces
+  is working (coal isn't reaching them). STOP crafting circuits/electric. GO to
+  the furnace line and PHYSICALLY: place a burner-inserter (or normal inserter)
+  next to each starved furnace pulling COAL from the nearest coal source/belt
+  into it, and an inserter putting IRON ORE into it. If furnaces are scattered,
+  run a short transport-belt of coal past them. Get furnaces reading 'working'
+  again — that is your ONLY job until furnaces >10 working. Report furnace
+  working count. Resume electric AFTER. ***
   *** 17:1x PHASE 2 — JJ IS BUILDING THE RED-SCIENCE ASSEMBLER himself (iron
   +copper now fully automated). SUPPORT, don't duplicate: keep iron-gear +
   copper-plate flowing to JJ's assembler, build MORE LABS (2-4) + inserter-link
