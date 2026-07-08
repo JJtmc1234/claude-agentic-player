@@ -35,7 +35,14 @@ TEAM TODO LIST
 ##  - Start with what runs (even 2-3 fed assemblers > 5 starved) and add    ##
 ##    assemblers as supply allows. Target ~30 SPM = 5 fed assemblers.       ##
 ## This is ACHIEVABLE: craft asm+chest+inserter, place adjacent, keep the   ##
-## chests full. Report #red-sci assemblers WORKING + SPM each cycle. ***    ##
+## chests full. Report #red-sci assemblers WORKING + SPM each cycle.        ##
+## *** FOUNDATION FIRST — SEMI-AUTO COAL (the base keeps dying to 0        ##
+## furnaces on coal): place ONE big COAL CHEST by the furnace line + a     ##
+## burner/normal INSERTER from that chest into EACH furnace. Then the team ##
+## only has to keep the ONE chest full of coal (haul coal into it) instead ##
+## of hand-loading 16 furnaces — inserters distribute it. Same pattern for ##
+## the burner drills' fuel. This stops the recurring full stall + is the   ##
+## foundation the red-sci block needs. miner+builder: build this NOW. ***   ##
 ##  1. COAL BELT: coal drills -> belt -> inserters fueling every FURNACE   ##
 ##     (+ burner drills). This unstalls smelting (only 1/16 furnaces work  ##
 ##     now b/c coal isn't reaching them). Do this FIRST.                   ##
