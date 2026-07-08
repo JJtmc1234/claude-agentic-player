@@ -2,6 +2,13 @@ TEAM TODO LIST
 ==============
 
 ##########################################################################
+## *** 17:2x UNBLOCK FIRST — AUTOMATE COAL FEED. The stockpile stays      ##
+## empty because the team is stuck HAND-REFUELING burner drills (coal      ##
+## treadmill). FIX IT: miner+builder build a SELF-FEEDING COAL setup —     ##
+## coal drills -> belt/inserters -> automatically fuel the burner drills + ##
+## furnaces (and the boiler). Once coal auto-feeds, NOBODY hand-refuels    ##
+## and the team is FREE to craft+stockpile. This is the prerequisite to    ##
+## the stockpile actually filling. (Going electric later ends it fully.)***##
 ## *** 17:1x TEAM PRIMARY FOCUS NOW (JJ "have em work on stockpiling"):   ##
 ## STOCKPILE BUILDING SUPPLIES. JJ is handling defense + the red-science  ##
 ## assembler + power himself, so the team's #1 job = CRAFT + STOCKPILE    ##
