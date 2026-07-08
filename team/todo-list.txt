@@ -13,6 +13,14 @@ TEAM TODO LIST
 ## burner drills as electric covers them. (4) Coal still feeds FURNACES    ##
 ## (stone furnaces burn coal until electric furnaces, much later). Don't   ##
 ## build MORE burner drills. Do this gradually; keep the base running. ***##
+## *** 17:3x BASE IS STALLING — FIX FIRST (keep-alive priority). Diagnosis: ##
+## 12 burner drills + 7 furnaces = NO FUEL (coal not distributed); 12      ##
+## drills = output FULL/backed up; 5 furnaces = NO ORE. So: (A) COAL —     ##
+## shuttle/belt coal to the no-fuel drills + furnaces NOW (miner+courier). ##
+## (B) FLOW — the backed-up drills aren't feeding the starved furnaces:    ##
+## add inserters/belts so drill ore -> furnace, and clear full outputs.    ##
+## A running 8-furnace base beats a stalled 16. Then continue the electric ##
+## swap (electric drills end the drill-fuel half of this). ***             ##
 ## *** 17:3x JJ IS AWAY — run the ROADMAP autonomously (small-scope only): ##
 ## electric swap + keep base ALIVE (coal to furnaces, ore flowing) + fill  ##
 ## the spaceship stockpile + expand + scout. NO big new redesigns or new   ##
