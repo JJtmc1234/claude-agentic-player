@@ -344,3 +344,10 @@ Next: stage 2 (cables curriculum) bundled in next mod deploy per `mod/claude-com
 - claude-companion mod scaffold (info.json, control.lua) — initial chat-buffer + ping/pong remote interface. Published to mod portal.
 - RCON client (bridge/rcon_client.py) + _claude.call_mod wrapper with retry on empty responses and raw_decode fallback for concatenated JSON.
 - Server-side helpers: restart.ps1 (save → warn-chat → stop → deploy → publish → start → ping workflow).
+
+## 2026-07-08 - Crude pumped, oil-processing unlocked (Phase 2 gate)
+- JJ + scout reached the SE crude field; 7 pumpjacks producing at ~(137,366).
+- oil-processing tech auto-unlocked (trigger: mine crude) -> chempack/blue path open.
+- Phase 1 parallel: 12 electric drills auto-mining + ~100 belts placed + hub steam scaled to 12 engines.
+- Strategy note (JJ): ROCKET RUSH, not bot rush -- do NOT detour into a roboport/bot logistics network; stay belt-based and push the rocket/platform path.
+- Next: refinery + chem plants -> petroleum/plastic/sulfur/lubricant -> chempack -> rocket-silo research.

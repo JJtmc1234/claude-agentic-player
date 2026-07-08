@@ -29,6 +29,12 @@ TEAM TODO LIST
 ##########################################################################
 ## *** 08:1x (07-08, JJ) NEW ROADMAP — 3 PHASES, IN ORDER. READ FIRST. ***##
 ## NORTH STAR = CREATE A SPACE PLATFORM.                                  ##
+## *** 13:0x JJ: ROCKET RUSH, NOT BOT RUSH — do NOT detour into a         ##
+## roboport/construction-bot logistics network. Stay belt-based and push  ##
+## straight for the rocket/platform. Bots are a "later" nicety, not now. ##
+## *** 13:0x MILESTONE: CRUDE PUMPED — 7 pumpjacks @ (137,366),           ##
+## oil-processing UNLOCKED. Phase 2 is GO: build refinery + chem plants   ##
+## -> petroleum/plastic/sulfur/lubricant -> chempack (blue). ***          ##
 ##                                                                        ##
 ## PHASE 1 (GATE, do FIRST): TRUE FULL AUTOMATION of 30 SPM red science   ##
 ##   with ZERO employee action. The base must RUN ITSELF — no hand-hauls, ##
