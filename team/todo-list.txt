@@ -2,6 +2,31 @@ TEAM TODO LIST
 ==============
 
 ##########################################################################
+## *** 12:5x ON RELAUNCH — DRIVE YOUR OWN CHAR NOW, IMMEDIATE TASK. ***   ##
+## Owner = PER-CHARACTER (see in-game-owner.txt top box). No idle. If your ##
+## primary is blocked, do the FALLBACK — never sit still.                 ##
+##                                                                        ##
+## employee-1 = MINER (unum64): execute the POLE-OUT plan — scale hub     ##
+##   steam (add boiler+steam engine at hub water), run a power-pole line   ##
+##   to the NE iron, place your 16 staged e-drills, belt ore toward the    ##
+##   furnaces. FALLBACK: hand-haul iron+coal so furnaces + power stay fed. ##
+## employee-2 = COURIER (unum66): craft from base stock (3300+ copper/345 ##
+##   circ/gears) — transport-belts, inserters, e-drills, 2 more assemblers ##
+##   — and DELIVER to miner/builder. FALLBACK: haul plates between chests, ##
+##   keep autopack input buffers topped.                                   ##
+## employee-3 = BUILDER (unum65): build the 5-ASSEMBLER autopack line near ##
+##   the hub — input chest+inserter -> assembler -> inserter -> lab, short ##
+##   inserters only. Add the 2 missing assemblers (have 3, need 5).        ##
+##   FALLBACK: place power poles/inserters where miner's drills land; keep ##
+##   smelting drained.                                                     ##
+## employee-4 = SCOUT (unum67): continue WEST approach to the crude at     ##
+##   (145,368), chart it (it is NOT charted yet — get eyes on it), watch   ##
+##   the nest at (200,190). FALLBACK: chart outward in ~30t hops, report   ##
+##   resources + threats.                                                  ##
+## Then continue the 3-phase roadmap below. ***                           ##
+##########################################################################
+
+##########################################################################
 ## *** 08:1x (07-08, JJ) NEW ROADMAP — 3 PHASES, IN ORDER. READ FIRST. ***##
 ## NORTH STAR = CREATE A SPACE PLATFORM.                                  ##
 ##                                                                        ##
