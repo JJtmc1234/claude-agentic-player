@@ -2,6 +2,19 @@ TEAM TODO LIST
 ==============
 
 ##########################################################################
+## *** 13:5x MGR DIAGNOSIS (root cause of no steel/plate):               ##
+##  - The 18 e-drills are ALL on COAL, feeding a belt that is JAMMED w/    ##
+##    804 coal (no inserters pull it off -> 17/18 drills stalled).         ##
+##  - There is NO iron/copper MINING automation. 0 iron-ore, 0 iron-plate, ##
+##    0 copper-ore in chests. Iron-plate only ever came from hand-hauling. ##
+##  - So steel=0 -> refinery blocked -> chempack blocked. The gate is      ##
+##    UPSTREAM: build IRON + COPPER e-drill -> furnace -> chest lines that  ##
+##    actually CONNECT (inserters at every transfer), and add inserters    ##
+##    pulling the coal belt into furnaces/boilers.                         ##
+##  MINER/COURIER (whoever's alive): FIRST fix — put e-drills on an IRON   ##
+##  patch, inserter/belt the ore into furnaces, steel from that plate.     ##
+##  Manager fueled all 26 furnaces w/ coal (13:5x) but they have NO ORE.  ##
+##########################################################################
 ## *** 13:4x JJ GOAL (~3 HRS): CHEMPACK FULLY AUTOMATED @ 30 SPM.         ##
 ## Critical path: STEEL -> refinery+chem block @ crude tanks (-10,7) ->   ##
 ## petroleum/sulfur/plastic/lubricant -> 5 chempack assemblers belt-fed.  ##
