@@ -16,6 +16,13 @@ deployed. That is now superseded — it is deployed.
 
 ## Current owner
 
+*** 17:4x MANAGER TAKES builder(65) — JJ authorized Manager to step in and
+*** build the coal feed + red-sci automation (base frozen, panes couldn't
+*** execute the belt build). employee-3: STAND DOWN on builder(65) — do NOT
+*** drive it until this clears. miner(64)/courier(66)/scout(67) keep working
+*** their roles (feed ore/coal, haul, scout). Manager yields builder back when
+*** the automation runs. ***
+
 *** 16:3x FRESH MAP GO — 2.1 + SPACE AGE IS LIVE. Stand-down CLEARED. ***
 *** New map, new chars (storage reset). Driving VERIFIED on 2.1 (walk test).
 *** Per-character ownership — DRIVE YOUR OWN CHAR NOW (resolve unum via
