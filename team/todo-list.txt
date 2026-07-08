@@ -29,12 +29,20 @@ TEAM TODO LIST
 ##########################################################################
 ## *** 08:1x (07-08, JJ) NEW ROADMAP — 3 PHASES, IN ORDER. READ FIRST. ***##
 ## NORTH STAR = CREATE A SPACE PLATFORM.                                  ##
-## *** 13:0x JJ: ROCKET RUSH, NOT BOT RUSH — do NOT detour into a         ##
-## roboport/construction-bot logistics network. Stay belt-based and push  ##
-## straight for the rocket/platform. Bots are a "later" nicety, not now. ##
+## *** 13:1x JJ (CORRECTED): BOT RUSH *THEN* ROCKET RUSH. Sequence:       ##
+## 1) finish oil->chempack (blue) — also needed for robot frames          ##
+##    (electric-engine=lubricant, battery=sulfuric acid, both from oil);   ##
+## 2) BOT RUSH: research construction-robotics + logistics, build         ##
+##    roboports + construction/logistic bots. Bots + GHOST placement then  ##
+##    do the building (builder lays ghosts, bots construct) — sidesteps    ##
+##    slow manual multi-entity placement;                                  ##
+## 3) ROCKET RUSH: with bots building, push rocket-silo + parts -> launch  ##
+##    -> space platform. (Supersedes the earlier "not bot rush" note.) *** ##
 ## *** 13:0x MILESTONE: CRUDE PUMPED — 7 pumpjacks @ (137,366),           ##
-## oil-processing UNLOCKED. Phase 2 is GO: build refinery + chem plants   ##
-## -> petroleum/plastic/sulfur/lubricant -> chempack (blue). ***          ##
+## oil-processing UNLOCKED. Phase 2 is GO. JJ DECISION: REFINE AT BASE —  ##
+## bring crude home (pipe/train from the field), build refinery + chem     ##
+## plants in a BASE oil zone -> petroleum/plastic/sulfur/lubricant ->      ##
+## chempack (blue). Do NOT build the refining block out at the field. ***  ##
 ##                                                                        ##
 ## PHASE 1 (GATE, do FIRST): TRUE FULL AUTOMATION of 30 SPM red science   ##
 ##   with ZERO employee action. The base must RUN ITSELF — no hand-hauls, ##
