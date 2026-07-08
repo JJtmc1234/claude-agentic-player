@@ -4,6 +4,23 @@ Running record of major milestones. Newest at top.
 
 ---
 
+## 2026-07-07 (night) — Nauvis bootstrap: red-sci semi-auto + GREEN unlocked
+
+- Fresh 2.1+SA nauvis start bootstrapped by the team (hand-fed semi-automation
+  after full-belt automation proved too hard for the panes): iron+coal+copper
+  mining, ~16 furnaces, 3 red-science assemblers running ~18 SPM (target 30 = 5).
+- Recurring base-stall root causes identified: coal not distributed (hand-fed) +
+  furnace/assembler OUTPUT backup (full_output, no drains). Team building
+  input+output chests per machine (semi-auto) to stabilize.
+- GREEN SCIENCE unlocked (logistic-science-pack researched) — 2nd of 3 science
+  tiers needed for the rocket.
+- NORTH STAR set (JJ): LAUNCH A ROCKET (gate to Vulcanus). Verified path =
+  red+green+BLUE(oil) science only — NO purple/yellow needed for rocket-silo.
+  Strategy: lean Nauvis starter, real base on Vulcanus later.
+- JJ handled biters directly (shotgun buffed in 2.1); cleared nests. Manager
+  briefly took builder to fix the frozen base (JJ-authorized) then yielded back.
+- JJ logged off for the night; team running autonomously toward green->oil/blue.
+
 ## 2026-07-07 — MIGRATED TO FACTORIO 2.1 + SPACE AGE (fresh map)
 
 - Major platform change (JJ directive). Old 2.0 blue-science base ARCHIVED to
