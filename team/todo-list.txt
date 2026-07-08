@@ -17,7 +17,8 @@ TEAM TODO LIST
 ## BASE: self-sustaining via the remote maintenance loop. KEEP IT ALIVE   ##
 ## (iron/coal/copper hauls, drill fuel, furnace drain, lab feed). No new  ##
 ## build directions overnight. When JJ is back: the oil build is step 1.  ##
-## Scout pane (emp4) is DEAD — flag JJ to relaunch. ***                   ##
+## All 4 panes ALIVE (scout emp4 running read-only biter-watch, perimeter ##
+## clear ~evo 0.18) — corrected, scout is NOT dead. ***                   ##
 ##########################################################################
 
 ##########################################################################
