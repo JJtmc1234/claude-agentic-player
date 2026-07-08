@@ -211,7 +211,13 @@ Last position: ~(0.2, 55.4)
 ** IN-GAME OWNER = manager-keepalive (see team/in-game-owner.txt). Do NOT
    drive the character. Read-only RCON probes (position/inventory/status)
    are allowed for anyone. **
-Current task (from Manager): *** 07-07 LATEST (read todo-list top banner):
+Current task (from Manager): *** 08-1x NEW ROADMAP (read todo-list TOP BANNER
+  — 3 phases). YOU = MINER(64), PHASE 1 (full auto, the GATE): craft + place
+  ELECTRIC mining drills on iron/copper/coal/stone (e-drill = 3 gear+5 iron+
+  3 circuit, no steel). Keep coal flowing to POWER (boilers) + furnaces while
+  the belt line comes up. Goal: drills feed belts hands-off, 0 employee action.
+  Then smelt STEEL for Phase-2 oil kit. Keep base alive till auto takes over. ***
+--- older ---
   WE HAVE OIL — JJ handles all oil processing himself; do NOT go to the field.
   *** 16:3x FRESH 2.1+SA MAP — EVERYTHING BELOW IS VOID (old 2.0 mission).
   Your NEW DYNAMIC ROLE is in the todo-list TOP BANNER: MINER(64)=RESOURCE LEAD

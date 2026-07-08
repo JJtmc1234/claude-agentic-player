@@ -2,26 +2,44 @@ TEAM TODO LIST
 ==============
 
 ##########################################################################
-## *** 02:1x (07-08, Manager) OVERNIGHT CEILING — READ THIS FIRST.        ##
-## ALL finite red+green(+military) techs are RESEARCHED (40+ done). The   ##
-## ONLY remaining lab research is INFINITE repeatables (proj-damage-N,    ##
-## weapon-speed-N, stronger-explosives-N, research-speed-N, defender).    ##
-## FINAL: research is DONE for the night. Labs IDLE is the ACCEPTED       ##
-## ceiling — every remaining tech needs MILITARY sci (off rocket-path,    ##
-## do NOT build it overnight) or BLUE/oil (JJ's build). Stop flagging     ##
-## "research at 0" / "queue low" — it's expected. Do NOT keep re-queuing  ##
-## military techs; they sit at 0% with no mil-sci. Just keep base ALIVE.  ##
-## *** oil-processing is NOT lab-researchable — it is TRIGGER-gated       ##
-## (mine-entity crude-oil). It auto-unlocks the instant crude is first    ##
-## mined, i.e. when JJ's PUMPJACK runs. So the oil gate is HARD-held for  ##
-## JJ (the human oil build) — do not try to queue oil-processing.         ##
-## steel-axe is ALSO trigger-gated (craft 50 steel-plate) — a cheap       ##
-## OPTIONAL win (faster hand-mining) if the miner has spare steel.        ##
-## BASE: self-sustaining via the remote maintenance loop. KEEP IT ALIVE   ##
-## (iron/coal/copper hauls, drill fuel, furnace drain, lab feed). No new  ##
-## build directions overnight. When JJ is back: the oil build is step 1.  ##
-## All 4 panes ALIVE (scout emp4 running read-only biter-watch, perimeter ##
-## clear ~evo 0.18) — corrected, scout is NOT dead. ***                   ##
+## *** 08:1x (07-08, JJ) NEW ROADMAP — 3 PHASES, IN ORDER. READ FIRST. ***##
+## NORTH STAR = CREATE A SPACE PLATFORM.                                  ##
+##                                                                        ##
+## PHASE 1 (GATE, do FIRST): TRUE FULL AUTOMATION of 30 SPM red science   ##
+##   with ZERO employee action. The base must RUN ITSELF — no hand-hauls, ##
+##   no hand-feeding, no remote maintenance loop. Concretely:             ##
+##   - ELECTRIC mining drills (we have 26 BURNER, 0 electric) on iron +   ##
+##     copper + coal + stone. e-drill = 3 gear+5 iron-plate+3 circuit     ##
+##     (craftable now, NO steel needed).                                  ##
+##   - POWER to run them: scale steam (boiler+steam-engine, coal-fed) or  ##
+##     solar (researched). Currently only 1 boiler/2 engines — too small. ##
+##   - BELTS + inserters: ore -> furnaces (fuel furnaces via coal belt),  ##
+##     plate -> gear/green-circuit/red-sci assemblers -> labs. We have    ##
+##     0 BELTS today — this is a from-scratch belt build.                 ##
+##   - 5 red-sci assemblers FULLY FED (we have 3). Target 30 SPM,         ##
+##     self-sustaining, hands-off. THIS IS THE GATE — verify it runs with ##
+##     employees standing back before moving on.                          ##
+##                                                                        ##
+## PHASE 2: OIL UP -> blue science. Crude patch is CHARTED: 7 wells       ##
+##   centered ~(145, 370), ~400 tiles SE of spawn, area CLEAR (0 nests/   ##
+##   worms, evo 0.22). Build PUMPJACK on a well -> oil-processing tech    ##
+##   auto-unlocks -> refinery + chem plants -> lubricant/plastic/sulfur   ##
+##   -> BLUE science. Needs STEEL (we have 0 -> smelt steel-plate first). ##
+##   pumpjack=5 steel+10 gear+5 circuit+10 pipe. refinery=15 steel+10     ##
+##   gear+10 stone-brick+10 circuit+10 pipe. chem-plant=5 steel+5 gear+   ##
+##   5 circuit+5 pipe. Pre-stage the kit in a chest by spaceship.         ##
+##                                                                        ##
+## PHASE 3: SPACE PLATFORM. blue sci -> research rocket-silo path         ##
+##   (processing-unit, LDS, rocket-fuel, concrete[done], logistics) ->    ##
+##   build rocket silo + rocket parts -> launch -> space platform.        ##
+##                                                                        ##
+## ROLES THIS PHASE: miner(64)=e-drills on ore+coal+stone + power fuel.   ##
+##   builder(65)=power scale-up + belt/inserter network + 5-asm red line. ##
+##   courier(66)=craft e-drills/belts/inserters/asms from base stock +    ##
+##   feed the build; then craft oil kit. scout(67)=chart/secure SE route  ##
+##   to (145,370), watch biters, flex to build. KEEP BASE ALIVE until the ##
+##   auto line takes over. Stock now: 3317 copper, 345 circ, 138 gear,    ##
+##   185 iron, 0 steel, 0 pipe, 0 belts. ***                              ##
 ##########################################################################
 
 ##########################################################################
