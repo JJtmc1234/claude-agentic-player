@@ -22,13 +22,20 @@ TEAM TODO LIST
 ##########################################################################
 
 ##########################################################################
-## *** 18:3x #1 GOAL (JJ): 30 SPM RED SCIENCE, self-running. = 5 asm-1 on  ##
-## automation-science-pack (6 packs/min each = 30) + ~1 asm on iron-gear-  ##
-## wheel feeding them. Supply needed/min: ~60 iron-plate + 30 copper-plate.##
-## automation-science-pack = 1 iron-gear-wheel + 1 copper-plate. Build the ##
-## WHOLE chain BELT-FED (no hand-feeding — that's why it keeps stalling):  ##
-## NOTE: coal feed is currently MANUAL (hand-loaded furnaces, will re-     ##
-## stall) — the durable COAL BELT is the foundation, do it first.          ##
+## *** 18:4x #1 GOAL (JJ): REAL HAND-FED SEMI-AUTOMATION for red science.  ##
+## Forget full belt automation (too hard to build reliably) — build a      ##
+## WORKING semi-auto core the team keeps fed BY HAND:                       ##
+##  - Place a COMPACT BLOCK near the hub: 5 assembling-machines on          ##
+##    automation-science-pack + 1 on iron-gear-wheel + the lab, each with   ##
+##    an INPUT CHEST + inserter (chest -> assembler, assembler -> lab via   ##
+##    inserter). Short inserters only; NO long belts needed.                ##
+##  - The TEAM'S JOB = keep those input chests TOPPED UP by hand: haul      ##
+##    iron-plate + copper-plate into the gear/red-sci chests, and keep COAL ##
+##    in the furnaces. Machines run continuously; humans refill the buffers.##
+##  - Start with what runs (even 2-3 fed assemblers > 5 starved) and add    ##
+##    assemblers as supply allows. Target ~30 SPM = 5 fed assemblers.       ##
+## This is ACHIEVABLE: craft asm+chest+inserter, place adjacent, keep the   ##
+## chests full. Report #red-sci assemblers WORKING + SPM each cycle. ***    ##
 ##  1. COAL BELT: coal drills -> belt -> inserters fueling every FURNACE   ##
 ##     (+ burner drills). This unstalls smelting (only 1/16 furnaces work  ##
 ##     now b/c coal isn't reaching them). Do this FIRST.                   ##
