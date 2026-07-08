@@ -2,6 +2,15 @@ TEAM TODO LIST
 ==============
 
 ##########################################################################
+## *** 17:1x TEAM PRIMARY FOCUS NOW (JJ "have em work on stockpiling"):   ##
+## STOCKPILE BUILDING SUPPLIES. JJ is handling defense + the red-science  ##
+## assembler + power himself, so the team's #1 job = CRAFT + STOCKPILE    ##
+## mall items into labeled chests at the (0,0) hub: transport-belts,      ##
+## inserters, small-electric-poles, stone-furnaces, burner/electric       ##
+## drills, iron-gears, copper-cable, electronic-circuits, underground-    ##
+## belts + splitters (when unlocked), assembling-machines. Set up         ##
+## assemblers to AUTO-produce these where you can; keep a steady buffer   ##
+## of each. Miner keeps iron/copper/coal feeding it. This is the focus.***##
 ## *** 17:0x CALM PHASED ROADMAP (JJ-endorsed). Don't rush, don't        ##
 ## constantly redesign, PRESERVE working builds, prefer small improve-    ##
 ## ments over big redesigns. Verify against live state (may differ).      ##
