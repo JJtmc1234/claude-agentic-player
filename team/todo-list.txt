@@ -95,8 +95,11 @@ TEAM TODO LIST
 ## killer; keep the coal chest/furnaces fed so it never fully stalls.      ##
 ## (2) Hold/grow red-sci semi-auto (toward 5 asm / 30 SPM). (3) When GREEN ##
 ## unlocks, build 1-2 green (logistic-science-pack) assemblers + feed the  ##
-## lab. (4) Then start the OIL/BLUE chain (pumpjack->refinery->chem) — the ##
-## deep rocket gate. Keep chars ALIVE (retreat from any biter; don't       ##
+## lab. (4) OIL: pumpjacks UNLOCKED but nearest crude is FAR (100s of      ##
+## tiles SE) + UNDISCOVERED — do NOT trek out autonomously (too far/       ##
+## dangerous, builder died before). HOLD the oil build for JJ; keep base + ##
+## science running = the overnight ceiling. Keep chars ALIVE (retreat from ##
+## any biter; don't                                                        ##
 ## engage nests). Preserve working builds. Partial progress is fine —      ##
 ## get as far toward the rocket as possible overnight.                     ##
 ## *** 19:3x SCALE GREEN SCIENCE — THE research bottleneck now. Labs are   ##
