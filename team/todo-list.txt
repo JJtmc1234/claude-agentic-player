@@ -15,10 +15,13 @@ TEAM TODO LIST
 ## (shotgun), and 0 biters are within 80t of any char. Do NOT just HOLD —  ##
 ## RESUME the red-sci automation build + normal work. Only retreat if a    ##
 ## biter actually closes within ~30t of you. Keep building. ***            ##
-## *** NORTH STAR (JJ 18:5x): LAUNCH A ROCKET. Path: red sci (now) ->      ##
-## green -> oil/BLUE sci -> production/utility sci -> research ROCKET-SILO  ##
-## -> build silo + rocket parts (low-density-structure, rocket-fuel,       ##
-## processing-unit) -> LAUNCH. The rocket is the GATE to Vulcanus.         ##
+## *** NORTH STAR (JJ 18:5x): LAUNCH A ROCKET. VERIFIED tech path (rocket- ##
+## silo needs ONLY red+green+BLUE/chemical packs — NO purple/yellow):      ##
+## red sci (now) -> green -> oil/BLUE (chemical) sci -> research ROCKET-    ##
+## SILO + its prereqs (processing-unit, low-density-structure, rocket-fuel,##
+## concrete, logistic-robotics, adv-material-processing-2) -> build silo + ##
+## rocket parts -> LAUNCH. Blue (oil) is the deep gate. Rocket = Vulcanus  ##
+## gate.                                                                   ##
 ## STRATEGY (JJ): Nauvis = LEAN STARTER — build just enough to tech up +   ##
 ## reach the rocket; the REAL base goes on VULCANUS later. Don't over-build##
 ## Nauvis; keep it functional, aim at the rocket. Current step = stabilize ##
