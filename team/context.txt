@@ -288,15 +288,14 @@ Character name: courier — unum 52 (FRESH MAP; re-spawned @ (4,60) 2026-07-05).
 Last position: ~(3.5, 58.2)
 Current task (from Manager): *** 07-07 LATEST (read todo-list top banner):
   WE HAVE OIL — JJ handles processing himself; do NOT go to the field.
-  *** 17:0x COPPER OUTPOST + HAUL (updated — copper is FAR): the base is
-  copper-starved (nearest copper = SW patch (-19,54), ~108 tiles from the NE
-  base). Plan: build a small COPPER SMELTING OUTPOST at (-19,54) — 2-3 burner
-  drills ON the copper + 1-2 stone furnaces (smelt to PLATE on-site, plate is
-  cheaper to haul than ore) + a chest — then HAUL copper-PLATE back to the base
-  in batches. It's a long haul until belts/trains (later phase); keep a steady
-  trickle so red science can start. Report copper-plate stock at base each cycle.
-  (This has been slow 2 cycles — make concrete progress: get the outpost drills
-  placed THIS cycle.) ***
+  *** 17:0x CORRECTION — JJ's SW patch (~-19,54 area) is the STARTER BASE and
+  JJ ALREADY has copper + stone mines there. Do NOT build a duplicate copper
+  mine (preserve JJ's builds). Instead: go to JJ's SW base, take copper-PLATE
+  (or copper ore -> smelt) from his mine's output, and HAUL it to wherever red
+  science gets built. Coordinate with JJ's layout; don't overwrite his stuff.
+  (Manager is asking JJ whether to anchor the growing base at the iron/coal-rich
+  NE or at his SW starter — hold heavy building until that's decided; keep
+  hauling copper + feeding furnaces meanwhile.) ***
   --- role ref ---
   COURIER(66)=LOGISTICS+SCIENCE LEAD (craft gears/cables/circuits/belts/inserters,
   haul, build+FEED the first LAB with red science). connect_named('courier'). ***
