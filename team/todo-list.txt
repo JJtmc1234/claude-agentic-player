@@ -10,7 +10,11 @@ TEAM TODO LIST
 ## drills, iron-gears, copper-cable, electronic-circuits, underground-    ##
 ## belts + splitters (when unlocked), assembling-machines. Set up         ##
 ## assemblers to AUTO-produce these where you can; keep a steady buffer   ##
-## of each. Miner keeps iron/copper/coal feeding it. This is the focus.***##
+## of each. Miner keeps iron/copper/coal feeding it. This is the focus.   ##
+## *** DEPOSIT INTO CHESTS (JJ 17:2x): every crafted/gathered supply must  ##
+## go INTO a hub STOCKPILE CHEST — do NOT hoard items in your character    ##
+## inventory. Craft -> walk to hub -> put_in_chest. Empty inventories that  ##
+## roam = wasted work (scout was caught roaming empty). Keep depositing.***##
 ## *** 17:0x CALM PHASED ROADMAP (JJ-endorsed). Don't rush, don't        ##
 ## constantly redesign, PRESERVE working builds, prefer small improve-    ##
 ## ments over big redesigns. Verify against live state (may differ).      ##

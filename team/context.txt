@@ -603,11 +603,13 @@ Branch: `employee-4`.
 Character name: scout — unum 53 (FRESH MAP; re-spawned @ (6,60) 2026-07-05).
   Driving VERIFIED. You OWN this char (see in-game-owner.txt) — drive it now.
 Last position: ~(5.8, 59.5)
-Current task (from Manager): *** 17:1x DEFENSE CANCELLED — JJ handles defense
-  himself ("I can make defense"). Resume SCOUT+FLEX: chart charted-bound areas,
-  report only CHARTED resource finds, watch for biters near the hub (warn if any
-  approach), and FLEX to help the (0,0) hub build or the SW->hub copper belt when
-  idle. No turret-building needed. ***
+Current task (from Manager): *** 17:2x STOP ROAMING EMPTY (JJ: "scout's
+  inventory is empty"). CONTRIBUTE MATERIALLY: go to a resource near the hub,
+  MINE iron/copper/stone/coal + chop a little wood, CRAFT building supplies
+  (belts, inserters, poles, furnaces, gears, cable, circuits), and DEPOSIT them
+  into the hub STOCKPILE CHESTS at (0,0) — don't carry a full/empty idle
+  inventory around. Defense is JJ's (cancelled). Do a quick biter/chart check
+  each cycle, but your main job now = feed the chest stockpile. ***
   *** 16:3x FRESH 2.1+SA MAP — EVERYTHING BELOW IS
   VOID (old 2.0 mission). Your NEW DYNAMIC ROLE is in the todo-list TOP BANNER:
   SCOUT(67)=SCOUT+DEFENSE+FLEX (explore + chart, find + report resource patches,
