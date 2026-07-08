@@ -7,20 +7,24 @@ TEAM TODO LIST
 ## ments over big redesigns. Verify against live state (may differ).      ##
 ## CURRENT STATE: iron+coal drills + iron furnaces at the NE hub. => we   ##
 ## are finishing PHASE 1 and starting PHASE 2.                            ##
-## *** DECISIONS (JJ 17:0x): (1) ANCHOR = NE IRON HUB — grow the base +   ##
-##   build red science HERE (iron+coal rich). Courier hauls COPPER from   ##
-##   JJ's SW mine (it's NOT far — manageable haul). Don't duplicate JJ's  ##
-##   SW copper/stone mines; preserve his builds. (2) ATTACKS EXPECTED     ##
+## *** DECISIONS (JJ 17:0x): (1) HUB = ~(0,0) near the crash-site         ##
+##   SPACESHIP (central between SW copper/stone and NE iron/coal). Build   ##
+##   red science + assemblers + the stockpile/mall HERE at (0,0). FEED it: ##
+##   haul/belt IRON+COAL in from the NE patches and COPPER from JJ's SW    ##
+##   mine (both "not far"). KEEP the team's existing NE iron drills+        ##
+##   furnaces (preserve builds) — they smelt plates that get moved to the  ##
+##   (0,0) hub. Don't duplicate JJ's SW copper/stone mines. (2) ATTACKS    ##
+##   EXPECTED                                                              ##
 ##   SOON — DEFENSE moves up: scout builds gun-turrets + ammo (+ walls if  ##
 ##   available) at the NE base perimeter NOW. (3) JJ is establishing basic ##
 ##   POWER himself — builder need not rush power; focus smelting + science.##
 ## (4) ONLY MENTION CHARTED THINGS in reports (don't surface patches/coords##
 ##   the player hasn't discovered on the map; RCON sees fog-hidden stuff — ##
 ##   don't report it). (5) BELT COPPER OVER: build a transport-belt line   ##
-##   from JJ's SW copper mine to the NE base so copper flows automatically  ##
+##   from JJ's SW copper mine to the (0,0) HUB so copper flows automatically##
 ##   (hand-haul meanwhile). Long run — build it in segments with poles;     ##
-##   craft belts from NE iron. (6) STOCKPILE BUILDING SUPPLIES: craft +     ##
-##   stockpile in labeled chests at the NE base for JJ + team — transport-  ##
+##   craft belts from iron. (6) STOCKPILE BUILDING SUPPLIES: craft +        ##
+##   stockpile in labeled chests at the (0,0) HUB for JJ + team — transport-##
 ##   belts, inserters, small-electric-poles, stone-furnaces, burner/electric##
 ##   drills, underground-belts + splitters (when unlocked), assemblers.     ##
 ##   Keep a steady buffer of each; this is the Phase-4 mall, started early. ##

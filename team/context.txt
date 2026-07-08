@@ -603,9 +603,9 @@ Character name: scout — unum 53 (FRESH MAP; re-spawned @ (6,60) 2026-07-05).
   Driving VERIFIED. You OWN this char (see in-game-owner.txt) — drive it now.
 Last position: ~(5.8, 59.5)
 Current task (from Manager): *** 17:0x DEFENSE NOW (JJ: attacks expected soon).
-  Priority: return to the NE base perimeter and set up DEFENSE — craft/place
-  gun-turrets + firearm-magazine ammo (and walls if available) covering the base
-  edge facing pollution/nests. gun-turret + ammo are early-craftable. Keep some
+  Priority: go to the (0,0) HUB (near the crash-site spaceship) and set up
+  DEFENSE — craft/place gun-turrets + firearm-magazine ammo (and walls if
+  available) covering the hub edge facing pollution/nests. gun-turret + ammo are early-craftable. Keep some
   charting but DEFENSE first this phase. Report turret+ammo count each cycle. ***
   *** 16:3x FRESH 2.1+SA MAP — EVERYTHING BELOW IS
   VOID (old 2.0 mission). Your NEW DYNAMIC ROLE is in the todo-list TOP BANNER:
