@@ -2,6 +2,22 @@ TEAM TODO LIST
 ==============
 
 ##########################################################################
+## *** 17:3x #1 SINGLE FOCUS — BUILD THE COAL+ORE BELT AUTOMATION.        ##
+## The base has STALLED 3x because coal + ore are HAND-fed and keep        ##
+## running out (right now: 8 furnaces no-fuel, 6 no-ore, 0 coal buffered, ##
+## even though 10 coal drills + iron drills are mining fine). STOP hand-   ##
+## feeding. BUILD IT ONCE: (a) a transport-belt from the COAL drills past  ##
+## the furnace line + a burner/normal INSERTER loading COAL into each      ##
+## furnace (and into the burner drills' fuel); (b) a belt/inserter moving  ##
+## IRON ORE from the iron drills INTO the furnaces. Result: furnaces stay  ##
+## fueled + fed automatically and STOP stalling. miner+builder OWN this;   ##
+## courier hauls belts/inserters/coal to them. PAUSE electric swap +       ##
+## stockpile + scouting extras until furnaces read mostly 'working' again. ##
+## This ONE build ends the recurring death-spiral. Report furnace working  ##
+## count each cycle. ***                                                   ##
+##########################################################################
+
+##########################################################################
 ## *** 17:3x ELECTRIC DRILL IS UNLOCKED — DO THE SWAP (JJ "we don't need  ##
 ## burner drills"). NOT copper-blocked: ~264 copper-cable IS stockpiled,   ##
 ## so CRAFT electronic-circuits NOW (copper-cable + iron-plate) -> electric ##
