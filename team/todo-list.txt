@@ -2,6 +2,19 @@ TEAM TODO LIST
 ==============
 
 ##########################################################################
+## *** 13:4x JJ GOAL (~3 HRS): CHEMPACK FULLY AUTOMATED @ 30 SPM.         ##
+## Critical path: STEEL -> refinery+chem block @ crude tanks (-10,7) ->   ##
+## petroleum/sulfur/plastic/lubricant -> 5 chempack assemblers belt-fed.  ##
+## BUILDER PANE IS DEAD (JJ offline, can't relaunch) -> REASSIGN:         ##
+##   MINER(64): TOP PRIORITY = STEEL. Feed iron-plate + coal into the      ##
+##     stone furnaces (JJ built a steel cluster) -> steel-plate to a chest.##
+##     Target 100+ steel. Steel gates the whole refinery build.           ##
+##   COURIER(66): craft pipe + refinery + chem plants; once steel exists,  ##
+##     BUILD the refinery/chem block at the crude tanks (you can place).   ##
+##   SCOUT(67): oil field reached — secure/defend it, watch the (200,190)  ##
+##     nest; then flex back to help build.                                 ##
+## Manager will RCON-drive the build if the live panes also stall. ***     ##
+##########################################################################
 ## *** 12:5x ON RELAUNCH — DRIVE YOUR OWN CHAR NOW, IMMEDIATE TASK. ***   ##
 ## Owner = PER-CHARACTER (see in-game-owner.txt top box). No idle. If your ##
 ## primary is blocked, do the FALLBACK — never sit still.                 ##
