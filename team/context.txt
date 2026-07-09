@@ -304,7 +304,15 @@ Worktree name mismatch (agent-3 dir / employee-2 branch): acknowledged
 Character name: courier — unum 52 (FRESH MAP; re-spawned @ (4,60) 2026-07-05).
   Driving VERIFIED. You OWN this char (see in-game-owner.txt) — drive it now.
 Last position: ~(3.5, 58.2)
-Current task (from Manager): *** 16:2x CLEAN SPLIT. BUILDER(you)=keep SCALING
+Current task (from Manager): *** 17:2x BUILDER = build the AUTOPACK ASSEMBLER
+  LINE (the 30-SPM capstone). Courier owns the copper line, miner owns iron —
+  DON'T touch ore units (that's the overlap). YOUR job: near the hub, place a
+  block of assemblers fed by INSERTERS from the hub plate/gear chests: 1 asm on
+  iron-gear-wheel, 1 on copper-cable + electronic-circuit (green), and 3-5 asm on
+  automation-science-pack (red), each with input chest+inserter -> asm -> inserter
+  -> a red-sci output chest / lab. Short inserters, clean zone. Iron+copper plate
+  already auto-flow to the hub. Target ~30 SPM autopack, hands-off. ***
+  *** 16:2x CLEAN SPLIT. BUILDER(you)=keep SCALING
   auto ore units with the miner's proven recipe (drill@edge -> atomic chest-at-
   drop -> furnace FIRST then inserters -> plate chest; power pole <=3t; only near
   existing power). Priority: finish an auto COPPER unit, then add more iron/copper
