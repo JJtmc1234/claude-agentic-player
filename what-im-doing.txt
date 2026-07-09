@@ -138,7 +138,9 @@ JJ may need to RELAUNCH the 4 employee Claude sessions to get them self-driving.
   Manager inserts inputs via RCON each cycle). Miner out of big poles (0 wood/steel
   on hand) -> craft more poles (take steel from chest) to power green + expand.
   *** FULL CHEMPACK CHAIN OPERATIONAL (07-09) *** All 4 assemblers placed:
-  green(-29.5,17.5, no_power/low-pri), adv(-26.5,17.5, WORKING), engine(-23.5,17.5,
+  green(-29.5,17.5, POWERED+WORKING -- small pole @ (-31.5,17.5) via builder's
+  spare pole; fed iron+cu-cable in bulk -> auto-makes green; shuttle green->adv
+  each cycle), adv(-26.5,17.5, WORKING), engine(-23.5,17.5,
   WORKING), chempack(-23.5,20.5, WORKING). Fed chempack sulfur+adv+engine -> making
   chemical-science-pack (blue!). asm-1 is slow (~48s/craft) -> packs finish shortly.
   SEMI-AUTO: each cycle Manager shuttles adv-circuit + engine outputs (+ sulfur
