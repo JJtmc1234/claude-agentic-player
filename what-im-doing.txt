@@ -104,12 +104,18 @@ JJ may need to RELAUNCH the 4 employee Claude sessions to get them self-driving.
   clipping y~-1.5). Placed a branch pipe @ (-30.5,-25.5) -> CONFIRMED water=99.98
   flows in (safe tap, boilers untouched). Laid 4 pipes down to y=-22.5 before
   miner ran out; miner now crafting 100 more pipes (eta ~50s).
-  PLAN (continue next cycle): finish the vertical run down x=-30.5 to y~7,
-  tunneling under the assembler @ y~-1.5 with 1 underground pair; then run EAST
-  ~6-14t to a SULFUR chem-plant sited between the water (x=-30) and petroleum
-  (west refinery tap @ (-17.5,15.5)); tap petroleum west to it. Then adv-circuit+
-  engine+chempack co-located; haul finished chempack (item) to the 5 labs.
-  100 plastic staged in courier(66).
+  *** SULFUR GATE DONE (07-09) *** Water pipe complete: branch @ (-30.5,-26.5) ->
+  down x=-30.5 (jog to x=-29.5 past the assembler) -> east along the clear y=9.5
+  band to (-22.5,9.5). SULFUR chem-plant @ (-21.5,11.5) dir=0: NW input on the
+  water pipe (-22.5,9.5), NE input fed petroleum via x=-19.5 column from the west
+  refinery tap (-17.5,15.5); middle tile (-21.5,9.5) left EMPTY so water+petro
+  don't mix. Powered by a big-electric-pole @ (-21,14) (wired to base grid).
+  STATUS = working, PRODUCING SULFUR (water=90, petro=90). 100 plastic in courier.
+  REMAINING to chempack (blue): electronic-circuit (green) + advanced-circuit +
+  engine-unit assemblers (employees hand-crafting these), then chempack asm
+  (sulfur+adv-circuit+engine-unit) -> haul packs to the 5 labs. NOTE: sulfur +
+  plastic share the one west refinery (45 petro/s vs 20+30 draw) -> may need a 2nd
+  refinery hooked up later for full rate.
 - 2.1 GOTCHAS (hit live): (a) insert_into_entity/take_from_entity REQUIRE the
   numeric inventory `slot` arg or they crash (get_inventory(nil)). (b) the crafter
   input/output defines were RENAMED: use defines.inventory.crafter_input(=2) and

@@ -18,11 +18,10 @@ TEAM TODO LIST
 ##     (petro tap @ pipe (-17.5,15.5)). TODO: sustained coal feed (stocked    ##
 ##     chest+inserter, coal from iron-chest @ (-31.5,-8.5)) + inserter to      ##
 ##     DRAIN plastic to a chest, else it caps ~100 and stalls.               ##
-##  2. *** THE GATE *** sulfur plant needs WATER. Nearest water access =    ##
-##     base boiler network, pipe @ (-16.5,-26.5), ~43t due N of oil zone.   ##
-##     Manager routes the water pipe down the CLEAR east column x=-12       ##
-##     (x~-16 is blocked: belt row, crash-site @ y=-6, base cluster) to a   ##
-##     sulfur chem-plant at the EAST oil sub-zone (tanks/refinery @ x~-6).  ##
+##  2. *** SULFUR GATE DONE *** water pipe built (branch @ (-30.5,-26.5) ->  ##
+##     x=-30.5 down -> y=9.5 band east). SULFUR chem-plant @ (-21.5,11.5)    ##
+##     WORKING, producing sulfur (water+petro both fed, powered). The one    ##
+##     un-hand-craftable input is now automated.                            ##
 ##  3. adv-circuit asm (2 plastic+4 copper-cable+2 elec-circuit).           ##
 ##  4. engine-unit asm (1 steel+1 gear+2 pipe; steel ~1000 banked).         ##
 ##  5. chempack asm (1 sulfur+3 adv-circuit+2 engine-unit) -> belt to labs. ##

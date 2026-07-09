@@ -383,3 +383,14 @@ Next: stage 2 (cables curriculum) bundled in next mod deploy per `mod/claude-com
   (blue) chain. Not sustained yet (needs coal-feed + plastic-drain inserters).
 - Chempack recipe already unlocked; remaining chain = adv-circuit + sulfur(water)
   + engine-unit -> chempack -> feed 5 labs (all missing_science_packs).
+
+## 2026-07-09 — SULFUR gate cleared (water pipe + sulfur plant online)
+- Built a ~44-tile water pipe: safe branch off the boiler supply line's open west
+  end @ (-30.5,-26.5) (boilers untouched) -> down x=-30.5 -> east along a clear
+  y=9.5 band to the oil zone. Route-analyzed to dodge the crash-site + base.
+- SULFUR chem-plant @ (-21.5,11.5): water (NW input) + petroleum (NE input, piped
+  from the west refinery tap), middle tile empty to prevent mixing, powered by a
+  big pole. WORKING -> producing sulfur. Sulfur was the ONLY chem input that
+  can't be hand-crafted, so this was the true gate to blue science.
+- Remaining to chempack: green/adv circuits + engine-units (employees hand-craft)
+  -> chempack assembler -> feed the 5 labs -> unblocks research toward the rocket.
