@@ -29,7 +29,9 @@ TEAM TODO LIST
 ##   stocked for the chempack line: ELECTRONIC-CIRCUIT (green, craft from   ##
 ##   iron+cu-cable -- currently 0, biggest gap), iron-gear-wheel, pipe,     ##
 ##   copper-cable, steel-plate. Manager pulls these into the assemblers.    ##
-##   Keep ~100+ green circuits there. (You also mine iron/coal/copper.)     ##
+##   Keep ~100+ green circuits there. Also stock 2-3 BIG/MEDIUM electric    ##
+##   poles (craft: iron-stick+steel+cu-cable) so Manager can add a 2nd      ##
+##   chempack assembler to double blue-science throughput. (Also mine.)     ##
 ## COURIER(66): you hold 100 plastic-bar. HAND-CRAFT the non-fluid chem     ##
 ##   intermediates to pre-stage chempack: electronic-circuit (1 iron+3 cu-  ##
 ##   cable), advanced-circuit (2 plastic+4 cu-cable+2 elec-circ), engine-   ##
