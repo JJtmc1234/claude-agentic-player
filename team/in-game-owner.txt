@@ -8,12 +8,13 @@
 ##   courier -> unum 11186                                                  ##
 ## employee-1 / employee-2: RECONNECT via connect_named('miner'/'courier')  ##
 ## -> you'll get the new unum. Re-stock as needed.                          ##
-## *** POWER EMERGENCY (Manager fixing): the base electric grid FRAGMENTED  ##
-## (net4 machines / net10 generators split -> ALL boilers full_output, all  ##
-## science machines no_power, blue stalled). Cause: a pole in the machine-  ##
-## feed chain was lost (~between (-28.5,-17.5) and (-30.5,-28.5)). Manager   ##
-## is crafting poles (scout) to rebuild the chain. employee-1/3: if you can, ##
-## help place electric poles to reconnect generators->machines.             ##
+## *** POWER RESTORED (Manager, 11:4x) *** the grid split was fixed by a pole ##
+## @ (-16.5,-28.5) bridging net10(engines)<->net4(machines). Boilers+machines ##
+## powered again; chain restarting (feed inputs to un-stall). ROOT CAUSE =    ##
+## BITERS: they destroyed 2 steam-engines (@ -18.5,-30/-35) + poles + killed  ##
+## miner/courier. *** BASE DEFENSE BREACH -- HARDEN THE NW/POWER PERIMETER ** ##
+## scout/employees: build walls+gun turrets around the boiler/power block     ##
+## (x~-12..-18, y~-31..-36) + the NW chem/power zone; a biter path is open.   ##
 ## owner: PER-CHARACTER (updated unums):                                    ##
 ##   employee-1 -> miner   unum 11185                                       ##
 ##   employee-2 -> courier unum 11186                                       ##
