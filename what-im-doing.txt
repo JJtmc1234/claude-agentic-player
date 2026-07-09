@@ -75,6 +75,13 @@ JJ may need to RELAUNCH the 4 employee Claude sessions to get them self-driving.
   where their panes work), testing each fluid tap empirically like the crude fix.
   Next brick = plastic plant tapping the refinery petroleum output (drains it,
   keeps oil flowing, feeds adv-circuits).
+- PETROLEUM TAP FOUND (07-09, empirical): refinery (-15.5,12.5) dir=8 outputs
+  petroleum at tile (-17.5,14.5); a pipe @ (-17.5,15.5) carries it (petro=100).
+  The other 2 output tiles (-15.5,14.5)/(-13.5,14.5) are empty (basic proc =
+  petroleum only). Test pipes left @ (-17.5,15.5)[petro tap] + (-15.5,15.5)[dead].
+  PLASTIC PLANT PLAN: place chemical-plant with a fluid input pipe-connected to
+  (-17.5,15.5), recipe=plastic-bar, insert coal, belt out plastic. Need a
+  chemical-plant item (craft: 2.1 recipe -> verify live). Miner(64) has 46 pipes.
 
 ## ROCKET/SPACE CAPABILITIES (mod 0.12.0, LIVE + verified)
 remote.call('claude', fn, ...): get_rocket_silos(unum), load_rocket(unum,x,y,
