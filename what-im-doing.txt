@@ -166,6 +166,14 @@ JJ may need to RELAUNCH the 4 employee Claude sessions to get them self-driving.
   recipe = 1 inserter+1 transport-belt; those aren't auto-produced) -> green +
   blue are the research limiters now. Labs: (-34,-10),(-34,-6),(-26,-9),(-26,-6),
   (-23,-9) [floored].
+  *** FEED ALL 3 SCIENCE PRODUCERS + TARGETED DELIVERY (07-09 hard lesson) ***
+  The base auto-feeds NONE of its science assemblers. Each cycle Manager must feed:
+  RED asms @ (-21.5,-5.5),(-21.5,-1.5),(-17.5,-1.5) with copper-plate + iron-gear;
+  GREEN asms (emp-1 feeds belts/inserters); BLUE chain (below). Then DELIVER
+  TARGETED: only insert a pack into a lab whose count of THAT pack is low (<15) --
+  else limited packs get hogged by one already-stocked lab while others starve
+  (this + stalled red froze research @ 67.9% for 5 cycles). Labs are unbalanced
+  (some need red, some blue) so always deliver all 3 types by need.
   *** COPPER-CABLE ASSEMBLER @ (-33.5,20.5) (recipe copper-cable) *** ROOT FIX --
   there was NO cable production + stock hit 0 (1830 copper-plate unused), which
   starved both adv lines -> stalled blue -> stalled research @ 67.9% for 4 cycles.
