@@ -18,12 +18,19 @@ TEAM TODO LIST
 ##     (petro tap @ pipe (-17.5,15.5)). TODO: sustained coal feed (stocked    ##
 ##     chest+inserter, coal from iron-chest @ (-31.5,-8.5)) + inserter to      ##
 ##     DRAIN plastic to a chest, else it caps ~100 and stalls.               ##
-##  2. sulfur plant: needs WATER piped ~30t from offshore-pump @ (-42,-27). ##
+##  2. *** THE GATE *** sulfur plant needs WATER. Nearest water access =    ##
+##     base boiler network, pipe @ (-16.5,-26.5), ~43t due N of oil zone.   ##
+##     Manager will run a vertical water pipe down x~-16.5 to a sulfur      ##
+##     chem-plant at the oil zone (underground pairs under base infra).     ##
 ##  3. adv-circuit asm (2 plastic+4 copper-cable+2 elec-circuit).           ##
 ##  4. engine-unit asm (1 steel+1 gear+2 pipe; steel ~1000 banked).         ##
 ##  5. chempack asm (1 sulfur+3 adv-circuit+2 engine-unit) -> belt to labs. ##
 ## MINER(64): keep iron/steel/plate + craft pipes/gears on request.        ##
-## COURIER(66): haul coal to the plastic plant + finished packs to labs.   ##
+## COURIER(66): you hold 100 plastic-bar. HAND-CRAFT the non-fluid chem     ##
+##   intermediates to pre-stage chempack: electronic-circuit (1 iron+3 cu-  ##
+##   cable), advanced-circuit (2 plastic+4 cu-cable+2 elec-circ), engine-   ##
+##   unit (1 steel+1 gear+2 pipe). Stage them in a chest near the oil zone.  ##
+##   (Sulfur is Manager's water-pipe job; everything else you can craft.)    ##
 ## BUILDER(65): build the chem asms/belts if your pane merges master.      ##
 ## SCOUT(67): secure the water-pipe corridor + oil zone; watch biters.     ##
 ##                                                                         ##

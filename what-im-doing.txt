@@ -87,6 +87,18 @@ JJ may need to RELAUNCH the 4 employee Claude sessions to get them self-driving.
   inserter+chest coal feed (kept stocked) + inserter draining plastic to a chest/
   belt, then adv-circuit asm (plastic+copper-cable+elec-circuit) and sulfur
   (needs water piped from pump @ -42,-27) -> engine-unit -> chempack -> labs.
+- CRITICAL-PATH (07-09 economy scan): raw mats ABUNDANT (copper-cable 1640,
+  copper-plate 3160, steel 1058, iron-plate 4800, pipe 70). electronic-circuit=0
+  (no green-circuit production) -> green/adv circuits + engine-units are all
+  HAND-CRAFTABLE (no fluid) as a bootstrap, so they are NOT the gate. THE GATE =
+  SULFUR (only chain input that can't be hand-crafted -> needs a chem plant with
+  WATER). Nearest water to the oil zone is the base BOILER network; closest
+  water-carrying pipe @ (-16.5,-26.5), ~43 tiles due NORTH of the oil zone
+  (x~-16.5). No lake near oil (nearest water tile 42t out). PLAN: run a ~43-tile
+  water pipe (mostly vertical at x~-16.5, underground-pipe pairs to tunnel under
+  base infra) from the boiler water network down to a sulfur chem-plant at the
+  oil zone; then adv-circuit + engine + chempack all co-located, haul only the
+  finished chempack (item) to the 5 labs. 100 plastic already staged in courier(66).
 - 2.1 GOTCHAS (hit live): (a) insert_into_entity/take_from_entity REQUIRE the
   numeric inventory `slot` arg or they crash (get_inventory(nil)). (b) the crafter
   input/output defines were RENAMED: use defines.inventory.crafter_input(=2) and
