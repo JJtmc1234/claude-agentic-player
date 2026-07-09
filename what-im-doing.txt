@@ -145,6 +145,18 @@ JJ may need to RELAUNCH the 4 employee Claude sessions to get them self-driving.
   from sulfur plant/courier) into the chempack asm. Miner(64) is MANAGER-CLAIMED
   for this build (owner file updated; emp-1 stood down). NEXT: verify packs, HAUL
   to the 5 labs (insert lab_input) -> research 'advanced-oil-processing' resumes;
+  *** RESEARCH RESUMED (07-09) *** fed blue packs to lab @ (-34,-10) -> it's
+  WORKING, advanced-oil-processing progressing (was 0 -> 1.8% -> 4.8% and rising).
+  SEMI-AUTO LOOP (do each cycle until automated): (1) take advanced-circuit from
+  adv asm (-26.5,17.5) output + engine-unit from engine asm (-23.5,17.5) output +
+  sulfur from sulfur plant (-21.5,11.5) -> insert all into chempack asm (-23.5,
+  20.5); (2) take chemical-science-pack from chempack asm -> insert lab_input of
+  labs (blue was the only missing pack; labs already have red 59 + green 94).
+  Blue-pack RATE (slow asm-1, ~2 per 48s) is now the limiter; 75 needed for this
+  research. TO AUTOMATE (free the manual loop): inserters/chests between asm
+  outputs -> chempack -> a lab-feed belt; or upgrade to asm-2/3 + parallel chempack
+  asms. Assemblers are placed adjacent (no inserter gap) so automating needs a
+  small re-layout.
   then add inserters+chests for hands-off sustained flow (75 packs needed). Also
   power the green asm (craft big pole: 5 steel+8 iron-stick+4 cu-cable) OR keep
   hand-crafting green (88 banked). Watch: sulfur+plastic share 1 refinery (petro
