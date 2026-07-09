@@ -124,8 +124,19 @@ JJ may need to RELAUNCH the 4 employee Claude sessions to get them self-driving.
   a line near the sulfur plant: green-circuit asm -> adv-circuit asm -> engine asm
   -> chempack asm, fed by the fluid plants (sulfur @ (-21.5,11.5), plastic @
   (-18.5,17.5)) + iron/cu/steel from base. Drain sulfur/plastic into the line.
-  STARTED: miner crafting 40 green-circuits (seed for the assemblers). 50 sulfur
-  drained into courier(66). NEXT: craft gears+assemblers, place + wire the line.
+  ASSEMBLER LINE (07-09, in progress): crafted 5 assembling-machine-1 (miner).
+  Placed a row @ y=17.5: green-circuit @ (-29.5,17.5), advanced-circuit @
+  (-26.5,17.5), engine-unit @ (-23.5,17.5); recipes set. Power: poles @ (-26,15)
+  small + (-21,14)/(-26,20) big (net 4). adv + engine POWERED; GREEN still no_power
+  (too far west, need a pole ~x=-30 -- but I have 88 green circuits hand-crafted
+  so green asm is low priority). ADV-CIRCUIT ASM = WORKING (fed plastic+cu-cable+
+  green). REMAINING: (1) place chempack asm -- (-20.5,17.5) keeps failing 'cannot
+  place' (blocked, find clear spot near the pole, e.g. (-26.5,20.5)); (2) feed
+  engine asm (steel+gear+pipe; miner has 78 gears, needs steel from chest + pipe);
+  (3) feed chempack asm (sulfur[50 in courier]+adv-circuit+engine); (4) haul packs
+  to labs; (5) later: inserters/chests for sustained flow (currently semi-auto:
+  Manager inserts inputs via RCON each cycle). Miner out of big poles (0 wood/steel
+  on hand) -> craft more poles (take steel from chest) to power green + expand.
 - 2.1 GOTCHAS (hit live): (a) insert_into_entity/take_from_entity REQUIRE the
   numeric inventory `slot` arg or they crash (get_inventory(nil)). (b) the crafter
   input/output defines were RENAMED: use defines.inventory.crafter_input(=2) and
