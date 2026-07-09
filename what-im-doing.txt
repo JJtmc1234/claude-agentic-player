@@ -166,6 +166,13 @@ JJ may need to RELAUNCH the 4 employee Claude sessions to get them self-driving.
   recipe = 1 inserter+1 transport-belt; those aren't auto-produced) -> green +
   blue are the research limiters now. Labs: (-34,-10),(-34,-6),(-26,-9),(-26,-6),
   (-23,-9) [floored].
+  *** 2nd ADV-CIRCUIT LINE @ (-27.5,26.5) *** (medium pole @ (-25,26); added
+  because 1 adv asm couldn't feed 2 chempacks -> blue went 2 -> 8). Feed BOTH adv
+  @ (-26.5,17.5) and (-27.5,26.5) with plastic+cu-cable+green-circ each cycle;
+  drain both -> chempacks. IRON source: the chest @ (-14,-1) is now EMPTY -- pull
+  iron dynamically (find a chest with >=50 iron-plate; ~3200 in stock at (69,-39)).
+  BASE WATCH: all 29 furnaces went idle once (smelting stalled, copper-ore=0) --
+  big plate buffers (3200 iron/2030 cu) cover it but miner should restart ore flow.
   *** COAL IS MANDATORY EACH CYCLE *** feed coal (from chest @ (-31.5,-8.5)) to
   the plastic plant (-18.5,17.5) -- if coal runs out, plastic stops -> adv starves
   -> chempacks starve -> NO BLUE (whole chain cascades down; this stalled lubricant
