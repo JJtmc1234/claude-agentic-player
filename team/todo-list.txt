@@ -25,7 +25,11 @@ TEAM TODO LIST
 ##  3. adv-circuit asm (2 plastic+4 copper-cable+2 elec-circuit).           ##
 ##  4. engine-unit asm (1 steel+1 gear+2 pipe; steel ~1000 banked).         ##
 ##  5. chempack asm (1 sulfur+3 adv-circuit+2 engine-unit) -> belt to labs. ##
-## MINER(64): keep iron/steel/plate + craft pipes/gears on request.        ##
+## MINER(64): CHEMPACK SUPPLY -- keep the staging chest @ (-12.5,3.5)       ##
+##   stocked for the chempack line: ELECTRONIC-CIRCUIT (green, craft from   ##
+##   iron+cu-cable -- currently 0, biggest gap), iron-gear-wheel, pipe,     ##
+##   copper-cable, steel-plate. Manager pulls these into the assemblers.    ##
+##   Keep ~100+ green circuits there. (You also mine iron/coal/copper.)     ##
 ## COURIER(66): you hold 100 plastic-bar. HAND-CRAFT the non-fluid chem     ##
 ##   intermediates to pre-stage chempack: electronic-circuit (1 iron+3 cu-  ##
 ##   cable), advanced-circuit (2 plastic+4 cu-cable+2 elec-circ), engine-   ##
