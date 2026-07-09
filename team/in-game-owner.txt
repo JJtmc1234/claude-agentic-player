@@ -1,9 +1,16 @@
 # In-game character owner
 
 ##########################################################################
-## *** 12:2x (07-08, Manager) AUTHORITATIVE — OVERRIDES EVERYTHING BELOW.##
-## owner: PER-CHARACTER. Each employee DRIVES ITS OWN named char, NOW:    ##
-##   employee-1 -> miner   unum 64                                        ##
+## *** 09:3x (07-09, Manager) AUTHORITATIVE -- OVERRIDES EVERYTHING BELOW.##
+## *** MANAGER CLAIMS miner(64) TEMPORARILY *** I am actively RCON-driving ##
+## miner 64 for the chempack assembler-line build (crafting assemblers/    ##
+## circuits + placing entities). employee-1: STAND DOWN on driving miner   ##
+## 64 -- do NOT issue craft/walk/mine on it (the mod allows ONE craft-job  ##
+## per char, so we collide). Read-only probes are fine. I'll hand miner    ##
+## back (revert this box) once the chempack line is running. Sorry for the ##
+## earlier undocumented use -- you were right to flag it (emp-1 09:30).    ##
+## owner: PER-CHARACTER for the rest:                                      ##
+##   employee-1 -> miner   unum 64   *** MANAGER-DRIVEN (stand down) ***    ##
 ##   employee-2 -> courier unum 66                                        ##
 ##   employee-3 -> builder unum 65                                        ##
 ##   employee-4 -> scout   unum 67                                        ##
