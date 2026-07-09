@@ -155,6 +155,17 @@ JJ may need to RELAUNCH the 4 employee Claude sessions to get them self-driving.
   20.5) AND chempack #2 @ (-27.5,23.5) [ADDED, 2x throughput, powered by big pole
   @ (-30,24)]; (2) take chemical-science-pack from BOTH chempack asms -> insert
   lab_input of labs (blue was the only missing pack; labs already have red+green).
+  *** 07-09 IMPORTANT: labs need RED+GREEN+BLUE, not just blue *** the labs'
+  initial red/green buffers depleted (~15 cycles of research). NONE of the science
+  is auto-delivered to labs -- Manager must shuttle ALL THREE each cycle: drain
+  red asms @ (-21.5,-5.5),(-21.5,-1.5),(-17.5,-1.5) + green asms @ (-36.5,-4.5),
+  (-31.5,-1.5),(-23.5,4.5),(-19.5,4.5) + both chempacks -> insert into labs. USE
+  LIVE lab positions (l.position via find_entities_filtered{name='lab'}) -- do NOT
+  hardcode floored coords (insert lookup radius is 0.6, floored coords miss ->
+  'no entity with inventory'). Red is plentiful; GREEN is source-starved (its
+  recipe = 1 inserter+1 transport-belt; those aren't auto-produced) -> green +
+  blue are the research limiters now. Labs: (-34,-10),(-34,-6),(-26,-9),(-26,-6),
+  (-23,-9) [floored].
   ALSO each cycle: drain green asm (-29.5,17.5) -> adv asm; refill green asm
   (iron+cu-cable), adv (plastic+cu-cable), engine (steel+gear+pipe) from base
   chests (iron @ (-14,-1), cu-cable @ (-9,2), steel @ (-31.5,-8.5), gear+pipe @

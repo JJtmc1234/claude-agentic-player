@@ -29,9 +29,11 @@ TEAM TODO LIST
 ##   stocked for the chempack line: ELECTRONIC-CIRCUIT (green, craft from   ##
 ##   iron+cu-cable -- currently 0, biggest gap), iron-gear-wheel, pipe,     ##
 ##   copper-cable, steel-plate. Manager pulls these into the assemblers.    ##
-##   Keep ~100+ green circuits there. Also stock 2-3 BIG/MEDIUM electric    ##
-##   poles (craft: iron-stick+steel+cu-cable) so Manager can add a 2nd      ##
-##   chempack assembler to double blue-science throughput. (Also mine.)     ##
+##   Keep ~100+ green circuits there. GREEN SCIENCE is now a research       ##
+##   limiter: 2 of the 4 green-science asms are starved (recipe = 1 inserter##
+##   +1 transport-belt). Craft INSERTERS + TRANSPORT-BELTS and feed/stock    ##
+##   them for the green-science asms @ (-36.5,-4.5),(-31.5,-1.5),(-23.5,4.5),##
+##   (-19.5,4.5) so green keeps flowing to the 5 labs. (Also mine.)         ##
 ## COURIER(66): you hold 100 plastic-bar. HAND-CRAFT the non-fluid chem     ##
 ##   intermediates to pre-stage chempack: electronic-circuit (1 iron+3 cu-  ##
 ##   cable), advanced-circuit (2 plastic+4 cu-cable+2 elec-circ), engine-   ##
