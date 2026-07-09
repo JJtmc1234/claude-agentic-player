@@ -5,8 +5,9 @@ The Agent can then execute the spec with .place_layout(). No alignment math
 in calling code — that's all encapsulated here.
 """
 from __future__ import annotations
+import math
 from dataclasses import dataclass, field
-from typing import List, Tuple, Optional
+from typing import Dict, List, Tuple, Optional
 
 from agent.geometry import (
     DIR_NORTH, DIR_SOUTH, DIR_EAST, DIR_WEST, DIR_VECTORS,
@@ -15,6 +16,14 @@ from agent.geometry import (
     inserter_pickup_for_drill, inserter_pickup_for_furnace,
     SMALL_POLE_SUPPLY_AREA, SMALL_POLE_WIRE_DISTANCE,
 )
+
+# Column / row pitch for the electric-mining-drill array. Kept module-level so
+# the sizing helper (electric_drill_array_bom) and the planner agree by
+# construction — change them in one place.
+#   col_pitch = 3  -> 3x3 footprints edge-to-edge, no gap.
+#   row_pitch = 5  -> drill row (3) + belt lane (1) + pole strip (1).
+ELECTRIC_ARRAY_COL_PITCH = 3
+ELECTRIC_ARRAY_ROW_PITCH = 5
 
 
 @dataclass
@@ -306,10 +315,75 @@ def plan_belt_run(start: Tuple[float, float], end: Tuple[float, float],
     )
 
 
+@dataclass
+class ArrayBOM:
+    """Bill-of-materials / sizing for an electric-mining-drill array.
+
+    Entity counts match plan_electric_drill_array() exactly (same pitch
+    constants), so callers can pre-craft the right amount before building.
+    `belts` counts the per-row lanes only; pass output_spine=True to include
+    the collector spine + lane extensions (matches the planner's spine option).
+    """
+    rows: int
+    cols: int
+    drills: int
+    belts: int
+    poles: int
+
+    def raw_materials(self) -> Dict[str, int]:
+        """Rough craft-material totals for the entities above.
+
+        Sourced from team/supply-priorities.md recipe costs (Space Age 2.0):
+          electric-mining-drill = 10 iron-plate + 5 iron-gear-wheel + 3 circuit
+          transport-belt        = 0.5 iron-plate + 0.5 iron-gear-wheel  (2 per craft)
+          small-electric-pole   = 0.5 wood + 1 copper-cable            (2 per craft)
+        These are ENTITY inputs (gears/circuits/cables counted as their own
+        items, not decomposed further). Estimate only — verify recipes live
+        with game.forces.player.recipes[name] before mass-crafting.
+        """
+        return {
+            'iron-plate': self.drills * 10 + math.ceil(self.belts * 0.5),
+            'iron-gear-wheel': self.drills * 5 + math.ceil(self.belts * 0.5),
+            'electronic-circuit': self.drills * 3,
+            'wood': math.ceil(self.poles * 0.5),
+            'copper-cable': self.poles * 1,
+        }
+
+
+def electric_drill_array_bom(rows: int = 2, cols: int = 4,
+                             output_spine: bool = False) -> ArrayBOM:
+    """Size an electric-mining-drill array WITHOUT building it — how many
+    drills / belts / poles a rows x cols array needs. Pure (no RCON), so it is
+    safe to call for pre-crafting and is unit-tested against the planner.
+
+    Counts (must stay in lockstep with plan_electric_drill_array):
+      drills = rows * cols
+      belts  = rows * ((cols-1)*col_pitch + 1)             per-row lanes
+               + (2*rows + (rows-1)*row_pitch + 1)         if output_spine
+                 (per-row 2-tile lane extension + one vertical collector spine)
+      poles  = rows * ceil(cols / 2)
+    """
+    if rows < 1 or cols < 1:
+        raise ValueError("rows and cols must be >= 1")
+    belts_per_row = (cols - 1) * ELECTRIC_ARRAY_COL_PITCH + 1
+    belts = rows * belts_per_row
+    if output_spine:
+        spine_len = (rows - 1) * ELECTRIC_ARRAY_ROW_PITCH + 1
+        belts += 2 * rows + spine_len      # 2-tile lane extension per row, + spine
+    return ArrayBOM(
+        rows=rows,
+        cols=cols,
+        drills=rows * cols,
+        belts=belts,
+        poles=rows * math.ceil(cols / 2),
+    )
+
+
 def plan_electric_drill_array(patch_center: Tuple[float, float],
                               rows: int = 2, cols: int = 4,
                               drill_dir: int = DIR_SOUTH,
-                              belt_flow: int = DIR_EAST) -> LineSpec:
+                              belt_flow: int = DIR_EAST,
+                              output_spine: bool = False) -> LineSpec:
     """Scalable electric-mining-drill array over an ore patch, centred on `patch_center`.
 
     Geometry (all from base prototypes — see geometry.py):
@@ -336,9 +410,14 @@ def plan_electric_drill_array(patch_center: Tuple[float, float],
         raise NotImplementedError("plan_electric_drill_array currently supports drill_dir=DIR_SOUTH")
     if belt_flow not in (DIR_EAST, DIR_WEST):
         raise ValueError("belt_flow must be DIR_EAST or DIR_WEST")
+    if output_spine and belt_flow != DIR_EAST:
+        # The spine geometry (collector two tiles east of the lane ends) is only
+        # worked out + tested for east-flowing lanes. Refuse rather than emit an
+        # unverified layout, matching this module's convention.
+        raise NotImplementedError("output_spine currently requires belt_flow=DIR_EAST")
 
     pcx, pcy = patch_center
-    col_pitch, row_pitch = 3, 5
+    col_pitch, row_pitch = ELECTRIC_ARRAY_COL_PITCH, ELECTRIC_ARRAY_ROW_PITCH
     # Anchor: top-left drill centre so the drill grid is centred on patch_center.
     cx0, cy0 = snap_3x3_center(pcx - (cols - 1) * col_pitch / 2.0,
                                pcy - (rows - 1) * row_pitch / 2.0)
@@ -346,6 +425,16 @@ def plan_electric_drill_array(patch_center: Tuple[float, float],
     poles: List[Placement] = []
     belts: List[Placement] = []
     drills: List[Placement] = []
+
+    # East x of the last drill's output tile — same for every row. With a spine,
+    # each row lane runs further east so it side-loads into the spine. The spine
+    # sits 3 tiles east of the last drill centre: clear of the 3x3 footprints AND
+    # of the last pole column (which, for odd `cols`, lands 2 tiles east of the
+    # drills). Lane extensions are on the lane row (drill_y+2), so they share a
+    # column with that pole but never its row.
+    bx_last_x, _ = electric_drill_output_tile(cx0 + (cols - 1) * col_pitch, cy0, drill_dir)
+    spine_x = bx_last_x + 3
+    lane_end_x = (spine_x - 1) if output_spine else bx_last_x
 
     for r in range(rows):
         row_y = cy0 + r * row_pitch
@@ -356,12 +445,11 @@ def plan_electric_drill_array(patch_center: Tuple[float, float],
                                     f'r{r}c{c} drill'))
         # --- belt lane: continuous run catching every drop, flowing belt_flow ---
         bx0, by = electric_drill_output_tile(cx0, row_y, drill_dir)
-        bx_last, _ = electric_drill_output_tile(cx0 + (cols - 1) * col_pitch, row_y, drill_dir)
-        lane = plan_belt_run((bx0, by), (bx_last, by),
+        lane = plan_belt_run((bx0, by), (lane_end_x, by),
                              belt_item='transport-belt', first='h')
         # Force flow direction (a 1-row run defaults to EAST; honor belt_flow=WEST too)
         if belt_flow == DIR_WEST:
-            lane = plan_belt_run((bx_last, by), (bx0, by), first='h')
+            lane = plan_belt_run((lane_end_x, by), (bx0, by), first='h')
         for p in lane.placements:
             belts.append(Placement(p.item, p.x, p.y, p.direction, f'r{r} {p.note}'))
         # --- pole strip: 1 tile south of the belt lane, one pole per 2 columns ---
@@ -371,6 +459,17 @@ def plan_electric_drill_array(patch_center: Tuple[float, float],
             px, py = snap_1x1_center(px, pole_y)
             poles.append(Placement('small-electric-pole', px, py, 0, f'r{r} pole'))
 
+    # --- optional output spine: one vertical collector belt gathering every row
+    # lane into a single exit. Sits two tiles east of the drills (clear of all
+    # 3x3 footprints); each east-flowing lane side-loads into it; the spine flows
+    # SOUTH to a single output tile below the array. ---
+    if output_spine:
+        _, first_by = electric_drill_output_tile(cx0, cy0, drill_dir)
+        _, last_by = electric_drill_output_tile(cx0, cy0 + (rows - 1) * row_pitch, drill_dir)
+        spine = plan_belt_run((spine_x, first_by), (spine_x, last_by), first='v')
+        for p in spine.placements:
+            belts.append(Placement(p.item, p.x, p.y, p.direction, 'spine'))
+
     placements = poles + belts + drills
     return LineSpec(
         name=f"electric drill array {rows}x{cols} @ {patch_center}",
@@ -378,10 +477,16 @@ def plan_electric_drill_array(patch_center: Tuple[float, float],
         fuel=[],   # electric drills + belts + poles: no burner fuel
         notes=(
             f"{rows*cols} electric-mining-drills, {len(belts)} belts, {len(poles)} poles. "
-            "Each row's belt lane is independent (merge lanes with plan_belt_run + a "
-            "splitter on the output side). Drills face south, drop into the lane at "
+            + ("Row lanes merge into ONE south-flowing output spine (2 tiles east of "
+               "the drills); the last spine belt is the array's single output. "
+               if output_spine else
+               "Each row's belt lane is independent (merge lanes with plan_belt_run + a "
+               "splitter, or pass output_spine=True). ")
+            + "Drills face south, drop into the lane at "
             "centre+2; poles sit 3 tiles south of each row (supply<=2.5 reaches drill "
-            "edges, wire<=7.5 keeps strips connected). No fuel — all electric."
+            "edges, wire<=7.5 keeps strips connected). No fuel — all electric. "
+            "Tile geometry is unit-tested (no overlaps); confirm belt THROUGHPUT "
+            "live before relying on the spine merge."
         ),
     )
 

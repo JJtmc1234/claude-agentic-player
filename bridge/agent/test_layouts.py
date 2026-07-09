@@ -11,7 +11,8 @@ if str(_BRIDGE) not in sys.path:
 from agent.layouts import (plan_iron_smelt_line, plan_drill_to_chest,
                             plan_multi_drill_line, plan_steel_smelt,
                             plan_wall_turret_segment,
-                            plan_belt_run, plan_electric_drill_array)
+                            plan_belt_run, plan_electric_drill_array,
+                            electric_drill_array_bom)
 from agent.geometry import DIR_NORTH, DIR_SOUTH, DIR_EAST, DIR_WEST
 
 
@@ -168,6 +169,54 @@ def main():
     row_drills = sorted([d for d in drills if d.y == min(x.y for x in drills)],
                         key=lambda d: d.x)
     check("column pitch = 3", 3.0, row_drills[1].x - row_drills[0].x)
+
+    print("electric_drill_array_bom matches the planner's counts:")
+    # The sizing helper must agree with what plan_electric_drill_array actually emits.
+    for rows, cols in [(2, 4), (3, 5), (1, 1), (4, 7)]:
+        bom = electric_drill_array_bom(rows, cols)
+        spec = plan_electric_drill_array((0, 0), rows=rows, cols=cols)
+        d = len([p for p in spec.placements if p.item == 'electric-mining-drill'])
+        b = len([p for p in spec.placements if p.item == 'transport-belt'])
+        po = len([p for p in spec.placements if p.item == 'small-electric-pole'])
+        check(f"bom drills {rows}x{cols}", d, bom.drills)
+        check(f"bom belts {rows}x{cols}", b, bom.belts)
+        check(f"bom poles {rows}x{cols}", po, bom.poles)
+    # raw_materials returns the expected keys and scales with drills.
+    mats = electric_drill_array_bom(2, 4).raw_materials()
+    check("bom materials has iron-plate", True, 'iron-plate' in mats)
+    check("bom iron-plate = 8 drills*10 + ceil(20*0.5)", 8 * 10 + 10, mats['iron-plate'])
+    check("bom circuits = 8 drills*3", 24, mats['electronic-circuit'])
+
+    print("plan_electric_drill_array 2x4 with output_spine:")
+    spec = plan_electric_drill_array((0, 0), rows=2, cols=4, output_spine=True)
+    drills = [p for p in spec.placements if p.item == 'electric-mining-drill']
+    belts = [p for p in spec.placements if p.item == 'transport-belt']
+    poles = [p for p in spec.placements if p.item == 'small-electric-pole']
+    check("8 drills (spine unchanged)", 8, len(drills))
+    check("4 poles (spine unchanged)", 4, len(poles))
+    # belts = per-row lanes (extended by 1 each) + vertical spine
+    bom_spine = electric_drill_array_bom(2, 4, output_spine=True)
+    check("spine belt count matches bom", bom_spine.belts, len(belts))
+    # CRITICAL: whole array + spine must have zero overlapping footprints.
+    sets = _occupied_tiles(spec.placements)
+    union = set().union(*sets)
+    total = sum(len(s) for s in sets)
+    check("no overlapping footprints (2x4 + spine)", total, len(union))
+    # There is exactly ONE single output: the southernmost spine belt flows south
+    # and nothing sits south of it in the same column.
+    spine_belts = [b for b in belts if b.note == 'spine']
+    check("spine is a vertical line (one x)", 1, len({b.x for b in spine_belts}))
+    check("all spine belts flow SOUTH", True, all(b.direction == DIR_SOUTH for b in spine_belts))
+
+    print("plan_electric_drill_array 3x5 + spine also disjoint:")
+    spec = plan_electric_drill_array((10, -6), rows=3, cols=5, output_spine=True)
+    sets = _occupied_tiles(spec.placements)
+    union = set().union(*sets)
+    total = sum(len(s) for s in sets)
+    check("no overlapping footprints (3x5 + spine)", total, len(union))
+    belts = [p for p in spec.placements if p.item == 'transport-belt']
+    check("3x5 spine belt count matches bom",
+          electric_drill_array_bom(3, 5, output_spine=True).belts, len(belts))
 
 
 if __name__ == '__main__':
