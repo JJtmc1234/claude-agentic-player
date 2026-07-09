@@ -152,8 +152,13 @@ JJ may need to RELAUNCH the 4 employee Claude sessions to get them self-driving.
   SEMI-AUTO LOOP (do each cycle until automated): (1) take advanced-circuit from
   adv asm (-26.5,17.5) output + engine-unit from engine asm (-23.5,17.5) output +
   sulfur from sulfur plant (-21.5,11.5) -> insert all into chempack asm (-23.5,
-  20.5); (2) take chemical-science-pack from chempack asm -> insert lab_input of
-  labs (blue was the only missing pack; labs already have red 59 + green 94).
+  20.5) AND chempack #2 @ (-27.5,23.5) [ADDED, 2x throughput, powered by big pole
+  @ (-30,24)]; (2) take chemical-science-pack from BOTH chempack asms -> insert
+  lab_input of labs (blue was the only missing pack; labs already have red+green).
+  ALSO each cycle: drain green asm (-29.5,17.5) -> adv asm; refill green asm
+  (iron+cu-cable), adv (plastic+cu-cable), engine (steel+gear+pipe) from base
+  chests (iron @ (-14,-1), cu-cable @ (-9,2), steel @ (-31.5,-8.5), gear+pipe @
+  staging (-12.5,3.5)). All via courier(66) take/insert (no craft-job conflict).
   Blue-pack RATE (slow asm-1, ~2 per 48s) is now the limiter; 75 needed for this
   research. TO AUTOMATE (free the manual loop): inserters/chests between asm
   outputs -> chempack -> a lab-feed belt; or upgrade to asm-2/3 + parallel chempack
