@@ -111,11 +111,21 @@ JJ may need to RELAUNCH the 4 employee Claude sessions to get them self-driving.
   refinery tap (-17.5,15.5); middle tile (-21.5,9.5) left EMPTY so water+petro
   don't mix. Powered by a big-electric-pole @ (-21,14) (wired to base grid).
   STATUS = working, PRODUCING SULFUR (water=90, petro=90). 100 plastic in courier.
-  REMAINING to chempack (blue): electronic-circuit (green) + advanced-circuit +
-  engine-unit assemblers (employees hand-crafting these), then chempack asm
-  (sulfur+adv-circuit+engine-unit) -> haul packs to the 5 labs. NOTE: sulfur +
-  plastic share the one west refinery (45 petro/s vs 20+30 draw) -> may need a 2nd
-  refinery hooked up later for full rate.
+  REMAINING to chempack (blue): build an ASSEMBLER LINE (hand-crafting is too
+  slow -- see below). NOTE: sulfur + plastic share the one west refinery (45
+  petro/s vs 20+30 draw) -> may need a 2nd refinery hooked up later for full rate.
+- CHEMPACK MATH (07-09): research 'advanced-oil-processing' = 75 units = needs 75
+  red+green+BLUE packs. Recipes: chempack = 1 sulfur+3 adv-circuit+2 engine (->2);
+  adv-circuit = 2 plastic+4 cu-cable+2 green-circuit; engine = 1 steel+1 gear+2
+  pipe; green-circuit = 1 iron+3 cu-cable. Hand-crafting 75 packs ~40 min (too
+  slow) -> MUST build assemblers. Mod craft() is NON-recursive (needs direct
+  ingredients present) so craft tiers bottom-up. PLAN: hand-craft ~4 assembling-
+  machine-1 (each = 3 green+5 gear+9 iron; green circuits hand-craft fast) -> place
+  a line near the sulfur plant: green-circuit asm -> adv-circuit asm -> engine asm
+  -> chempack asm, fed by the fluid plants (sulfur @ (-21.5,11.5), plastic @
+  (-18.5,17.5)) + iron/cu/steel from base. Drain sulfur/plastic into the line.
+  STARTED: miner crafting 40 green-circuits (seed for the assemblers). 50 sulfur
+  drained into courier(66). NEXT: craft gears+assemblers, place + wire the line.
 - 2.1 GOTCHAS (hit live): (a) insert_into_entity/take_from_entity REQUIRE the
   numeric inventory `slot` arg or they crash (get_inventory(nil)). (b) the crafter
   input/output defines were RENAMED: use defines.inventory.crafter_input(=2) and
