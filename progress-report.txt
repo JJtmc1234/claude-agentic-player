@@ -415,3 +415,13 @@ Next: stage 2 (cables curriculum) bundled in next mod deploy per `mod/claude-com
   circuit assembler, and discovered the labs need ALL THREE science types
   (red+green+blue) delivered each cycle (none auto-delivered; green is belt-
   limited). emp-1 supplying materials + belts.
+
+## 2026-07-09 — Research steered toward the North Star (rocket -> Vulcanus)
+- lubricant researched; now on electric-engine. Confirmed rocket-silo -> space-
+  platform -> thruster -> planet-discovery-vulcanus ALL need only red+green+blue
+  (no purple/yellow), so the North Star is reachable with current science.
+- Queued the rocket path: processing-unit, adv-material-processing-2, low-density-
+  structure, flammables, battery, electric-energy-distribution-2 (+ electric-
+  engine). Deeper prereqs (concrete, logistic-robotics, rocket-fuel, rocketry ->
+  rocket-silo -> space-platform ...) get added as they unlock. Manager keeps the
+  labs fed (red/green/blue) + extends the queue each cycle.

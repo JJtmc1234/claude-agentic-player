@@ -212,6 +212,18 @@ JJ may need to RELAUNCH the 4 employee Claude sessions to get them self-driving.
   output at SW-south). Future mod win: auto-resolve crafter input slot in
   insert_into_entity so callers needn't pass the 2.1 define.
 
+## RESEARCH PATH TO THE ROCKET (queued 07-09) -- rocket-silo -> space-platform ->
+## space-platform-thruster -> planet-discovery-vulcanus ALL need only red+green+
+## blue (NO purple/yellow) so the North Star is reachable with current science!
+## rocket-silo prereqs: concrete, rocket-fuel, processing-unit, logistic-robotics,
+## low-density-structure, advanced-material-processing-2. QUEUED so far: electric-
+## engine, processing-unit, adv-material-processing-2, low-density-structure,
+## flammables, battery, electric-energy-distribution-2. AS THESE FINISH, add the
+## next tier (f.add_research only adds when prereqs met -- NOT recursive): concrete,
+## logistic-robotics, rocket-fuel (needs flammables), rocketry, then rocket-silo,
+## space-platform, space-platform-thruster, planet-discovery-vulcanus. Keep
+## extending the queue each cycle as techs unlock. Labs need red+green+blue fed.
+
 ## ROCKET/SPACE CAPABILITIES (mod 0.12.0, LIVE + verified)
 remote.call('claude', fn, ...): get_rocket_silos(unum), load_rocket(unum,x,y,
   item,count), set_silo_auto_launch(unum,x,y,bool), launch_rocket(unum,x,y),
