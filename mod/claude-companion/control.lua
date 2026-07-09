@@ -499,7 +499,7 @@ local function ping()
   init_all()
   return {
     ok = true,
-    pong = "from claude-companion 0.11.1",
+    pong = "from claude-companion " .. (script.active_mods["claude-companion"] or "?"),
     tick = game.tick,
     chat_buffer_size = #storage.chat_log,
     mining_jobs = count_kv(storage.mining_jobs),
@@ -1229,6 +1229,222 @@ local function remove_char(name)
 end
 
 
+-- ---------- rocket / spaceship capabilities (0.12.0) ----------
+-- Space Age: rocket silos, rockets, and space platforms so the team can
+-- launch cargo / starter-packs and route platforms between planets
+-- (e.g. Nauvis -> Vulcanus -> Nauvis, without boarding). All read the
+-- character's own force. Heavy pcall so a bad API path returns an error
+-- string over RCON instead of erroring the save.
+
+local function _char_fs(character_unum)
+  local c = game.get_entity_by_unit_number(character_unum)
+  if not c or not c.valid then return nil end
+  return c
+end
+
+local function _inv_contents(inv)
+  local out = {}
+  if not inv then return out end
+  local ok, c = pcall(function() return inv.get_contents() end)
+  if not ok or not c then return out end
+  for _, e in pairs(c) do
+    if type(e) == 'table' and e.name then
+      out[e.name] = (out[e.name] or 0) + (e.count or 0)
+    end
+  end
+  return out
+end
+
+local SPACE_PLATFORM_STATE_NAMES = {}
+if defines.space_platform_state then
+  for k, v in pairs(defines.space_platform_state) do SPACE_PLATFORM_STATE_NAMES[v] = k end
+end
+
+-- List rocket silos on the character's surface + force: build progress,
+-- status, auto-launch flag, whether a rocket is present, and rocket cargo.
+local function get_rocket_silos(character_unum)
+  local c = _char_fs(character_unum)
+  if not c then return { ok = false, error = 'no character' } end
+  local silos = c.surface.find_entities_filtered{ type = 'rocket-silo', force = c.force }
+  local out = {}
+  for _, s in ipairs(silos) do
+    local rocket_inv
+    pcall(function() rocket_inv = s.get_inventory(defines.inventory.rocket_silo_rocket) end)
+    local auto
+    pcall(function() auto = s.auto_launch end)
+    out[#out + 1] = {
+      x = s.position.x, y = s.position.y,
+      rocket_parts = s.rocket_parts,
+      status = s.status,
+      auto_launch = auto,
+      rocket_present = (s.rocket ~= nil),
+      cargo = _inv_contents(rocket_inv),
+    }
+  end
+  return { ok = true, count = #out, silos = out }
+end
+
+local function _find_silo_at(c, x, y)
+  local ents = c.surface.find_entities_filtered{
+    position = { x, y }, radius = 3, type = 'rocket-silo', force = c.force,
+  }
+  return ents[1]
+end
+
+-- Insert items from the character into a rocket silo's rocket cargo (slot 9).
+-- Used to load a space-platform-starter-pack (or any cargo) before launch.
+local function load_rocket(character_unum, x, y, item_name, count)
+  local c = _char_fs(character_unum)
+  if not c then return { ok = false, error = 'no character' } end
+  local silo = _find_silo_at(c, x, y)
+  if not silo then return { ok = false, error = 'no rocket-silo near (' .. x .. ',' .. y .. ')' } end
+  local inv
+  pcall(function() inv = silo.get_inventory(defines.inventory.rocket_silo_rocket) end)
+  if not inv then return { ok = false, error = 'silo has no rocket cargo yet (build rocket parts first)' } end
+  local char_inv = c.get_main_inventory()
+  if not char_inv then return { ok = false, error = 'no character inventory' } end
+  local have = char_inv.get_item_count(item_name)
+  local want = math.min(count or have, have)
+  if want <= 0 then return { ok = false, error = 'character has no ' .. item_name } end
+  local moved = inv.insert{ name = item_name, count = want }
+  if moved > 0 then char_inv.remove{ name = item_name, count = moved } end
+  return { ok = true, moved = moved, cargo = _inv_contents(inv) }
+end
+
+-- Toggle a silo's auto-launch (fires as soon as a rocket + cargo are ready).
+local function set_silo_auto_launch(character_unum, x, y, enabled)
+  local c = _char_fs(character_unum)
+  if not c then return { ok = false, error = 'no character' } end
+  local silo = _find_silo_at(c, x, y)
+  if not silo then return { ok = false, error = 'no rocket-silo near (' .. x .. ',' .. y .. ')' } end
+  local ok, err = pcall(function() silo.auto_launch = (enabled and true or false) end)
+  if not ok then return { ok = false, error = tostring(err) } end
+  return { ok = true, auto_launch = silo.auto_launch }
+end
+
+-- Launch a ready rocket at the silo near (x, y).
+local function launch_rocket(character_unum, x, y)
+  local c = _char_fs(character_unum)
+  if not c then return { ok = false, error = 'no character' } end
+  local silo = _find_silo_at(c, x, y)
+  if not silo then return { ok = false, error = 'no rocket-silo near (' .. x .. ',' .. y .. ')' } end
+  local ok, res = pcall(function() return silo.launch_rocket() end)
+  if not ok then return { ok = false, error = tostring(res) } end
+  return { ok = res == true, launched = res, status = silo.status, rocket_parts = silo.rocket_parts }
+end
+
+-- List the team's space platforms: state, speed, location, hub position.
+local function list_platforms(character_unum)
+  local c = _char_fs(character_unum)
+  if not c then return { ok = false, error = 'no character' } end
+  local plats
+  pcall(function() plats = c.force.platforms end)
+  local out = {}
+  if plats then
+    for _, p in pairs(plats) do
+      local loc
+      pcall(function() loc = p.space_location and p.space_location.name or nil end)
+      local hub = {}
+      pcall(function() if p.hub and p.hub.valid then hub = { x = p.hub.position.x, y = p.hub.position.y } end end)
+      out[#out + 1] = {
+        name = p.name, index = p.index, state = p.state,
+        state_name = SPACE_PLATFORM_STATE_NAMES[p.state],
+        speed = p.speed, location = loc,
+        surface = p.surface and p.surface.name or nil, hub = hub,
+      }
+    end
+  end
+  return { ok = true, count = #out, platforms = out }
+end
+
+local function _find_platform(c, name_or_index)
+  local plats
+  pcall(function() plats = c.force.platforms end)
+  if not plats then return nil end
+  for _, p in pairs(plats) do
+    if p.name == name_or_index or p.index == name_or_index then return p end
+  end
+  return nil
+end
+
+-- Detailed status of one platform: state, schedule records, hub cargo.
+local function get_platform(character_unum, name_or_index)
+  local c = _char_fs(character_unum)
+  if not c then return { ok = false, error = 'no character' } end
+  local p = _find_platform(c, name_or_index)
+  if not p then return { ok = false, error = 'no platform ' .. tostring(name_or_index) } end
+  local loc; pcall(function() loc = p.space_location and p.space_location.name or nil end)
+  local hub_cargo = {}
+  pcall(function()
+    if p.hub and p.hub.valid then hub_cargo = _inv_contents(p.hub.get_output_inventory()) end
+  end)
+  local records = {}
+  pcall(function()
+    local sched = p.schedule
+    if sched and sched.get_records then
+      for _, r in pairs(sched.get_records()) do
+        records[#records + 1] = { station = r.station, temporary = r.temporary }
+      end
+    end
+  end)
+  return {
+    ok = true, name = p.name, index = p.index, state = p.state,
+    state_name = SPACE_PLATFORM_STATE_NAMES[p.state], speed = p.speed,
+    location = loc, surface = p.surface and p.surface.name or nil,
+    schedule = records, hub_cargo = hub_cargo,
+  }
+end
+
+-- Set a platform's travel route: ordered planet names it should visit and
+-- loop (e.g. {'vulcanus','nauvis'}). Best-effort across schedule API shapes.
+local function set_platform_route(character_unum, name_or_index, planet_names)
+  local c = _char_fs(character_unum)
+  if not c then return { ok = false, error = 'no character' } end
+  local p = _find_platform(c, name_or_index)
+  if not p then return { ok = false, error = 'no platform ' .. tostring(name_or_index) } end
+  if type(planet_names) ~= 'table' or #planet_names == 0 then
+    return { ok = false, error = 'planet_names must be a non-empty array of planet names' }
+  end
+  local records = {}
+  for _, planet in ipairs(planet_names) do
+    records[#records + 1] = {
+      station = planet,
+      wait_conditions = { { type = 'time', ticks = 30 * 60, compare_type = 'or' } },
+    }
+  end
+  local applied, err = false, nil
+  pcall(function()
+    local sched = p.schedule
+    if sched and sched.set_records then
+      sched.set_records(records); applied = true
+    elseif sched and sched.add_record then
+      if sched.clear_records then sched.clear_records() end
+      for _, r in ipairs(records) do sched.add_record(r) end
+      applied = true
+    end
+  end)
+  if not applied then
+    local ok2, e2 = pcall(function() p.schedule = { current = 1, records = records } end)
+    applied = ok2; err = e2
+  end
+  if not applied then return { ok = false, error = 'could not set schedule: ' .. tostring(err) } end
+  return { ok = true, route = planet_names, state = p.state, state_name = SPACE_PLATFORM_STATE_NAMES[p.state] }
+end
+
+-- List planets (name + whether we have a surface there yet).
+local function get_planets(_character_unum)
+  local out = {}
+  if game.planets then
+    for name, planet in pairs(game.planets) do
+      local visited = false
+      pcall(function() visited = (planet.surface ~= nil) end)
+      out[#out + 1] = { name = name, visited = visited }
+    end
+  end
+  return { ok = true, planets = out }
+end
+
+
 -- ---------- remote interface registration ----------
 
 remote.add_interface("claude", {
@@ -1266,6 +1482,15 @@ remote.add_interface("claude", {
   spawn_named_char = spawn_named_char,
   list_chars = list_chars,
   remove_char = remove_char,
+  -- 0.12.0 additions: rocket + space-platform capabilities
+  get_rocket_silos = get_rocket_silos,
+  load_rocket = load_rocket,
+  set_silo_auto_launch = set_silo_auto_launch,
+  launch_rocket = launch_rocket,
+  list_platforms = list_platforms,
+  get_platform = get_platform,
+  set_platform_route = set_platform_route,
+  get_planets = get_planets,
 })
 
 
