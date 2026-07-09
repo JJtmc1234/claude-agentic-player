@@ -2,6 +2,24 @@ TEAM TODO LIST
 ==============
 
 ##########################################################################
+## *** 11:5x DEFENSE EMERGENCY (Manager) -- TOP PRIORITY *** the BASE has  ##
+## ZERO gun turrets (all 56 are far at the old oil field); biters keep      ##
+## breaching + destroyed steam engines/poles + killed miner/courier 3x.     ##
+## Evolution ~41%. Power was down (Manager fixed). TEAM DEFENSE TASKS:      ##
+##  - SCOUT(67)+BUILDER(65): CRAFT gun-turrets + firearm-magazines + walls  ##
+##    and RING the base perimeter -- esp the POWER BLOCK (boilers/engines   ##
+##    x~-12..-18 y~-31..-36), the NW chem/lab/power zone, and the (0,0)      ##
+##    char-SPAWN (chars spawn there via connect_named + get one-shot).      ##
+##  - MINER(64=new 11196): mine MORE copper+iron (copper-plate is LOW,      ##
+##    blocking turret craft). Keep smelting fed.                            ##
+##  - LOAD every base turret with ammo; keep ammo stocked.                  ##
+## NOTE: connect_named respawns at (0,0) UNDEFENDED -> new chars die.       ##
+## Keep chars inside turret cover. New unums: miner=11196 courier=11197     ##
+## (older 11185/86/64/66 all dead). *** This needs JJ's combat/map-view    ##
+## help when he's back -- flagged. ***                                     ##
+##########################################################################
+
+##########################################################################
 ## *** 07-09 AUTHORITATIVE (Manager, overrides everything below) ***      ##
 ## NORTH STAR: send a SPACE PLATFORM to Vulcanus and BACK -- do NOT board  ##
 ## it. Bootstrap the Vulpire only AFTER JJ is physically at Vulcanus.      ##
