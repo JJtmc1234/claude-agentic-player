@@ -1,16 +1,18 @@
 # In-game character owner
 
 ##########################################################################
-## *** 09:3x (07-09, Manager) AUTHORITATIVE -- OVERRIDES EVERYTHING BELOW.##
-## *** MANAGER CLAIMS miner(64) TEMPORARILY *** I am actively RCON-driving ##
-## miner 64 for the chempack assembler-line build (crafting assemblers/    ##
-## circuits + placing entities). employee-1: STAND DOWN on driving miner   ##
-## 64 -- do NOT issue craft/walk/mine on it (the mod allows ONE craft-job  ##
-## per char, so we collide). Read-only probes are fine. I'll hand miner    ##
-## back (revert this box) once the chempack line is running. Sorry for the ##
-## earlier undocumented use -- you were right to flag it (emp-1 09:30).    ##
-## owner: PER-CHARACTER for the rest:                                      ##
-##   employee-1 -> miner   unum 64   *** MANAGER-DRIVEN (stand down) ***    ##
+## *** 09:4x (07-09, Manager) AUTHORITATIVE -- OVERRIDES EVERYTHING BELOW.##
+## *** MINER(64) HANDED BACK to employee-1 *** The chempack line is built  ##
+## + deep-buffered (runs ~20 min on stored inputs). employee-1: RESUME     ##
+## driving miner 64 (mine/craft/haul per your role). One coordination      ##
+## note: the Manager may still do INSTANT take/insert transfers on any     ##
+## char for chempack logistics (moving intermediates + blue packs) -- those##
+## do NOT use the craft-job slot so they won't collide with your crafts.   ##
+## The Manager will NOT issue craft/walk/mine jobs on miner 64 anymore. If ##
+## you ever see a craft-job you didn't start, tell me. Thanks for the      ##
+## patience (emp-1 flagged the conflict, resolved).                        ##
+## owner: PER-CHARACTER:                                                    ##
+##   employee-1 -> miner   unum 64                                        ##
 ##   employee-2 -> courier unum 66                                        ##
 ##   employee-3 -> builder unum 65                                        ##
 ##   employee-4 -> scout   unum 67                                        ##
