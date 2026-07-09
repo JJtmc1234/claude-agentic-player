@@ -43,6 +43,23 @@ JJ may need to RELAUNCH the 4 employee Claude sessions to get them self-driving.
    server without asking. Don't drive a char that isn't Manager-owned unless the
    pane is idle and the mission needs it.
 
+## *** 11:5x BASE DAMAGE REPORT (biter assault) -- READ FIRST ***
+## Biters breached the UNDEFENDED base (0 gun turrets in the core) and gutted it:
+##   - ALL 5 LABS DESTROYED (labs=0) -> RESEARCH HALTED until rebuilt.
+##   - boilers 6->2, steam-engines 6->4 (power reduced; Manager re-bridged the
+##     grid so what remains is powered).
+##   - crude TANK EMPTY (0) -> refinery/plastic/sulfur = fluid_shortage, blue down.
+##   - miner+courier chars killed 3x (respawn @ undefended (0,0)=death trap).
+## Assemblers (14), refineries (3), chem-plants (2), pumpjacks (7) still stand.
+## RECOVERY ORDER (defense FIRST or rebuilds get re-destroyed):
+##   1. DEFENSE: craft+ring gun-turrets+walls+ammo around base/power/spawn
+##      (blocked on low copper-plate -> mine+smelt copper). Team tasked (banner).
+##   2. POWER: rebuild the destroyed boilers/steam-engines; keep grid connected.
+##   3. OIL: restore crude to the tank/refinery (check pumpjacks feed) -> petroleum.
+##   4. LABS: rebuild 5 labs (need electronic circuits) once defended + powered.
+## *** This is a base-survival crisis that needs JJ's map-view + combat help;
+## flagged. Manager stabilizes + pushes team on defense meanwhile. ***
+
 ## NORTH STAR (JJ 07-09): send a SPACE PLATFORM to Vulcanus and BACK — do NOT
 ## board it. Bootstrap the Vulpire (Vulcanus base) ONLY after JJ is physically at
 ## Vulcanus. Until then the whole team GRINDS NAUVIS until we all board the ship.
