@@ -20,6 +20,19 @@ Manager updates this file in the SAME commit as the merge itself
 
 ---
 
+### 2026-07-09 — employee-1 + employee-4 → master (file cherry-pick)
+sha: 8523a0a
+Reviewed-by: Manager (Opus 4.8)
+Cherry-pick (files only, no context.txt churn)
+Summary: emp-1 layouts.py ArrayBOM sizing helper + output_spine option for
+  plan_electric_drill_array (pure, unit-tested); emp-4 read-only _base_health.py
+  production-status monitor.
+Files: 3 changed, ~314+, ~11-.
+Notes: py_compile OK; test_layouts.py all PASS; injection-scanned clean (no
+  eval/exec of external data, read-only RCON). emp-3 NOT merged — it is behind
+  master (lacks the 0.12.0 rocket fns); its craft() 2.1 fix is already effectively
+  live (craft works on master). emp-3 will pick up 0.12.0 on its next master-merge.
+
 ### 2026-07-07 13:02 — employee-4 → master (code cherry-pick)
 sha: (see git log)
 Reviewed-by: Manager (Opus 4.8)

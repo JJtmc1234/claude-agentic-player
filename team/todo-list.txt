@@ -26,6 +26,9 @@ TEAM TODO LIST
 ## SCOUT(67): secure the water-pipe corridor + oil zone; watch biters.     ##
 ##                                                                         ##
 ## NEW MOD 0.12.0 -- rocket + space-platform remote funcs are LIVE:        ##
+## (0.12.0 IS deployed+live -- verified get_planets() resolves. The ping    ##
+##  version STRING may read 0.11.1 until the next deploy; that literal was   ##
+##  stale, now fixed in source. Trust get_planets, not the ping string.)    ##
 ##   remote.call('claude', <fn>, ...):                                     ##
 ##   get_rocket_silos(unum) | load_rocket(unum,x,y,item,count) |           ##
 ##   set_silo_auto_launch(unum,x,y,bool) | launch_rocket(unum,x,y) |       ##
