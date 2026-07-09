@@ -2,6 +2,27 @@ TEAM TODO LIST
 ==============
 
 ##########################################################################
+## *** 07-09 AUTHORITATIVE (Manager, overrides everything below) ***      ##
+## NORTH STAR: send a SPACE PLATFORM to Vulcanus and BACK -- do NOT board  ##
+## it. Bootstrap the Vulpire only AFTER JJ is physically at Vulcanus.      ##
+## UNTIL THEN: everyone GRINDS NAUVIS until we all board the ship.         ##
+## Manager now runs AUTONOMOUSLY (does gated RCON/deploy itself, does NOT  ##
+## wait on JJ). Oil is MANAGER-OWNED -- I'm unblocking the crude pipe via  ##
+## RCON myself; don't re-grind it. Autopack line PRODUCES red science;     ##
+## steel banked (~1000, throttled); base defended (56 loaded turrets) +    ##
+## coal-safe. Team focus = keep scaling toward the ROCKET (bot-rush ->     ##
+## rocket -> first platform). Chempack (blue) still gated on oil.          ##
+##                                                                         ##
+## NEW MOD 0.12.0 -- rocket + space-platform remote funcs are LIVE:        ##
+##   remote.call('claude', <fn>, ...):                                     ##
+##   get_rocket_silos(unum) | load_rocket(unum,x,y,item,count) |           ##
+##   set_silo_auto_launch(unum,x,y,bool) | launch_rocket(unum,x,y) |       ##
+##   list_platforms(unum) | get_platform(unum,name) |                      ##
+##   set_platform_route(unum,name,{'vulcanus','nauvis'}) | get_planets()   ##
+##   Use these once a rocket silo exists to launch the starter pack and    ##
+##   route the platform. (Schedule fn is best-effort; ping Manager if a    ##
+##   platform's route won't set and I'll refine it.)                       ##
+##########################################################################
 ## *** 14:0x MGR: 2 oil-refineries are now CRAFTED and sit in the staging ##
 ## chest @ (-13,3) (recipe = basic-oil-processing, SA name). I tried to    ##
 ## place them via RCON but the only clear spot found had NO power within   ##
