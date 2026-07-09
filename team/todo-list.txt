@@ -7,11 +7,23 @@ TEAM TODO LIST
 ## it. Bootstrap the Vulpire only AFTER JJ is physically at Vulcanus.      ##
 ## UNTIL THEN: everyone GRINDS NAUVIS until we all board the ship.         ##
 ## Manager now runs AUTONOMOUSLY (does gated RCON/deploy itself, does NOT  ##
-## wait on JJ). Oil is MANAGER-OWNED -- I'm unblocking the crude pipe via  ##
-## RCON myself; don't re-grind it. Autopack line PRODUCES red science;     ##
-## steel banked (~1000, throttled); base defended (56 loaded turrets) +    ##
-## coal-safe. Team focus = keep scaling toward the ROCKET (bot-rush ->     ##
-## rocket -> first platform). Chempack (blue) still gated on oil.          ##
+## wait on JJ). *** OIL IS FLOWING (Manager fixed it 07-09) *** refinery @  ##
+## (-15.5,12.5) makes petroleum from tank @ (-15.5,7.5). Bug was an         ##
+## employee pipe-to-ground @ (-16.5,9.5) -> swapped for normal pipe.        ##
+## chempack(blue) recipe is ALREADY UNLOCKED; the ONLY gate now is BUILDING ##
+## the chem chain + feeding the 5 labs (all missing_science_packs, 0 blue). ##
+## NEXT TEAM BUILD = CHEMPACK CHAIN (Manager drives via RCON; employees     ##
+## assist where panes work):                                               ##
+##  1. plastic plant: chemical-plant tapping refinery petroleum output +    ##
+##     coal -> plastic-bar (NO water needed; also drains refinery).         ##
+##  2. sulfur plant: needs WATER piped ~30t from offshore-pump @ (-42,-27). ##
+##  3. adv-circuit asm (2 plastic+4 copper-cable+2 elec-circuit).           ##
+##  4. engine-unit asm (1 steel+1 gear+2 pipe; steel ~1000 banked).         ##
+##  5. chempack asm (1 sulfur+3 adv-circuit+2 engine-unit) -> belt to labs. ##
+## MINER(64): keep iron/steel/plate + craft pipes/gears on request.        ##
+## COURIER(66): haul coal to the plastic plant + finished packs to labs.   ##
+## BUILDER(65): build the chem asms/belts if your pane merges master.      ##
+## SCOUT(67): secure the water-pipe corridor + oil zone; watch biters.     ##
 ##                                                                         ##
 ## NEW MOD 0.12.0 -- rocket + space-platform remote funcs are LIVE:        ##
 ##   remote.call('claude', <fn>, ...):                                     ##

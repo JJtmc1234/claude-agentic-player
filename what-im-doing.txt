@@ -43,36 +43,46 @@ JJ may need to RELAUNCH the 4 employee Claude sessions to get them self-driving.
    server without asking. Don't drive a char that isn't Manager-owned unless the
    pane is idle and the mission needs it.
 
-## CURRENT MISSION: OIL -> BLUE SCIENCE (the #1 goal)
-JJ's target: automate chemical-science-pack (blue). Gate = crude OIL.
-- Nearest crude oil: ~(151,275), ~260 tiles SE of base. 1 PUMPJACK is built
-  there but was "waiting_for_space" (disconnected — no pipe/tank draining it).
-- oil-processing tech = UNLOCKED (triggered when the pumpjack first produced
-  crude). Good — the tech gate is open.
-- The oil sat next to a biter nest that KILLED builder. On 2026-07-07 JJ joined
-  IN-GAME in a car w/ piercing rounds and CLEARED the oil nest -> the site is now
-  SAFE TO DEVELOP. (~22 biters still at a separate NE nest cluster ~225,165.)
-- REMAINING to blue science: connect pumpjack -> pipe/tank -> OIL REFINERY
-  (crude->petroleum) -> chemical plants (sulfur=petroleum+water, plastic=
-  petroleum+coal) -> advanced-circuit + engine-unit -> chemical-science-pack
-  assembler -> feed labs. Big remote build 260 tiles out; product haul-back
-  (train, railway IS researched) or on-site is the hard part.
+## NORTH STAR (JJ 07-09): send a SPACE PLATFORM to Vulcanus and BACK — do NOT
+## board it. Bootstrap the Vulpire (Vulcanus base) ONLY after JJ is physically at
+## Vulcanus. Until then the whole team GRINDS NAUVIS until we all board the ship.
+## Manager runs AUTONOMOUSLY — does gated RCON/deploy itself, does NOT ask JJ.
+## Arc: Nauvis starter -> chempack(blue) -> rocket -> first spacepack platform.
 
-## RIGHT NOW — 07-07 LATEST: MIGRATED TO 2.1 + SPACE AGE (fresh map, live)
-- Server is now Factorio 2.1.9 + Space Age + Quality + Elevated-rails + Recycler
-  + claude-companion 0.11.0. VERIFIED via ping ("from claude-companion 0.11.0")
-  and active_mods. Fresh SA freeplay map (nauvis, 0 chars, 0 players).
-- Old 2.0 blue-science base ARCHIVED (archive_bluesci_2026-07-07.zip; old
-  server.zip -> server_2.0_pre-fresh.zip). That base/oil/blue-sci mission is
-  HISTORY now (kept below for reference).
-- NO bot-rush BP (JJ changed his mind) — JJ uses his own component/science BPs.
-- TEAM STOOD DOWN (all chars idled, in-game-owner=NONE). Fresh map has NO named
-  chars (storage reset) — when JJ gives the GO + roles, re-spawn named chars via
-  the 07-05 procedure (spawn_named_char), then lift the stand-down.
-- Future modpack rotation JJ wants after SA: SE -> Bob's -> K2SE -> more.
-- Manager 2-min cron poll loop (job e4df6868) still running; probes now hit the
-  fresh 2.1 map.
-- NEXT: await JJ's direction for what the team does on the fresh SA map.
+## CURRENT MISSION: CHEMPACK (blue) -> unblock research -> rocket
+- Server: Factorio 2.1.9 + Space Age. Mod claude-companion 0.12.0 (rocket/space
+  fns added + published 07-09). ping version now dynamic.
+- OIL IS FLOWING (fixed 07-09 by Manager). Refinery @ (-15.5,12.5) dir=8 runs
+  basic-oil-processing, pulling crude from the full tank @ (-15.5,7.5). The bug
+  was an employee's pipe-to-ground @ (-16.5,9.5) that couldn't pass crude east —
+  swapped it for a normal pipe. Tank1 is dir=4 so its usable output is the SW-
+  south tile (-16.5,9.5). Refinery now full_output (petro caps at ~135) because
+  NOTHING drains it yet. 4 tanks @ y=7.5 x={-15.5,-12.5,-9.5,-6.5}, 25k crude ea.
+- chempack(blue) recipe is ALREADY UNLOCKED — sulfur, plastic-bar, adv-circuit,
+  engine-unit, chemical-science-pack recipes ALL enabled; oil/plastics/sulfur/
+  adv-circ/engine techs all researched. So the ONLY gate is BUILDING the chem
+  chain and feeding the 5 labs (all currently missing_science_packs, 0 blue).
+- Research stuck at current=advanced-oil-processing (queue: adv-oil, lubricant,
+  electric-engine) — needs blue packs fed to labs.
+- WATER: offshore-pump @ (-42,-27) full of water, ~30 tiles NW of the oil zone.
+  Sulfur needs petroleum+water co-located -> must pipe water (or petroleum) ~30t.
+  Plastic (petroleum+coal) needs NO water -> buildable first as a proof/drain.
+- CHEM CHAIN (verified recipes): plastic-bar(20 petro+1 coal->2), sulfur(30 petro
+  +30 water->2), advanced-circuit(2 plastic+4 copper-cable+2 electronic-circuit),
+  engine-unit(1 steel+1 gear+2 pipe), chemical-science-pack(1 sulfur+3 adv-circuit
+  +2 engine-unit). Steel ~1000 banked; iron 2600+ on miner.
+- PLAN: Manager drives the chem build via RCON across cycles (employees assist
+  where their panes work), testing each fluid tap empirically like the crude fix.
+  Next brick = plastic plant tapping the refinery petroleum output (drains it,
+  keeps oil flowing, feeds adv-circuits).
+
+## ROCKET/SPACE CAPABILITIES (mod 0.12.0, LIVE + verified)
+remote.call('claude', fn, ...): get_rocket_silos(unum), load_rocket(unum,x,y,
+  item,count), set_silo_auto_launch(unum,x,y,bool), launch_rocket(unum,x,y),
+  list_platforms(unum), get_platform(unum,name), set_platform_route(unum,name,
+  {'vulcanus','nauvis'}), get_planets(). Deliberately NO create_space_platform
+  spawn fn — platforms must be made legit via a starter-pack rocket launch.
+  Planets: nauvis(visited), vulcanus/gleba/fulgora/aquilo (not).
 
 ## (HISTORY — 2.0 base, now archived) RIGHT NOW: OIL IS FLOWING
 - WE HAVE OIL. JJ built 9 pumpjacks (all working) + 2 oil-refineries (basic-oil-
