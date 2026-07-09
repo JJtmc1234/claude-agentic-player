@@ -166,6 +166,10 @@ JJ may need to RELAUNCH the 4 employee Claude sessions to get them self-driving.
   recipe = 1 inserter+1 transport-belt; those aren't auto-produced) -> green +
   blue are the research limiters now. Labs: (-34,-10),(-34,-6),(-26,-9),(-26,-6),
   (-23,-9) [floored].
+  *** COAL IS MANDATORY EACH CYCLE *** feed coal (from chest @ (-31.5,-8.5)) to
+  the plastic plant (-18.5,17.5) -- if coal runs out, plastic stops -> adv starves
+  -> chempacks starve -> NO BLUE (whole chain cascades down; this stalled lubricant
+  at 10% until fixed). Also drain sulfur/engine (full_output) forward.
   ALSO each cycle: drain green asm (-29.5,17.5) -> adv asm; refill green asm
   (iron+cu-cable), adv (plastic+cu-cable), engine (steel+gear+pipe) from base
   chests (iron @ (-14,-1), cu-cable @ (-9,2), steel @ (-31.5,-8.5), gear+pipe @
