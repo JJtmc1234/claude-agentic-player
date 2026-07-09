@@ -94,11 +94,19 @@ JJ may need to RELAUNCH the 4 employee Claude sessions to get them self-driving.
   SULFUR (only chain input that can't be hand-crafted -> needs a chem plant with
   WATER). Nearest water to the oil zone is the base BOILER network; closest
   water-carrying pipe @ (-16.5,-26.5), ~43 tiles due NORTH of the oil zone
-  (x~-16.5). No lake near oil (nearest water tile 42t out). PLAN: run a ~43-tile
-  water pipe (mostly vertical at x~-16.5, underground-pipe pairs to tunnel under
-  base infra) from the boiler water network down to a sulfur chem-plant at the
-  oil zone; then adv-circuit + engine + chempack all co-located, haul only the
-  finished chempack (item) to the 5 labs. 100 plastic already staged in courier(66).
+  (x~-16.5). No lake near oil (nearest water tile 42t out).
+- ROUTE ANALYSIS (07-09): x~-16 column is BLOCKED (belt row @ y=-25, crash-site-
+  spaceship across y=-6 spanning x-19..-13, base cluster, congested oil zone).
+  CLEAR corridors are EAST: x=-12,-8,-7,-6 (<=3 obstacles in y[-24,6]). BEST =
+  x=-12: has a BOILER @ y=-27 (water source) AND is sparse. PLAN: run the water
+  pipe straight down x=-12 from the boiler water net to the EAST oil sub-zone
+  (crude tanks @ (-9.5,7.5),(-6.5,7.5) + refinery (-6.5,12.5)); put the sulfur
+  chem-plant there. Petroleum on the east side: hook the east refinery to its
+  crude tank (same pipe-bridge trick as west, but (-6.5,12.5) is dir=0 so inputs
+  face SOUTH away from tank -> may need mine+replace it dir=8, or pipe crude
+  around). Then adv-circuit+engine+chempack co-located; haul finished chempack
+  (item) to the 5 labs. 100 plastic staged in courier(66). NEXT CYCLE: build the
+  x=-12 water pipe + verify water reaches y~6.
 - 2.1 GOTCHAS (hit live): (a) insert_into_entity/take_from_entity REQUIRE the
   numeric inventory `slot` arg or they crash (get_inventory(nil)). (b) the crafter
   input/output defines were RENAMED: use defines.inventory.crafter_input(=2) and
