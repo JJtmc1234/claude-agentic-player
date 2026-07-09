@@ -394,3 +394,14 @@ Next: stage 2 (cables curriculum) bundled in next mod deploy per `mod/claude-com
   can't be hand-crafted, so this was the true gate to blue science.
 - Remaining to chempack: green/adv circuits + engine-units (employees hand-craft)
   -> chempack assembler -> feed the 5 labs -> unblocks research toward the rocket.
+
+## 2026-07-09 — Full chempack (blue science) chain operational
+- Built the assembler line (4x assembling-machine-1): green-circuit, advanced-
+  circuit, engine-unit, chemical-science-pack. adv/engine/chempack WORKING.
+- Fed the chempack assembler sulfur + advanced-circuits + engine-units -> it is
+  now producing chemical-science-pack (blue). Entire chain live: crude->petroleum
+  ->{plastic, sulfur} + circuits/engines -> chempack.
+- Currently semi-auto (Manager shuttles intermediates via RCON each cycle). Next:
+  haul packs to the 5 labs (research advanced-oil-processing needs 75) + add
+  inserters/chests for hands-off flow. Claimed miner(64) for the build (resolved
+  an ownership conflict emp-1 flagged).

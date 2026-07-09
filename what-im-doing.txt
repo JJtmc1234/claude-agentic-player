@@ -137,6 +137,18 @@ JJ may need to RELAUNCH the 4 employee Claude sessions to get them self-driving.
   to labs; (5) later: inserters/chests for sustained flow (currently semi-auto:
   Manager inserts inputs via RCON each cycle). Miner out of big poles (0 wood/steel
   on hand) -> craft more poles (take steel from chest) to power green + expand.
+  *** FULL CHEMPACK CHAIN OPERATIONAL (07-09) *** All 4 assemblers placed:
+  green(-29.5,17.5, no_power/low-pri), adv(-26.5,17.5, WORKING), engine(-23.5,17.5,
+  WORKING), chempack(-23.5,20.5, WORKING). Fed chempack sulfur+adv+engine -> making
+  chemical-science-pack (blue!). asm-1 is slow (~48s/craft) -> packs finish shortly.
+  SEMI-AUTO: each cycle Manager shuttles adv-circuit + engine outputs (+ sulfur
+  from sulfur plant/courier) into the chempack asm. Miner(64) is MANAGER-CLAIMED
+  for this build (owner file updated; emp-1 stood down). NEXT: verify packs, HAUL
+  to the 5 labs (insert lab_input) -> research 'advanced-oil-processing' resumes;
+  then add inserters+chests for hands-off sustained flow (75 packs needed). Also
+  power the green asm (craft big pole: 5 steel+8 iron-stick+4 cu-cable) OR keep
+  hand-crafting green (88 banked). Watch: sulfur+plastic share 1 refinery (petro
+  45/s vs ~50 draw) -> hook a 2nd refinery for full rate later.
 - 2.1 GOTCHAS (hit live): (a) insert_into_entity/take_from_entity REQUIRE the
   numeric inventory `slot` arg or they crash (get_inventory(nil)). (b) the crafter
   input/output defines were RENAMED: use defines.inventory.crafter_input(=2) and
