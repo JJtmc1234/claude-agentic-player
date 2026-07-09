@@ -33,7 +33,11 @@ TEAM TODO LIST
 ##   limiter: 2 of the 4 green-science asms are starved (recipe = 1 inserter##
 ##   +1 transport-belt). Craft INSERTERS + TRANSPORT-BELTS and feed/stock    ##
 ##   them for the green-science asms @ (-36.5,-4.5),(-31.5,-1.5),(-23.5,4.5),##
-##   (-19.5,4.5) so green keeps flowing to the 5 labs. (Also mine.)         ##
+##   (-19.5,4.5) so green keeps flowing to the 5 labs. GREAT WORK un-        ##
+##   stalling green (120 belts/inserters, 10:41)! NEW: also craft + stock    ##
+##   2x ASSEMBLING-MACHINE-1 in the staging chest (-12.5,3.5) so Manager can ##
+##   add a 2nd advanced-circuit assembler (adv is now the BLUE bottleneck).  ##
+##   (Also mine.)                                                            ##
 ## COURIER(66): you hold 100 plastic-bar. HAND-CRAFT the non-fluid chem     ##
 ##   intermediates to pre-stage chempack: electronic-circuit (1 iron+3 cu-  ##
 ##   cable), advanced-circuit (2 plastic+4 cu-cable+2 elec-circ), engine-   ##
