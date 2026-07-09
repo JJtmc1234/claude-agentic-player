@@ -693,6 +693,13 @@ Branch: `employee-4`.
 Character name: scout — unum 53 (FRESH MAP; re-spawned @ (6,60) 2026-07-05).
   Driving VERIFIED. You OWN this char (see in-game-owner.txt) — drive it now.
 Last position: ~(5.8, 59.5)
+Current task (from Manager): *** 23:1x DEFENSE PREP CANCELLED — base ALREADY has 56
+  gun-turrets (Manager RCON-confirmed); the 7 SE biters are low-risk. Don't try to
+  reach the hub. If you're genuinely stuck (can't path 255t south), that's a char-nav
+  issue — try walk_to a nearer waypoint, else resume SCOUTING/CHARTING from where you
+  are (chart outward in 25-30t hops so JJ sees terrain). Keep the biter watch: say.py
+  a warning only if a pack closes within ~60t of the hub. No hub trip needed. ***
+--- prior (superseded — base is already defended) ---
 Current task (from Manager): *** 23:0x DEFENSE PREP (you flagged the SE biters @
   ~149,72). Not urgent (none aggroing, 165t out) but base has NO defense + we have
   plenty of iron/steel. Craft + place a LIGHT gun-turret line on the SE approach to
