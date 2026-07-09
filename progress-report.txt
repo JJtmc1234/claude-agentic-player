@@ -405,3 +405,13 @@ Next: stage 2 (cables curriculum) bundled in next mod deploy per `mod/claude-com
   haul packs to the 5 labs (research advanced-oil-processing needs 75) + add
   inserters/chests for hands-off flow. Claimed miner(64) for the build (resolved
   an ownership conflict emp-1 flagged).
+
+## 2026-07-09 — advanced-oil-processing researched (first blue-gated tech done)
+- The research stuck at 0% for the entire session is COMPLETE. Full pipeline
+  proven end-to-end: crude -> petroleum -> {plastic, sulfur} -> circuits/engines
+  -> chemical-science-pack -> labs -> research. Queue advanced to lubricant ->
+  electric-engine.
+- Along the way: 2 parallel chempack assemblers (2x throughput), automated green-
+  circuit assembler, and discovered the labs need ALL THREE science types
+  (red+green+blue) delivered each cycle (none auto-delivered; green is belt-
+  limited). emp-1 supplying materials + belts.
