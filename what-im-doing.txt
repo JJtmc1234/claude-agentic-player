@@ -79,9 +79,21 @@ JJ may need to RELAUNCH the 4 employee Claude sessions to get them self-driving.
   petroleum at tile (-17.5,14.5); a pipe @ (-17.5,15.5) carries it (petro=100).
   The other 2 output tiles (-15.5,14.5)/(-13.5,14.5) are empty (basic proc =
   petroleum only). Test pipes left @ (-17.5,15.5)[petro tap] + (-15.5,15.5)[dead].
-  PLASTIC PLANT PLAN: place chemical-plant with a fluid input pipe-connected to
-  (-17.5,15.5), recipe=plastic-bar, insert coal, belt out plastic. Need a
-  chemical-plant item (craft: 2.1 recipe -> verify live). Miner(64) has 46 pipes.
+  PLASTIC PLANT: BUILT + PRODUCING (07-09). chemical-plant @ (-18.5,17.5) dir=0,
+  recipe=plastic-bar, NE input on petroleum pipe (-17.5,15.5), powered by the
+  medium-pole @ (-15.5,16.5). Bootstrapped with a batch of coal (courier took
+  from iron-chest @ (-31.5,-8.5), inserted). Status working; ~12+ plastic made.
+  NOT sustained yet: coal buffer will drain + output caps ~100 plastic. NEXT =
+  inserter+chest coal feed (kept stocked) + inserter draining plastic to a chest/
+  belt, then adv-circuit asm (plastic+copper-cable+elec-circuit) and sulfur
+  (needs water piped from pump @ -42,-27) -> engine-unit -> chempack -> labs.
+- 2.1 GOTCHAS (hit live): (a) insert_into_entity/take_from_entity REQUIRE the
+  numeric inventory `slot` arg or they crash (get_inventory(nil)). (b) the crafter
+  input/output defines were RENAMED: use defines.inventory.crafter_input(=2) and
+  crafter_output(=3), NOT assembling_machine_input (nil in 2.1). chest=1, lab_input
+  =2. (c) storage-tank direction rotates its fluid connections (tank1 dir=4 ->
+  output at SW-south). Future mod win: auto-resolve crafter input slot in
+  insert_into_entity so callers needn't pass the 2.1 define.
 
 ## ROCKET/SPACE CAPABILITIES (mod 0.12.0, LIVE + verified)
 remote.call('claude', fn, ...): get_rocket_silos(unum), load_rocket(unum,x,y,

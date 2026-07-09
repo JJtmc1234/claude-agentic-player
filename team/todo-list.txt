@@ -14,8 +14,10 @@ TEAM TODO LIST
 ## the chem chain + feeding the 5 labs (all missing_science_packs, 0 blue). ##
 ## NEXT TEAM BUILD = CHEMPACK CHAIN (Manager drives via RCON; employees     ##
 ## assist where panes work):                                               ##
-##  1. plastic plant: chemical-plant tapping refinery petroleum output +    ##
-##     coal -> plastic-bar (NO water needed; also drains refinery).         ##
+##  1. plastic plant: *DONE* chemical-plant @ (-18.5,17.5) making plastic-bar ##
+##     (petro tap @ pipe (-17.5,15.5)). TODO: sustained coal feed (stocked    ##
+##     chest+inserter, coal from iron-chest @ (-31.5,-8.5)) + inserter to      ##
+##     DRAIN plastic to a chest, else it caps ~100 and stalls.               ##
 ##  2. sulfur plant: needs WATER piped ~30t from offshore-pump @ (-42,-27). ##
 ##  3. adv-circuit asm (2 plastic+4 copper-cable+2 elec-circuit).           ##
 ##  4. engine-unit asm (1 steel+1 gear+2 pipe; steel ~1000 banked).         ##

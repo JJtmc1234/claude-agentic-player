@@ -374,3 +374,12 @@ Next: stage 2 (cables curriculum) bundled in next mod deploy per `mod/claude-com
 - Direction (JJ, 07-09): bootstrap Vulpire only after JJ is at Vulcanus; keep the
   team grinding Nauvis until we all board the spaceship; Manager runs autonomously
   (don't escalate, don't ask). Goal = platform to Vulcanus and back, don't board it.
+
+## 2026-07-09 — Oil unblocked + first chem plant (plastic) producing
+- Fixed the crude pipe (employee pipe-to-ground bug) -> refinery @ (-15.5,12.5)
+  makes petroleum. Found the petroleum output tap empirically (pipe @ -17.5,15.5).
+- Built chemical-plant @ (-18.5,17.5) (recipe plastic-bar), tapped petroleum,
+  bootstrapped coal -> PRODUCING plastic (working). First step of the chempack
+  (blue) chain. Not sustained yet (needs coal-feed + plastic-drain inserters).
+- Chempack recipe already unlocked; remaining chain = adv-circuit + sulfur(water)
+  + engine-unit -> chempack -> feed 5 labs (all missing_science_packs).
