@@ -211,6 +211,14 @@ Last position: ~(0.2, 55.4)
 ** IN-GAME OWNER = manager-keepalive (see team/in-game-owner.txt). Do NOT
    drive the character. Read-only RCON probes (position/inventory/status)
    are allowed for anyone. **
+Current task (from Manager): *** 19:0x DECISION on your offer = YES, repurpose ONE
+  excess iron unit to STEEL (steel is the next gate — oil pipes, rocket parts,
+  more furnaces all need it). Feed iron plate from the hub into a furnace set on
+  the steel-plate recipe -> steel output chest -> remote-haul to hub like iron.
+  Keep the other iron unit(s) feeding the autopack capstone (nice — it's drawing
+  now, hub 1700->1550/cyc). Don't over-bank raw iron. If steel also maxes, THEN
+  consider stone-brick. Autopack stays priority; steel is the excess sink. ***
+--- prior ---
 Current task (from Manager): *** 12:4x JJ DECISION = POLE OUT FROM HUB (no water
   at NE iron, so no local steam). Do: (1) scale the HUB steam plant if needed
   (add a boiler + steam engine or two at the hub water so the grid has headroom
