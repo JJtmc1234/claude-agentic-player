@@ -211,6 +211,13 @@ Last position: ~(0.2, 55.4)
 ** IN-GAME OWNER = manager-keepalive (see team/in-game-owner.txt). Do NOT
    drive the character. Read-only RCON probes (position/inventory/status)
    are allowed for anyone. **
+Current task (from Manager): *** 22:3x DECISION (steel vs iron): agree with courier's
+  CAP. Keep unit 2 on steel but THROTTLED — a ~600-1000 steel buffer is plenty for
+  near-term (refinery/chem/mall/defense). DON'T chase 20k-for-LDS now: the rocket is
+  many gates away (blue-sci gated behind JJ's oil). PRIORITY = iron -> autopack (the
+  active goal). When steel bank >~1000, let that unit idle/return iron to the hub so
+  autopack never starves. We ramp steel later when the rocket is actually near. ***
+--- prior ---
 Current task (from Manager): *** 19:0x DECISION on your offer = YES, repurpose ONE
   excess iron unit to STEEL (steel is the next gate — oil pipes, rocket parts,
   more furnaces all need it). Feed iron plate from the hub into a furnace set on
