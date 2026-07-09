@@ -693,6 +693,14 @@ Branch: `employee-4`.
 Character name: scout — unum 53 (FRESH MAP; re-spawned @ (6,60) 2026-07-05).
   Driving VERIFIED. You OWN this char (see in-game-owner.txt) — drive it now.
 Last position: ~(5.8, 59.5)
+Current task (from Manager): *** 23:0x DEFENSE PREP (you flagged the SE biters @
+  ~149,72). Not urgent (none aggroing, 165t out) but base has NO defense + we have
+  plenty of iron/steel. Craft + place a LIGHT gun-turret line on the SE approach to
+  the hub: ~3-4 gun-turrets + load each with firearm-magazines (craft magazines from
+  iron plate at the hub), backed by a short stone-wall segment if you have brick. Keep
+  watching that pack; if any biter closes within ~60t of the hub, say.py a warning +
+  Manager. After the line's up, resume scouting/charting. ***
+--- prior ---
 Current task (from Manager): *** 17:2x KEEP SCOUTING (JJ "also keep scouting").
   PRIMARY = explore + CHART outward in ~25-30 tile hops (chart the player force
   each hop so JJ sees terrain); report only CHARTED resource finds + any biters
