@@ -1,7 +1,49 @@
 # In-game character owner
 
 ##########################################################################
-## *** 11:2x (07-09, Manager) AUTHORITATIVE -- OVERRIDES EVERYTHING BELOW.##
+## *** 07-09 LATE (Manager) NEW-WORLD MIGRATION -- OVERRIDES ALL BELOW. *** ##
+## The team is now on JJ'S OWN CLIENT-HOSTED game (listen server, localhost ##
+## RCON 127.0.0.1:27015, reuses the headless password). base=2.0.77,        ##
+## surface=nauvis, SPACE EXPLORATION modpack. This is NOT the C:\Factorio-   ##
+## Server headless world -- that's abandoned for now.                       ##
+## MANAGER DRIVES the 4 chars here directly via RCON (employee panes are on  ##
+## the OLD headless setup + on HOLD -- they do NOT connect to this world     ##
+## yet). New chars spawned + nametagged near (-22,-42):                      ##
+##   miner=186 (iron)  builder=187 (coal)  courier=188 (copper) scout=189    ##
+##   (stone). All hand-mining via bridge/_team_automine.py (bg loop).        ##
+## Mod on portal = 0.12.3 (factorio 2.0, nametag feature). JJ's LIVE host is ##
+## still 0.12.2 (locked) -> nametag feature activates on his next re-host;   ##
+## tags currently drawn live via RCON. Only the Manager changes ownership.   ##
+##########################################################################
+
+##########################################################################
+## *** 13:xx (07-09, Manager) VULCANUS MISSION -- superseded by migration ***##
+## JJ dropped to VULCANUS and pulled the 4 team chars down there, then went ##
+## AFK with "keep em working" (chop wood + hit rocks). MANAGER now DRIVES   ##
+## these 4 Vulcanus chars for the mining mission (RCON walk_to/start_mining)##
+## -- employee panes: DO NOT connect_named/drive miner/courier/scout while  ##
+## this box stands; you'd fight the Manager. New unums after cargo-pod      ##
+## deaths (pods dropping at the ~(0,0) landing zone CRUSHED the unarmed      ##
+## chars -- keep them AWAY from the platform drop zone):                    ##
+##   miner=15221  courier=15222  scout=15223  builder=65  (all on vulcanus) ##
+## Manager loop each cycle: check walk/mining status, start_mining when     ##
+## arrived, reassign a fresh tree/rock when a job finishes, respawn+redeploy ##
+## any that die, keep them off the drop zone. Nauvis base = employee panes   ##
+## still own it (defense/recovery) -- unaffected.                            ##
+## STANDING ORDER (JJ AFK, "keep them working indefinitely; goal: first     ##
+## foundry"): auto-mine loop runs every poll cycle. FOUNDRY IS BLOCKED for   ##
+## autonomous build -- needs Foundry TECH (unresearched; needs metallurgic   ##
+## science) + craft steel50/circuit30/tungsten-carbide50/concrete20/lube20 + ##
+## labs+power. Walk+mine primitives can't do research/craft-chain. So the    ##
+## autonomous job = STOCKPILE raw mats (calcite/stone/coal/tungsten/wood) +  ##
+## keep chars alive until JJ returns to do research/build, or gives a        ##
+## craftable sub-goal. Do NOT claim a foundry was built.                     ##
+## LAVA GOTCHA: walk_to returns "no path found" when a mineable is across    ##
+## lava -> chars deadlock. FIX: when an idle char has no pathable target,    ##
+## TELEPORT it adjacent (find_non_colliding_position near the rock) then     ##
+## start_mining. Teleport bypasses lava pathing; use it in the mine loop.    ##
+## ---------------------------------------------------------------------- ##
+## *** 11:2x (07-09, Manager) prior nauvis note (superseded for the 4 chars)##
 ## *** MINER(64) + COURIER(66) DIED -- RESPAWNED with NEW unums *** likely  ##
 ## a biter breach (emp-4 flagged). New chars (empty inventory, @ ~(0,0)):   ##
 ##   miner   -> unum 11185                                                  ##

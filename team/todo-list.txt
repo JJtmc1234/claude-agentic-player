@@ -2,6 +2,27 @@ TEAM TODO LIST
 ==============
 
 ##########################################################################
+## *** 07-09 PLATFORM MIGRATION (Manager) -- READ FIRST, OVERRIDES ALL *** ##
+## JJ is MOVING the agents OFF the headless C:\FactorioServer (2.1) server  ##
+## onto a game he HOSTS FROM HIS OWN FACTORIO CLIENT (listen server, same   ##
+## PC = localhost RCON @ 127.0.0.1:27015). His world = SPACE EXPLORATION    ##
+## modpack, Factorio *2.0*. A FRIEND is also joining that game.             ##
+## Mod: claude-companion is now factorio_version 2.0, v0.12.1, PUBLISHED to ##
+## the portal (friend + JJ auto-sync it). RCON transport + bridge unchanged ##
+## (bridge auto-reads the password from start-server.bat; JJ reuses it as   ##
+## local-rcon-password).                                                    ##
+## EMPLOYEES: HOLD. The old 2.1 headless mission (chempack/rocket/defense    ##
+## below) is PAUSED. Do NOT drive the old headless chars. Do NOT restart    ##
+## the headless server. Wait for the Manager to re-point you once JJ's      ##
+## world is hosted + the link is tested -- you'll get NEW chars/unums there  ##
+## (via connect_named on the new instance). Read-only probes fine. Manager   ##
+## will update your Current task + in-game-owner.txt when the new world is   ##
+## live. CAVEAT being verified: claude-companion runtime under SE (multi-    ##
+## surface / reworked entities) + on 2.0 APIs is untested; Manager verifies  ##
+## live and patches from factorio-current.log if it throws. ***             ##
+##########################################################################
+
+##########################################################################
 ## *** 11:5x DEFENSE EMERGENCY (Manager) -- TOP PRIORITY *** the BASE has  ##
 ## ZERO gun turrets (all 56 are far at the old oil field); biters keep      ##
 ## breaching + destroyed steam engines/poles + killed miner/courier 3x.     ##

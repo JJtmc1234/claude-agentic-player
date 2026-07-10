@@ -34,10 +34,12 @@ local function init_path_requests() if not storage.path_requests then storage.pa
 local function init_craft_jobs()    if not storage.craft_jobs    then storage.craft_jobs    = {} end end
 local function init_arena()         if not storage.arena         then storage.arena         = {} end end
 local function init_claude_chars()  if not storage.claude_chars  then storage.claude_chars  = {} end end
+-- name -> render-object id of the floating nametag drawn above each char.
+local function init_claude_nametags() if not storage.claude_nametags then storage.claude_nametags = {} end end
 
 local function init_all()
   init_chat_log(); init_mining_jobs(); init_walks(); init_path_requests(); init_craft_jobs(); init_arena()
-  init_claude_chars()
+  init_claude_chars(); init_claude_nametags()
 end
 
 -- Migration: fold the legacy single-character key into the multi-char map.
@@ -896,13 +898,25 @@ end
 -- hardcoded list.
 local function player_craft_categories()
   local ch = prototypes.entity['character']
-  if ch and ch.crafting_categories then return ch.crafting_categories end
-  return { ['crafting'] = true, ['hand-crafting'] = true }  -- fallback
+  local ok, cats = pcall(function() return ch and ch.crafting_categories end)
+  if ok and type(cats) == 'table' then return cats end
+  return { ['crafting'] = true, ['advanced-crafting'] = true, ['hand-crafting'] = true }  -- fallback (2.0 + 2.1)
+end
+
+-- Version-agnostic recipe categories. 2.1 exposes LuaRecipePrototype.categories
+-- (array); 2.0 exposes .category (string). Accessing the ABSENT one throws on the
+-- proto wrapper (same failure that broke 2.1 originally), so probe each via pcall.
+local function recipe_categories(recipe)
+  local ok, cats = pcall(function() return recipe.categories end)
+  if ok and type(cats) == 'table' then return cats end
+  local ok2, cat = pcall(function() return recipe.category end)
+  if ok2 and cat then return { cat } end
+  return {}
 end
 
 local function is_hand_craftable(recipe)
   local allowed = player_craft_categories()
-  for _, cat in ipairs(recipe.categories or {}) do
+  for _, cat in ipairs(recipe_categories(recipe)) do
     if allowed[cat] then return true end
   end
   return false
@@ -915,7 +929,7 @@ local function craft(character_unum, recipe_name, count)
   local recipe = prototypes.recipe[recipe_name]
   if not recipe then return { ok = false, error = 'no recipe ' .. recipe_name } end
   if not is_hand_craftable(recipe) then
-    return { ok = false, error = 'recipe categories [' .. table.concat(recipe.categories or {}, ',') .. '] not hand-craftable (need a machine)' }
+    return { ok = false, error = 'recipe categories [' .. table.concat(recipe_categories(recipe), ',') .. '] not hand-craftable (need a machine)' }
   end
   for _, ing in ipairs(recipe.ingredients) do
     if ing.type == 'fluid' then
@@ -1089,7 +1103,7 @@ local function get_recipe(recipe_name)
   end
   return {
     ok = true, name = recipe_name,
-    categories = r.categories,
+    categories = recipe_categories(r),
     energy = r.energy,
     ingredients = ingredients,
     products = products,
@@ -1180,6 +1194,54 @@ end
 
 -- Spawn a free-standing character and record it under `name` in the
 -- storage.claude_chars map. Returns the new character's unit_number.
+-- Per-name nametag color so JJ + friends can tell the agents apart at a glance.
+local NAMETAG_COLORS = {
+  miner   = { r = 1.00, g = 0.78, b = 0.20 },  -- amber
+  builder = { r = 0.35, g = 0.70, b = 1.00 },  -- blue
+  courier = { r = 0.45, g = 0.95, b = 0.45 },  -- green
+  scout   = { r = 1.00, g = 0.45, b = 0.45 },  -- red
+}
+local NAMETAG_DEFAULT_COLOR = { r = 0.95, g = 0.95, b = 0.95 }
+
+local function destroy_nametag(name)
+  init_claude_nametags()
+  local id = storage.claude_nametags[name]
+  if id then
+    pcall(function()
+      local o = rendering.get_object_by_id and rendering.get_object_by_id(id)
+      if o and o.valid then o.destroy() else rendering.destroy(id) end
+    end)
+    storage.claude_nametags[name] = nil
+  end
+end
+
+-- Draw a floating text label above the character that follows it. Returns the
+-- render-object id (or nil on failure). Replaces any prior tag for this name.
+local function draw_nametag(name, char)
+  init_claude_nametags()
+  destroy_nametag(name)
+  if not (char and char.valid) then return nil end
+  local ok, obj = pcall(function()
+    return rendering.draw_text{
+      text = name,
+      surface = char.surface,
+      target = { entity = char, offset = { 0, -2.4 } },
+      color = NAMETAG_COLORS[name] or NAMETAG_DEFAULT_COLOR,
+      scale = 1.3,
+      alignment = 'center',
+      vertical_alignment = 'bottom',
+      scale_with_zoom = false,
+      only_in_alt_mode = false,
+    }
+  end)
+  if ok and obj then
+    local id = obj.id or obj
+    storage.claude_nametags[name] = id
+    return id
+  end
+  return nil
+end
+
 local function spawn_named_char(name, position)
   if type(name) ~= 'string' or name == '' then
     return { ok = false, error = 'name must be a non-empty string' }
@@ -1198,11 +1260,13 @@ local function spawn_named_char(name, position)
     return { ok = false, error = 'create_entity returned nil' }
   end
   storage.claude_chars[name] = c.unit_number
+  local tag_id = draw_nametag(name, c)
   return {
     ok = true,
     name = name,
     unit_number = c.unit_number,
     position = { x = c.position.x, y = c.position.y },
+    nametag_id = tag_id,
   }
 end
 
@@ -1225,6 +1289,7 @@ local function remove_char(name)
     if e and e.valid then e.destroy(); destroyed = true end
   end
   storage.claude_chars[name] = nil
+  destroy_nametag(name)
   return { ok = true, name = name, existed = unum ~= nil, destroyed = destroyed }
 end
 
