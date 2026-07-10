@@ -35,9 +35,14 @@ from rcon_client import RconClient  # noqa: E402
 # Config / connection
 # ---------------------------------------------------------------------------
 
-MODEL = "claude-opus-4-8"          # planner-tier reasoning; the executor tier can be Haiku later
-CHAR_NAME = "builder"              # the character this brain drives
-CYCLE_SECONDS = 4.0                # re-perceive + re-decide cadence
+# Two-tier for smart AND fast: a low-latency model drives moment-to-moment
+# actions on a tight loop; an occasional Opus planner sets strategy (stub below,
+# wired up when we go live). JJ wanted it faster -> Haiku 4.5 for the executor.
+FAST_MODEL = "claude-haiku-4-5"    # low-latency executor -- fast reactions
+PLANNER_MODEL = "claude-opus-4-8"  # smart periodic strategy (see run_planner note)
+CHAR_NAME = "companion"            # the brain's OWN teammate character (NOT JJ's)
+OWNER_PLAYER = "Factoriobrine"     # JJ -- spawn the teammate next to him + help him
+CYCLE_SECONDS = 1.5                # tight loop for a real-time co-op feel
 
 
 def _resolve_rcon_password() -> str:
@@ -69,9 +74,11 @@ def _resolve_unum() -> int:
         f"rcon.print(tostring(ch['{CHAR_NAME}']))"
     )
     if not out.isdigit():
-        # try to spawn it near origin if it doesn't exist yet
+        # spawn the teammate right next to JJ so he can play alongside it
         out = _rc(
-            f"local r=remote.call('claude','spawn_named_char','{CHAR_NAME}',{{0,0}}); "
+            f"local p=game.players['{OWNER_PLAYER}']; "
+            "local pos=(p and ((p.character and p.character.position) or p.position)) or {x=0,y=0}; "
+            f"local r=remote.call('claude','spawn_named_char','{CHAR_NAME}',{{pos.x+3,pos.y}}); "
             "rcon.print(tostring(r.unit_number))"
         )
     return int(out)
@@ -219,7 +226,7 @@ def insert_into(x: int, y: int, item: str, count: int, slot: str) -> str:
 def say(message: str) -> str:
     """Send a short message to JJ in the in-game chat. Use for milestones or blockers."""
     esc = message.replace("\\", "\\\\").replace("'", "\\'")
-    _rc(f"game.print('[Builder] {esc}',{{color={{r=0.35,g=0.7,b=1}}}})")
+    _rc(f"game.print('[Companion] {esc}',{{color={{r=0.35,g=0.7,b=1}}}})")
     return "said"
 
 
@@ -236,9 +243,11 @@ TOOLS = [walk_to, mine_nearest, craft, place, build_ghosts, insert_into, say, lo
 # REASON — the cached system prompt + the per-cycle decision
 # ---------------------------------------------------------------------------
 
-SYSTEM = """You are the BUILDER — one of JJ's autonomous helper characters in a
-Factorio co-op game. You control a single character through tools. JJ plays
-alongside you; help him build and grow the base.
+SYSTEM = """You are JJ's autonomous TEAMMATE — your own character in a Factorio
+co-op game, separate from JJ's character. JJ plays alongside you in real time.
+Stay near him, read what he's doing, and help: mine what's short, build his
+ghosts, fetch/craft parts, cover him. You act FAST — pick one clear action and do
+it; don't overthink, you'll re-decide in ~1.5 seconds.
 
 HARD RULES (never violate):
 - CRAFT, DON'T SPAWN. Only ever build things by mining, crafting, and placing real
@@ -263,8 +272,8 @@ GOAL: {goal}
 """
 
 DEFAULT_GOAL = (
-    "Build JJ's placed blueprint (drills, furnaces, chests, inserters). Fabricate the "
-    "parts you need from mined ore, and keep yourself alive."
+    "Help JJ in real time: stay near him, build any blueprint ghosts nearby, mine and "
+    "fetch/craft what he needs, and keep yourself alive."
 )
 
 
@@ -278,7 +287,7 @@ def run(goal: str = DEFAULT_GOAL) -> int:
         "text": SYSTEM.format(goal=goal),
         "cache_control": {"type": "ephemeral"},  # cache the stable prefix (~0.1x reads)
     }]
-    print(f"[brain] driving '{CHAR_NAME}' (unum {_UNUM}) with {MODEL}. Ctrl-C to stop.")
+    print(f"[brain] driving teammate '{CHAR_NAME}' (unum {_UNUM}) with {FAST_MODEL}. Ctrl-C to stop.")
     while True:
         state = perceive()
         if not state.get("alive"):
@@ -287,18 +296,18 @@ def run(goal: str = DEFAULT_GOAL) -> int:
             continue
         user = (
             "Current game state (JSON):\n" + json.dumps(state) +
-            "\n\nDecide and take the single best next action with your tools. "
-            "Keep it to a few tool calls, then stop for this turn."
+            "\n\nPick the single best next action and do it with your tools NOW. "
+            "Be fast: as few tool calls as possible, minimal deliberation -- you get "
+            "fresh state again in ~1.5s."
         )
         try:
+            # Fast executor: Haiku, no extended thinking, small max_tokens = low latency.
             runner = client.beta.messages.tool_runner(
-                model=MODEL,
-                max_tokens=1500,
+                model=FAST_MODEL,
+                max_tokens=800,
                 system=system,
                 tools=TOOLS,
                 messages=[{"role": "user", "content": user}],
-                thinking={"type": "adaptive"},
-                output_config={"effort": "medium"},
             )
             for _msg in runner:
                 pass  # tools execute inside the runner; we just drain it
