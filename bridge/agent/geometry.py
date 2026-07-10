@@ -47,9 +47,12 @@ def snap_1x1_center(target_x: float, target_y: float) -> Tuple[float, float]:
     return (_round_half_up(target_x - 0.5) + 0.5, _round_half_up(target_y - 0.5) + 0.5)
 
 
-def drill_drop_position(drill_cx: float, drill_cy: float, direction: int = DIR_SOUTH) -> Tuple[float, float]:
-    """Where a 2x2 burner-mining-drill drops items, given its center + facing direction.
-    Verified for burner-mining-drill in 2.0 — offset is 1.296875 along facing axis.
+def burner_drill_drop_position(drill_cx: float, drill_cy: float, direction: int = DIR_SOUTH) -> Tuple[float, float]:
+    """Where a 2x2 BURNER-mining-drill drops items, given its center + facing direction.
+    Verified for burner-mining-drill in 2.0 — offset is 1.296875 along facing axis, PLUS a
+    +0.5 perpendicular (X for N/S, Y for E/W) shift. This +0.5 asymmetry is burner-specific;
+    do NOT use this on an electric-mining-drill (use electric_drill_drop_position, which has
+    no perpendicular offset).
     """
     dx, dy = DIR_VECTORS[direction]
     OFFSET = 1.296875
@@ -68,10 +71,17 @@ def drill_drop_position(drill_cx: float, drill_cy: float, direction: int = DIR_S
     raise ValueError(f"unsupported direction {direction}")
 
 
+# Backward-compatible alias. The old generic name is kept so existing importers
+# (e.g. agent/__init__.py) keep working, but new code should call the explicit
+# burner_drill_drop_position / electric_drill_drop_position to avoid mixing the
+# burner-only +0.5 offset onto an electric drill.
+drill_drop_position = burner_drill_drop_position
+
+
 def inserter_pickup_for_drill(drill_cx: float, drill_cy: float,
                               direction: int = DIR_SOUTH) -> Tuple[float, float]:
-    """1x1 inserter position to pick up from drill drop tile."""
-    dx, dy = drill_drop_position(drill_cx, drill_cy, direction)
+    """1x1 inserter position to pick up from a BURNER drill's drop tile."""
+    dx, dy = burner_drill_drop_position(drill_cx, drill_cy, direction)
     perp_x, perp_y = DIR_VECTORS[direction]
     # Inserter is one tile further along facing direction than drop point.
     # Snap to 1x1 grid.

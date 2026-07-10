@@ -25,22 +25,25 @@ class Inventory:
                            item_name, count, 'to_chest')
 
     def chest_count(self, x: float, y: float, item_name: str,
-                    chest_name: str = 'wooden-chest', radius: float = 0.5) -> int:
-        """Read item count from a specific chest at (x, y)."""
+                    chest_name: str = 'wooden-chest', radius: float = 0.5) -> Optional[int]:
+        """Read item count from a specific chest at (x, y).
+
+        Returns the item count, or None on any error (no chest found, no
+        inventory, or an unparseable response)."""
         body = (
             f"local s = game.surfaces['nauvis']; "
             f"local ch = s.find_entities_filtered{{position={{{x}, {y}}}, "
             f"radius={radius}, name='{chest_name}'}}[1]; "
-            "if not ch then rcon.print(-1); return end; "
+            "if not ch then rcon.print('NO_CHEST'); return end; "
             "local inv = ch.get_inventory(defines.inventory.chest); "
-            "if not inv then rcon.print(-2); return end; "
+            "if not inv then rcon.print('NO_INV'); return end; "
             f"rcon.print(inv.get_item_count('{item_name}'))"
         )
         out = self.a.rcon.command('/silent-command ' + body).strip()
         try:
             return int(out)
         except ValueError:
-            return -3
+            return None
 
     def craft(self, recipe: str, count: int = 1, timeout_s: int = 120) -> dict:
         """Start a craft, poll until done, return the final get_craft_status dict."""
@@ -55,14 +58,23 @@ class Inventory:
         return {'status': 'timeout'}
 
     def craft_recipe_chain(self, recipes: list) -> list:
-        """Craft a sequence of (recipe, count) pairs sequentially. Returns results."""
+        """Craft a sequence of (recipe, count) pairs sequentially. Returns results.
+
+        Stops at the first failed step so a broken dependency (e.g. gears)
+        doesn't cascade into spurious failures for everything downstream
+        (belts). The last entry names the recipe that failed."""
         results = []
         for entry in recipes:
             if isinstance(entry, str):
                 recipe, count = entry, 1
             else:
                 recipe, count = entry[0], entry[1] if len(entry) > 1 else 1
-            results.append(self.craft(recipe, count))
+            res = self.craft(recipe, count)
+            if res.get('status') not in ('completed', 'idle'):
+                res.setdefault('recipe', recipe)
+                results.append(res)
+                break
+            results.append(res)
         return results
 
     def sort(self) -> bool:

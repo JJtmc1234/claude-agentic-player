@@ -43,6 +43,7 @@ PLANNER_MODEL = "claude-opus-4-8"  # smart periodic strategy (see run_planner no
 CHAR_NAME = "companion"            # the brain's OWN teammate character (NOT JJ's)
 OWNER_PLAYER = "Factoriobrine"     # JJ -- spawn the teammate next to him + help him
 CYCLE_SECONDS = 1.5                # tight loop for a real-time co-op feel
+PLAN_EVERY = 30                    # executor cycles between Opus planner re-strategizing (~45s)
 
 
 def _resolve_rcon_password() -> str:
@@ -267,8 +268,6 @@ state next turn. If nothing useful can be done, say so briefly and stop.
 GEOMETRY NOTES: inserter `direction` is the side it PICKS FROM (0=N,4=E,8=S,12=W),
 drop is opposite. A burner-mining-drill placed facing south drops ~1.3 tiles south
 of its center. Furnaces/drills are 2x2.
-
-GOAL: {goal}
 """
 
 DEFAULT_GOAL = (
@@ -277,28 +276,70 @@ DEFAULT_GOAL = (
 )
 
 
-def run(goal: str = DEFAULT_GOAL) -> int:
+# --- planner tier: an occasional Opus call sets the teammate's current goal ---
+PLANNER_SYSTEM = (
+    "You are the STRATEGIST for JJ's autonomous Factorio teammate. Given the live game "
+    "state and the standing mission, output ONE short paragraph (2-3 sentences) telling "
+    "the teammate what to focus on next -- concrete and current (e.g. 'JJ is laying a "
+    "drill blueprint east of you; mine iron to feed it, then build the ghosts'). No "
+    "preamble, just the goal."
+)
+
+_current_goal = DEFAULT_GOAL
+
+
+def _replan(client, state) -> None:
+    """Smart tier (Opus): (re)set the teammate's current goal from live state."""
+    global _current_goal
+    try:
+        resp = client.messages.create(
+            model=PLANNER_MODEL,
+            max_tokens=400,
+            system=PLANNER_SYSTEM,
+            thinking={"type": "adaptive"},
+            output_config={"effort": "low"},
+            messages=[{"role": "user", "content":
+                "Standing mission: " + DEFAULT_GOAL +
+                "\nLive state (JSON): " + json.dumps(state) +
+                "\nWrite the teammate's current goal."}],
+        )
+        txt = "".join(b.text for b in resp.content
+                      if getattr(b, "type", "") == "text").strip()
+        if txt:
+            _current_goal = txt
+            print(f"[planner] goal -> {txt}", flush=True)
+    except Exception as e:  # noqa: BLE001
+        print(f"[planner] error: {e}", flush=True)
+
+
+def run() -> int:
     if Anthropic is None:
         print("anthropic SDK not installed. run: pip install anthropic", file=sys.stderr)
         return 1
     client = Anthropic()  # reads ANTHROPIC_API_KEY (or an `ant auth login` profile)
+    # Cache the STABLE prefix (rules + geometry). The goal is NOT in here -- it goes in
+    # the per-cycle user message, so the planner can change it without busting the cache.
     system = [{
         "type": "text",
-        "text": SYSTEM.format(goal=goal),
-        "cache_control": {"type": "ephemeral"},  # cache the stable prefix (~0.1x reads)
+        "text": SYSTEM,
+        "cache_control": {"type": "ephemeral"},  # cache reads ~0.1x
     }]
-    print(f"[brain] driving teammate '{CHAR_NAME}' (unum {_UNUM}) with {FAST_MODEL}. Ctrl-C to stop.")
+    print(f"[brain] driving teammate '{CHAR_NAME}' (unum {_UNUM}); "
+          f"executor={FAST_MODEL} planner={PLANNER_MODEL}. Ctrl-C to stop.")
+    cyc = 0
     while True:
         state = perceive()
         if not state.get("alive"):
             print("[brain] character not alive; waiting.")
             time.sleep(CYCLE_SECONDS)
             continue
+        if cyc % PLAN_EVERY == 0:
+            _replan(client, state)  # smart tier: refresh strategy periodically
         user = (
-            "Current game state (JSON):\n" + json.dumps(state) +
-            "\n\nPick the single best next action and do it with your tools NOW. "
-            "Be fast: as few tool calls as possible, minimal deliberation -- you get "
-            "fresh state again in ~1.5s."
+            "Current goal: " + _current_goal +
+            "\nGame state (JSON):\n" + json.dumps(state) +
+            "\n\nPick the single best next action toward the goal and do it with your "
+            "tools NOW. Be fast: as few tool calls as possible -- fresh state in ~1.5s."
         )
         try:
             # Fast executor: Haiku, no extended thinking, small max_tokens = low latency.
@@ -315,6 +356,7 @@ def run(goal: str = DEFAULT_GOAL) -> int:
             return 0
         except Exception as e:  # noqa: BLE001
             print(f"[brain] error: {e}", flush=True)
+        cyc += 1
         time.sleep(CYCLE_SECONDS)
 
 

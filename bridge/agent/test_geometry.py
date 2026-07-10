@@ -11,7 +11,7 @@ if str(_BRIDGE) not in sys.path:
 
 from agent.geometry import (
     snap_2x2_center, snap_1x1_center, snap_3x3_center,
-    drill_drop_position,
+    burner_drill_drop_position,
     electric_drill_drop_position, electric_drill_output_tile, direction_toward,
     inserter_pickup_for_drill, inserter_pickup_for_furnace,
     DIR_NORTH, DIR_SOUTH, DIR_EAST, DIR_WEST, opposite_direction,
@@ -43,10 +43,10 @@ def main():
     check("(-14, 54.5) -> (-13.5, 54.5)", (-13.5, 54.5), snap_1x1_center(-14, 54.5))
     check("(87, 45.5) -> (87.5, 45.5)", (87.5, 45.5), snap_1x1_center(87, 45.5))
 
-    print("drill_drop_position (south-facing):")
+    print("burner_drill_drop_position (south-facing):")
     # Verified empirically against live server day 2: drill at (87, 42) drops at (87.5, 43.296875)
     check("(87, 42) south -> (87.5, 43.296875)",
-          (87.5, 43.296875), drill_drop_position(87, 42, DIR_SOUTH))
+          (87.5, 43.296875), burner_drill_drop_position(87, 42, DIR_SOUTH))
 
     print("inserter_pickup_for_drill (south-facing):")
     # For drill at (87, 42), inserter should be at (87.5, 44.5) per the verified layout.

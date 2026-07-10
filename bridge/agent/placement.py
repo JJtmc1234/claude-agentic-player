@@ -5,6 +5,21 @@ from typing import Optional, Tuple
 from agent.geometry import snap_2x2_center, snap_1x1_center
 
 
+# Ghost item substitutions applied when reviving ghosts: if the ghost's own
+# item isn't in the character inventory, build it with the fallback item
+# instead. asm2 ghosts get built as asm1 when only asm1 is on hand (Manager
+# upgrades later). Mirrors bridge/build_ghosts.py SUBSTITUTIONS.
+_GHOST_SUBSTITUTIONS = {
+    'assembling-machine-2': 'assembling-machine-1',
+}
+
+
+def _subs_lua() -> str:
+    """Lua table literal for the ghost substitution map."""
+    pairs = ",".join(f"['{k}']='{v}'" for k, v in _GHOST_SUBSTITUTIONS.items())
+    return "{" + pairs + "}"
+
+
 # Which target snap to use for each entity name. Defaults to 1x1 if unknown.
 _ENTITY_SNAP = {
     'burner-mining-drill': '2x2',
@@ -115,6 +130,9 @@ class Placement:
     def take_back(self, item: str, x: float, y: float) -> bool:
         """Mine an entity and return its name + inventory contents to character.
         Bypasses reach checks for large entities like crash-site-spaceship."""
+        # Convention: Factorio 2.0 get_contents() returns an ARRAY of
+        # {name, count, quality} records (not a name->count map), so ipairs +
+        # st.name/st.count is the correct iteration below.
         body = (
             f"local c = game.get_entity_by_unit_number({self.a.unit}); "
             f"local s = c.surface; local ci = c.get_main_inventory(); "
@@ -135,6 +153,81 @@ class Placement:
 
     def relocate(self, item: str, old_x: float, old_y: float,
                  new_x: float, new_y: float, direction: int = 0) -> dict:
-        """Pick up + replace at new position (uses take_back + place)."""
-        self.take_back(item, old_x, old_y)
+        """Pick up + replace at new position (uses take_back + place).
+        Guards the place on take_back success: if the pickup fails (entity not
+        found), skip placing so we don't emit a silent MISS by placing with no
+        item in inventory."""
+        if not self.take_back(item, old_x, old_y):
+            return {'result': 'take_back_failed', 'name': item}
         return self.place(item, new_x, new_y, direction)
+
+    def revive_ghost(self, x: float, y: float, radius: float = 0.4) -> dict:
+        """Revive a single entity-ghost near (x, y) from the character's main
+        inventory. Applies the asm2->asm1 substitution when only the fallback
+        item is on hand (destroys the ghost + builds the substitute in place).
+        Returns {'result': REVIVED|SUBBED|MISS|NO_ITEM|REVIVE_FAIL|SUB_FAIL}.
+        """
+        body = (
+            f"local c=game.get_entity_by_unit_number({self.a.unit}); "
+            f"local s=c.surface; local inv=c.get_main_inventory(); "
+            f"local subs={_subs_lua()}; "
+            f"local g=s.find_entities_filtered{{name='entity-ghost', "
+            f"position={{{x}, {y}}}, radius={radius}}}[1]; "
+            "if not g then rcon.print('MISS'); return end; "
+            "local gn=g.ghost_name; local item=nil; "
+            "if inv.get_item_count(gn) >= 1 then item=gn "
+            "elseif subs[gn] and inv.get_item_count(subs[gn]) >= 1 then item=subs[gn] end; "
+            "if not item then rcon.print('NO_ITEM'); return end; "
+            "if item == gn then "
+            "  local rev = g.revive{raise_revive=true, return_item_request_proxy=false}; "
+            "  if rev then inv.remove{name=item, count=1}; rcon.print('REVIVED') "
+            "  else rcon.print('REVIVE_FAIL') end "
+            "else "
+            "  local pos, dir = g.position, g.direction; g.destroy(); "
+            "  local ok, e = pcall(function() return s.create_entity{name=item, "
+            "    position=pos, direction=dir, force=c.force, raise_built=true} end); "
+            "  if ok and e then inv.remove{name=item, count=1}; rcon.print('SUBBED') "
+            "  else rcon.print('SUB_FAIL') end "
+            "end"
+        )
+        out = self.a.rcon.command('/silent-command ' + body).strip()
+        return {'result': out}
+
+    def build_nearby_ghosts(self, radius: float = 10.0) -> dict:
+        """Revive every entity-ghost within `radius` tiles of the character,
+        using items from the character's main inventory. Applies the asm2->asm1
+        substitution when only the fallback item is on hand. One RCON round-trip.
+        Returns {'revived': int, 'subbed': int, 'skipped': int}.
+        """
+        body = (
+            f"local c=game.get_entity_by_unit_number({self.a.unit}); "
+            f"local s=c.surface; local inv=c.get_main_inventory(); "
+            f"local subs={_subs_lua()}; local p=c.position; "
+            f"local gs=s.find_entities_filtered{{name='entity-ghost', "
+            f"area={{{{p.x-{radius}, p.y-{radius}}}, {{p.x+{radius}, p.y+{radius}}}}}}}; "
+            "local rv,sb,sk = 0,0,0; "
+            "for _, g in ipairs(gs) do "
+            "  if g.valid then "
+            "    local gn=g.ghost_name; local item=nil; "
+            "    if inv.get_item_count(gn) >= 1 then item=gn "
+            "    elseif subs[gn] and inv.get_item_count(subs[gn]) >= 1 then item=subs[gn] end; "
+            "    if not item then sk=sk+1 "
+            "    elseif item == gn then "
+            "      local rev = g.revive{raise_revive=true, return_item_request_proxy=false}; "
+            "      if rev then inv.remove{name=item, count=1}; rv=rv+1 else sk=sk+1 end "
+            "    else "
+            "      local pos, dir = g.position, g.direction; g.destroy(); "
+            "      local ok, e = pcall(function() return s.create_entity{name=item, "
+            "        position=pos, direction=dir, force=c.force, raise_built=true} end); "
+            "      if ok and e then inv.remove{name=item, count=1}; sb=sb+1 else sk=sk+1 end "
+            "    end "
+            "  end "
+            "end; "
+            "rcon.print(string.format('%d|%d|%d', rv, sb, sk))"
+        )
+        out = self.a.rcon.command('/silent-command ' + body).strip()
+        parts = out.split('|')
+        if len(parts) != 3:
+            return {'revived': 0, 'subbed': 0, 'skipped': 0, 'raw': out}
+        return {'revived': int(parts[0]), 'subbed': int(parts[1]),
+                'skipped': int(parts[2])}

@@ -12,7 +12,7 @@ from typing import Dict, List, Tuple, Optional
 from agent.geometry import (
     DIR_NORTH, DIR_SOUTH, DIR_EAST, DIR_WEST, DIR_VECTORS,
     snap_2x2_center, snap_1x1_center, snap_3x3_center,
-    drill_drop_position, electric_drill_output_tile, direction_toward,
+    burner_drill_drop_position, electric_drill_output_tile, direction_toward,
     inserter_pickup_for_drill, inserter_pickup_for_furnace,
     SMALL_POLE_SUPPLY_AREA, SMALL_POLE_WIRE_DISTANCE,
 )
@@ -491,17 +491,44 @@ def plan_electric_drill_array(patch_center: Tuple[float, float],
     )
 
 
+@dataclass
+class LayoutResult:
+    """Outcome of execute_layout — how far the placement chain got.
+
+    `placed_n` counts entities placed successfully. `first_failure` is the index
+    into spec.placements that failed (None if the whole chain placed). `fueled`
+    says whether the fuel pass ran (it is SKIPPED once a placement fails, so a
+    chain that died at the drill doesn't waste MISS fuel calls on entities that
+    were never built). `results` holds each place() dict, up to and including the
+    failing one.
+    """
+    placed_n: int
+    results: List[dict] = field(default_factory=list)
+    first_failure: Optional[int] = None
+    failure_reason: str = ''
+    fueled: bool = False
+
+    @property
+    def ok(self) -> bool:
+        return self.first_failure is None
+
+
 def execute_layout(agent, spec: LineSpec, clear_blockers: bool = True,
-                   mine_resources: bool = True) -> list:
-    """Execute a LineSpec via the agent. Returns list of placement results.
+                   mine_resources: bool = True) -> LayoutResult:
+    """Execute a LineSpec via the agent. Returns a LayoutResult.
 
     `mine_resources=True` (default) lets the furnace/inserter/chest placements
     consume any ore tiles in their footprint — important on dense ore patches
     where the iron-smelt-line's furnace would otherwise fail placement.
     Drills are intentionally NOT mine_resources (they need to be on ore).
+
+    On the FIRST placement failure the chain short-circuits AND the fuel pass is
+    skipped — fueling entities that were never placed just burns MISS calls.
     """
     results = []
-    for p in spec.placements:
+    first_failure = None
+    failure_reason = ''
+    for i, p in enumerate(spec.placements):
         # Drills want resources under them; everything else can consume them
         mine = mine_resources and not p.item.endswith('-mining-drill')
         res = agent.placement.place(p.item, p.x, p.y, p.direction,
@@ -509,7 +536,22 @@ def execute_layout(agent, spec: LineSpec, clear_blockers: bool = True,
                                     mine_resources=mine)
         results.append(res)
         if not res.get('ok'):
+            first_failure = i
+            failure_reason = (res.get('error')
+                              or f"placement of {p.item} at ({p.x},{p.y}) failed")
             break
-    for entry in spec.fuel:
-        agent.fuel.fuel(*entry[:3], fuel_item=entry[3], want_amount=entry[4])
-    return results
+
+    fueled = False
+    if first_failure is None:
+        for entry in spec.fuel:
+            agent.fuel.fuel(*entry[:3], fuel_item=entry[3], want_amount=entry[4])
+        fueled = True
+
+    placed_n = first_failure if first_failure is not None else len(results)
+    return LayoutResult(
+        placed_n=placed_n,
+        results=results,
+        first_failure=first_failure,
+        failure_reason=failure_reason,
+        fueled=fueled,
+    )

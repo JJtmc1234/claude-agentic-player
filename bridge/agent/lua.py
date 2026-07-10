@@ -11,6 +11,10 @@ Use `string.find(e.name, '...')` instead.
 Use `table.concat({...}, '\\n')` AFTER all rcon.print calls — never
 embed `\\n` literally inside a single rcon.print, it doesn't display
 across lines in RCON output.
+
+`get_contents()` returns an array of {name, count} in Factorio 2.0 —
+iterate with `ipairs`, not `pairs`. `pairs` still works on the array but
+`ipairs` is the canonical/correct pattern for a sequence.
 """
 from __future__ import annotations
 

@@ -52,31 +52,50 @@ class Mining:
         return got
 
     def chop_trees(self, n: int, search_radius: int = 100) -> int:
-        """Find + chop n trees within search_radius. Returns count chopped."""
+        """Find + chop n trees within search_radius. Returns count chopped.
+
+        Trees we walk to but cannot reach (blocked path, island) are
+        blacklisted by position so the next 'nearest' query skips them —
+        otherwise the same unreachable tree gets re-selected forever.
+        """
         chopped = 0
+        blacklist = set()  # '%.1f,%.1f' position keys of unreachable trees
         for _ in range(n):
+            excl = "{" + ",".join(f"['{k}']=true" for k in blacklist) + "}"
             out = self.a.rcon.command(
                 "/silent-command "
                 f"local c = game.get_entity_by_unit_number({self.a.unit}); "
                 "local s = c.surface; "
+                f"local bl = {excl}; "
                 f"local trees = s.find_entities_filtered{{position=c.position, "
                 f"radius={search_radius}, type='tree'}}; "
                 "if #trees == 0 then rcon.print('NONE'); return end; "
                 "local best, bestd = nil, 1e9; "
                 "for _, t in ipairs(trees) do "
-                "  local dx = t.position.x - c.position.x; "
-                "  local dy = t.position.y - c.position.y; "
-                "  local d = dx * dx + dy * dy; "
-                "  if d < bestd then bestd = d; best = t end "
+                "  local key = string.format('%.1f,%.1f', t.position.x, t.position.y); "
+                "  if not bl[key] then "
+                "    local dx = t.position.x - c.position.x; "
+                "    local dy = t.position.y - c.position.y; "
+                "    local d = dx * dx + dy * dy; "
+                "    if d < bestd then bestd = d; best = t end "
+                "  end "
                 "end; "
+                "if not best then rcon.print('NONE'); return end; "
                 "rcon.print(string.format('%.1f,%.1f', best.position.x, best.position.y))"
             ).strip()
             if out == 'NONE' or ',' not in out:
                 break
             sx, sy = out.split(',')
             tx, ty = float(sx), float(sy)
-            self.a.movement.walk_to(tx, ty, 1.2)
+            wst = self.a.movement.walk_to(tx, ty, 1.2)
+            if wst.get('status') != 'completed':
+                # Couldn't reach the tree — blacklist so we don't retry it.
+                blacklist.add(out)
+                continue
             res = self.mine_at(tx, ty)
             if res.get('ok'):
                 chopped += 1
+            else:
+                # Reached but mining failed (still out of reach, gone) — skip it.
+                blacklist.add(out)
         return chopped

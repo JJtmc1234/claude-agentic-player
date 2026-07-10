@@ -1,8 +1,12 @@
 """Autonomous power-chain builder — implements POWER_CHAIN.md's
 discovery-driven procedure with can_place + fluidbox checks at every step.
 
-Untested against live server (written 2026-06-20 while JJ playing).
-Should work end-to-end IF the documented 2.0 constraints hold.
+WARNING: UNVALIDATED / EXPERIMENTAL. This module has never been run against a
+live server and is NOT covered by any automated test (unlike power_plan.py,
+which has test_power_plan.py). It was written 2026-06-20 as a first draft and
+its geometry/fluidbox assumptions have not been confirmed in-game. Treat every
+offset and snap in here as a hypothesis, not a verified layout. Do not rely on
+build_power_chain() succeeding until it has been exercised on a running game.
 
 Usage:
     from agent import Agent

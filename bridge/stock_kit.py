@@ -34,7 +34,7 @@ def drain_chests(a: Agent) -> dict:
         ('copper chest', -10.5, 54.5, 'copper-plate'),
     ]:
         in_chest = a.inventory.chest_count(x, y, item)
-        if in_chest > 0:
+        if in_chest and in_chest > 0:  # chest_count returns None on error
             res = a.inventory.take_from_chest(x, y, item, in_chest)
             grabbed[item] = res.get('moved', 0)
             print(f"  {label}: +{grabbed[item]} {item}")
@@ -46,7 +46,7 @@ def fetch_coal(a: Agent) -> int:
     print("=== fetch coal from far chest (54.5, -46.5) ===")
     a.movement.walk_chunked(54, -46, chunk_size=30, radius_final=3)
     in_chest = a.inventory.chest_count(54.5, -46.5, 'coal')
-    if in_chest > 5:
+    if in_chest and in_chest > 5:  # chest_count returns None on error
         take = min(in_chest, 30)
         res = a.inventory.take_from_chest(54.5, -46.5, 'coal', take)
         moved = res.get('moved', 0)

@@ -41,9 +41,51 @@ class Movement:
             r = radius_final if s == steps else max(2.0, chunk_size * 0.1)
             last = self.walk_to(wx, wy, r)
             if last.get('status') == 'error' and 'no path' in str(last.get('error', '')):
-                # Try one tile offset
-                last = self.walk_to(wx + 1, wy, r)
+                # Try up to 4 cardinal offsets; abort if none path.
+                recovered = False
+                for ox, oy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                    last = self.walk_to(wx + ox, wy + oy, r)
+                    if not (last.get('status') == 'error'
+                            and 'no path' in str(last.get('error', ''))):
+                        recovered = True
+                        break
+                if not recovered:
+                    return {
+                        'status': 'error',
+                        'error': f'no path to intermediate waypoint '
+                                 f'near ({wx:.1f},{wy:.1f})',
+                    }
         return last
+
+    def follow(self, target_unum: int, radius: float = 6.0,
+               timeout_s: int = 120, poll_s: float = 2.0) -> dict:
+        """Stay within `radius` tiles of the entity `target_unum`, re-pathing
+        toward its current position each poll. Used by the 'stay near JJ'
+        teammate loop.
+
+        Returns when the character is within `radius` ('completed'), the target
+        is gone ('error'), or `timeout_s` elapses ('timeout').
+        """
+        deadline = time.time() + timeout_s
+        while time.time() < deadline:
+            tp = self.a.silent(
+                f"local e = game.get_entity_by_unit_number({target_unum}); "
+                "if not e or not e.valid then rcon.print('NONE'); return end; "
+                "rcon.print(string.format('%.2f,%.2f', e.position.x, e.position.y))"
+            )
+            if tp == 'NONE' or ',' not in tp:
+                return {'status': 'error', 'error': 'target not found'}
+            sx, sy = tp.split(',')
+            tx, ty = float(sx), float(sy)
+            cx, cy = self.a.position()
+            dist = ((tx - cx) ** 2 + (ty - cy) ** 2) ** 0.5
+            if dist <= radius:
+                return {'status': 'completed', 'distance': dist}
+            # (Re)issue movement toward the target's current position.
+            self.a.call('walk_to', self.a.unit, tx, ty, radius)
+            time.sleep(poll_s)
+        self.a.call('cancel_walk', self.a.unit)
+        return {'status': 'timeout', 'after_s': timeout_s}
 
     def step_aside(self, distance: float = 3.0) -> dict:
         """Move the character a short distance off its current spot, used to
