@@ -4,6 +4,26 @@ Running record of major milestones. Newest at top.
 
 ---
 
+## 2026-07-11 — Project BRAIN v2: pivot to deterministic build-macros
+
+- The reactive Haiku per-action loop hit its ceiling (built non-functional spaghetti
+  overnight; couldn't self-follow a multi-step bootstrap). Hard walls were the MAP:
+  no power without water (nearest ~120 tiles), treeless desert (no wood -> no early
+  electric poles), resources ~200 tiles apart.
+- Pivoted to scripted build-macros (bridge/agent/build_macros.py). VALIDATED LIVE:
+  build_burner_mine (drills mining into chests) + build_smelt_from_chests (furnace
+  columns, exact geometry, burner-inserters since no power). steam_power/belt/lab/mall
+  still to finish live.
+- Fixes: craft research-gate (closed the un-researched-craft exploit), crafter inventory
+  defines (crafter_input/output), chat/ping reading, goal.txt live-injection; added
+  recipe_info/tech_status/place_miner/take_from/equip tools.
+- Decision: fresh normal map + scripted macros (JJ). Docs: summary.txt (full history),
+  PROJECT_BRAIN_ROADMAP.md; removed 30+ old RL/team-era docs; refreshed context.txt.
+  Security audit clean (no API key / RCON password in repo or git history). Playwright
+  MCP added (Edge) for browser tasks.
+
+---
+
 ## 2026-07-07 (night) — Nauvis bootstrap: red-sci semi-auto + GREEN unlocked
 
 - Fresh 2.1+SA nauvis start bootstrapped by the team (hand-fed semi-automation
