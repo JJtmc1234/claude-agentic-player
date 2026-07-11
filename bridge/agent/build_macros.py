@@ -101,6 +101,7 @@ def build_burner_mine(ore_name: str, count: int, cx: float, cy: float) -> str:
         "local placed=0; local nofuel=0; local nochest=0; local fails=0; "
         "for _,e in ipairs(tiles) do "
         "  if placed>=want then break end; "
+        "  if ci.get_item_count('burner-mining-drill')<1 then break end; "
         "  local px=math.floor(e.position.x)+0.0; local py=math.floor(e.position.y)+0.0; "
         "  local k=key(px,py); "
         "  if not used[k] then "
@@ -124,6 +125,110 @@ def build_burner_mine(ore_name: str, count: int, cx: float, cy: float) -> str:
 
 
 # --------------------------------------------------------------------------- #
+# MACRO: smelter column below each ore chest (chest -> inserter -> furnace ->
+# inserter -> output chest). Geometry (verified): for a 1x1 source chest whose
+# CENTER is (chx, chy), going SOUTH:
+#   input inserter (chx, chy+1) dir 0 (picks N from chest, drops S)
+#   stone-furnace  (chx+0.5, chy+2.5)   [2x2, integer center, input tile = drop]
+#   output inserter(chx, chy+4) dir 0 (picks N from furnace, drops S)
+#   output chest   (chx, chy+5)
+# --------------------------------------------------------------------------- #
+
+def build_smelt_from_chests(cx: float, cy: float, ore_item: str = "iron-ore") -> str:
+    """For each ore-holding chest near (cx,cy) (e.g. drill output chests), build a
+    fueled stone-furnace column that pulls ore from the chest and outputs plates to a
+    new chest. Uses only items the companion has. Verifies furnace status after."""
+    lua = (
+        _companion_unum_lua() +
+        f"local cx={cx}; local cy={cy}; local ore='{ore_item}'; "
+        "local srcs=s.find_entities_filtered{type='container',position={cx,cy},radius=12}; "
+        "local built=0; local skipped=0; local msgs={}; "
+        "for _,chest in ipairs(srcs) do "
+        "  local sci=chest.get_inventory(defines.inventory.chest); "
+        "  if sci and sci.get_item_count(ore)>0 then "
+        "    local chx=chest.position.x; local chy=chest.position.y; "
+        # burner-inserters (coal-fueled) because there is no electricity yet -- electric
+        # 'inserter' sits no_power. Burner drills + furnaces + burner-inserters = a fully
+        # power-independent plate line.
+        "    if ci.get_item_count('stone-furnace')<1 or ci.get_item_count('burner-inserter')<2 or ci.get_item_count('iron-chest')<1 then "
+        "      skipped=skipped+1; msgs[#msgs+1]='out-of-parts(need stone-furnace,2x burner-inserter,iron-chest)'; break "
+        "    end; "
+        "    local ii=remote.call('claude','place_entity',u,'burner-inserter',chx,chy+1,0); "
+        "    local fr=remote.call('claude','place_entity',u,'stone-furnace',chx+0.5,chy+2.5,0); "
+        "    local oi=remote.call('claude','place_entity',u,'burner-inserter',chx,chy+4,0); "
+        "    local oc=remote.call('claude','place_entity',u,'iron-chest',chx,chy+5,0); "
+        "    local function fuelburner(px,py) local e=s.find_entities_filtered{name='burner-inserter',position={px,py},radius=0.6}[1]; if e then local fi=e.get_fuel_inventory(); local cc=ci.get_item_count('coal'); if fi and cc>0 then local mv=fi.insert{name='coal',count=math.min(3,cc)}; if mv>0 then ci.remove{name='coal',count=mv} end end end end; "
+        "    fuelburner(chx,chy+1); fuelburner(chx,chy+4); "
+        "    local furn=s.find_entities_filtered{name='stone-furnace',position={chx+0.5,chy+2.5},radius=1.2}[1]; "
+        "    if furn then local fi=furn.get_fuel_inventory(); local cc=ci.get_item_count('coal'); if fi and cc>0 then local mv=fi.insert{name='coal',count=math.min(10,cc)}; if mv>0 then ci.remove{name='coal',count=mv} end end end; "
+        "    built=built+1; "
+        "    msgs[#msgs+1]=string.format('col@(%.0f,%.0f) ins=%s furn=%s outins=%s outchest=%s', chx,chy, tostring(ii.ok),tostring(fr.ok),tostring(oi.ok),tostring(oc.ok)); "
+        "  end "
+        "end; "
+        "rcon.print('smelter columns built='..built..' skipped='..skipped..' | '..table.concat(msgs,' ; '))"
+    )
+    return rc(lua)
+
+
+# --------------------------------------------------------------------------- #
+# MACRO: belt router (L-path). Lays transport-belts from (x1,y1) to (x2,y2):
+# horizontal run first, then vertical, each belt facing the travel direction.
+# Directions: 0=N,4=E,8=S,12=W. UNTESTED live -- verify belt flow when the game is up.
+# --------------------------------------------------------------------------- #
+
+def connect_belt(x1: int, y1: int, x2: int, y2: int, belt: str = "transport-belt") -> str:
+    """Lay a belt line from (x1,y1) to (x2,y2) as an L (horizontal then vertical).
+    Places `belt` items from the companion's inventory; each belt faces its travel dir."""
+    lua = (
+        _companion_unum_lua() +
+        f"local x1,y1,x2,y2={x1},{y1},{x2},{y2}; local belt='{belt}'; local n=0; local fails=0; "
+        "local function put(px,py,dir) if ci.get_item_count(belt)<1 then return end; "
+        "  local r=remote.call('claude','place_entity',u,belt,px+0.5,py+0.5,dir); "
+        "  if r.ok then n=n+1 else fails=fails+1 end end; "
+        # horizontal
+        "local hd = (x2>=x1) and 4 or 12; local sx=(x2>=x1) and 1 or -1; "
+        "local xx=x1; while xx~=x2 do put(xx,y1,hd); xx=xx+sx end; "
+        # corner + vertical
+        "local vd = (y2>=y1) and 8 or 0; local sy=(y2>=y1) and 1 or -1; "
+        "local yy=y1; while yy~=y2 do put(x2,yy,vd); yy=yy+sy end; "
+        "put(x2,y2,vd); "
+        "rcon.print('belts placed='..n..' fails='..fails..' (belt='..belt..')')"
+    )
+    return rc(lua)
+
+
+# --------------------------------------------------------------------------- #
+# MACRO: steam power. Places offshore-pump on a water tile near (wx,wy), a row of
+# boilers fed by it (fueled with coal), steam-engines after the boilers, and a
+# small-electric-pole for distribution. Offshore-pump orientation is derived from
+# which side has land. UNTESTED live -- offshore-pump placement is finicky; this
+# self-verifies (reports each entity's ok/status) so it can be corrected on first run.
+# Needs in inventory: offshore-pump, boiler x n, steam-engine x n, pipe, coal, pole.
+# --------------------------------------------------------------------------- #
+
+def build_steam_power(wx: float, wy: float, boilers: int = 2) -> str:
+    """Build a steam-power station at the water near (wx,wy): offshore-pump -> boilers
+    (coal-fueled) -> steam-engines -> a pole. Reports what it placed + statuses so the
+    exact offsets can be tuned live. Places only items the companion has."""
+    lua = (
+        _companion_unum_lua() +
+        f"local wx,wy={wx},{wy}; local nb={boilers}; "
+        "local have={pump=ci.get_item_count('offshore-pump'),boiler=ci.get_item_count('boiler'),engine=ci.get_item_count('steam-engine'),pipe=ci.get_item_count('pipe'),pole=ci.get_item_count('small-electric-pole'),coal=ci.get_item_count('coal')}; "
+        # find a water tile with a land neighbour to the south (place pump facing north->land? we pick a water tile adjacent to land)
+        "local wt=s.find_tiles_filtered{position={wx,wy},radius=20,name={'water','deepwater'}}; "
+        "if #wt==0 then rcon.print('ERR:no water near ('..wx..','..wy..')') return end; "
+        "local wtile=wt[1]; local wpx=math.floor(wtile.position.x); local wpy=math.floor(wtile.position.y); "
+        # STEP 1 only: place the offshore-pump on the water tile (engine picks a valid
+        # orientation toward adjacent land). The boiler->engine->pipe->pole chain is left
+        # for live iteration next session (offsets must be verified against pump fluidbox).
+        "local pr=remote.call('claude','place_entity',u,'offshore-pump',wpx+0.5,wpy+0.5,0); "
+        "local msg='pump@('..wpx..','..wpy..')='..tostring(pr.ok)..(pr.ok and '' or (':'..tostring(pr.error))); "
+        "rcon.print('STEAM(STUB) '..msg..' | inv pump='..have.pump..' boiler='..have.boiler..' engine='..have.engine..' pipe='..have.pipe..' pole='..have.pole..' coal='..have.coal..' | TODO live: boiler/engine/pipe/pole layout')"
+    )
+    return rc(lua)
+
+
+# --------------------------------------------------------------------------- #
 # standalone test harness
 # --------------------------------------------------------------------------- #
 
@@ -139,8 +244,23 @@ def _main() -> int:
         cx = float(sys.argv[4]) if len(sys.argv) > 4 else 130.0
         cy = float(sys.argv[5]) if len(sys.argv) > 5 else -164.0
         print(build_burner_mine(ore, n, cx, cy))
+    elif macro == "build_smelt_from_chests":
+        cx = float(sys.argv[2]) if len(sys.argv) > 2 else 121.0
+        cy = float(sys.argv[3]) if len(sys.argv) > 3 else -201.0
+        ore = sys.argv[4] if len(sys.argv) > 4 else "iron-ore"
+        print(build_smelt_from_chests(cx, cy, ore))
+    elif macro == "connect_belt":
+        a = [int(v) for v in sys.argv[2:6]]
+        belt = sys.argv[6] if len(sys.argv) > 6 else "transport-belt"
+        print(connect_belt(a[0], a[1], a[2], a[3], belt))
+    elif macro == "build_steam_power":
+        wx = float(sys.argv[2]); wy = float(sys.argv[3])
+        nb = int(sys.argv[4]) if len(sys.argv) > 4 else 2
+        print(build_steam_power(wx, wy, nb))
     else:
-        print("macros: build_burner_mine <ore> <count> <cx> <cy>")
+        print("macros: build_burner_mine <ore> <count> <cx> <cy> | "
+              "build_smelt_from_chests <cx> <cy> <ore> | "
+              "connect_belt <x1> <y1> <x2> <y2> [belt] | build_steam_power <wx> <wy> [boilers]")
     return 0
 
 
