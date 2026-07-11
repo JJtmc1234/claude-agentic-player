@@ -414,7 +414,9 @@ def act(action: dict, _depth: int = 0) -> None:
                 "  elseif ty=='gun' then inv=c.get_inventory(defines.inventory.character_guns) "
                 "  elseif ty=='ammo' then inv=c.get_inventory(defines.inventory.character_ammo) end; "
                 "  if inv then local mv=inv.insert{name=e.name,count=e.count}; if mv>0 then ci.remove{name=e.name,count=mv} end end "
-                "end end")
+                "end end; "
+                # pull the trigger: a script character won't fire unless we set shooting_state
+                "local ag=c.get_inventory(defines.inventory.character_guns); if ag and ag[1] and ag[1].valid_for_read then c.shooting_state={state=defines.shooting.shooting_enemies,position=c.position} end")
         elif t == "attack":
             # equip whatever we have, then approach the nearest enemy (character auto-fires if armed)
             act({"type": "equip"}, _depth + 1)
@@ -497,6 +499,14 @@ def run() -> int:
             if not state.get("alive"):
                 _heal_companion()   # died or unum went stale -> re-find/respawn near JJ
                 time.sleep(CYCLE_SECONDS); continue
+            if state.get("weapon_equipped"):
+                # keep the trigger pulled: script character auto-fires at in-range enemies only
+                # while shooting_state is set -> re-assert every cycle when armed
+                try:
+                    _rc(f"local c=game.get_entity_by_unit_number({_UNUM}); if c and c.valid then "
+                        "c.shooting_state={state=defines.shooting.shooting_enemies,position=c.position} end")
+                except Exception:  # noqa: BLE001
+                    pass
             fresh_chat = read_chat()
             # watch-and-complement: which entities near JJ are NEW since last cycle
             cur_ids = {e["id"]: e for e in state.get("near_jj", [])}
