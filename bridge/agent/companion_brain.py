@@ -43,8 +43,8 @@ INTENT_MODEL = "claude-opus-4-8"   # the "intelligence" — reasons about JJ's i
 CHAR_NAME = "companion"
 OWNER = "Factoriobrine"             # JJ's in-game handle
 OWNERS = (OWNER, "IdBaj98")
-CYCLE_SECONDS = 1.5                 # tight loop so it reacts to JJ quickly
-AUTONOMOUS_EVERY = 12              # cycles between autonomous ticks when JJ is quiet (~18s)
+CYCLE_SECONDS = 1.0                 # read chat + react EVERY SECOND (JJ wants snappy responses)
+AUTONOMOUS_EVERY = 15               # cycles between autonomous ticks when JJ is quiet (~15s)
 
 
 def _resolve_rcon_password() -> str:
@@ -98,10 +98,19 @@ for _,rn in ipairs({'iron-ore','copper-ore','coal','stone'}) do
   for _,e in ipairs(es) do local dx=e.position.x-c.position.x;local dy=e.position.y-c.position.y;local d=dx*dx+dy*dy;if d<bd then bd=d;best=e end end
   if best then res[rn]={x=math.floor(best.position.x),y=math.floor(best.position.y),dist=math.floor(bd^0.5)} end
 end
+-- nearest biter/threat
+local threat=nil
+local en=s.find_nearest_enemy{position=c.position,max_distance=70,force=c.force}
+if en and en.valid then threat={name=en.name,x=math.floor(en.position.x),y=math.floor(en.position.y),dist=math.floor(((en.position.x-c.position.x)^2+(en.position.y-c.position.y)^2)^0.5)} end
+-- do I have combat gear? (so the brain knows if it can fight or must retreat)
+local armed=(inv.get_item_count('submachine-gun')>0 or inv.get_item_count('pistol')>0) and (inv.get_item_count('firearm-magazine')>0 or inv.get_item_count('piercing-rounds-magazine')>0)
+local ag=c.get_inventory(defines.inventory.character_guns)
+local equipped_gun = ag and ag[1] and ag[1].valid_for_read or false
 rcon.print(helpers.table_to_json({
-  alive=true, x=math.floor(c.position.x), y=math.floor(c.position.y), inventory=items,
+  alive=true, x=math.floor(c.position.x), y=math.floor(c.position.y), health=math.floor(c.health or 0),
+  inventory=items,
   jj = jp and {x=math.floor(jp.x),y=math.floor(jp.y),holding=jjcursor,mining=jjmining,dist=jjdist} or nil,
-  near_jj=nearjj, nearest_resource=res,
+  near_jj=nearjj, nearest_resource=res, threat=threat, have_weapon=armed, weapon_equipped=equipped_gun,
 }))
 """
 
@@ -171,12 +180,25 @@ YOUR #1 JOB EVERY TURN IS JJ. Priority order:
 4. Only if JJ isn't directing -> advance the base yourself (the standing mission).
 
 Talk to JJ when it's useful: acknowledge his request, answer his questions, report a win,
-or a quick quip. Keep it to one short sentence. Don't narrate every micro-action; don't
-repeat yourself. If a request is genuinely ambiguous in a way that changes what you'd build,
-ask ONE short question — otherwise just pick and go.
+or a quick quip. Keep it to one short sentence. Don't narrate every micro-action; NEVER
+repeat the same line twice in a row (if you already said you're on it, stay quiet and act).
+If a request is genuinely ambiguous in a way that changes what you'd build, ask ONE short
+question — otherwise just pick and go.
+
+EXPLAIN YOUR REASONING: when you start something on your own or make a notable call, add a
+short WHY so JJ knows you're thinking ahead — e.g. "grabbing copper, we'll need it for
+circuits" or "walling the east first, that's where biters come from." One line, not a lecture.
+
+FETCH / COURIER: if JJ asks you to bring him something ("bring me 50 iron plates"), use the
+`fetch` action — you'll gather it and deliver it into his hands. Say you're on the way.
+
+COMBAT & SAFETY: `threat` is the nearest enemy; `have_weapon` / `weapon_equipped` say if you
+can fight. If a threat is close: WARN JJ ("biters east, ~30 tiles!"). If you're armed, `equip`
+then `attack` to fight alongside him or defend the base; if NOT armed or health is low,
+retreat toward JJ / the base — don't die. Build turret defenses when asked.
 
 RULES: CRAFT/PLACE real items only (never spawn). Only build unlocked recipes. No power yet
-means burner machines + burner inserters. Don't die to biters (retreat if low/threatened).
+means burner machines + burner inserters.
 
 YOU CAN DESIGN YOUR OWN ACTIONS. You are NOT limited to the presets — compose the PRIMITIVES
 below into a `plan` (an ordered list of steps) to build or do anything JJ asks. If you invent
@@ -200,6 +222,9 @@ Primitives (compose these freely):
   {"type":"take","x":N,"y":N,"item":"...","count":N,"slot":"output|fuel|chest"}     out of a machine there
   {"type":"craft","recipe":"...","count":N}
   {"type":"research","tech":"..."}
+  {"type":"fetch","item":"...","count":N}             gather item + deliver it to JJ
+  {"type":"equip"}                                     wear/wield any combat gear you have
+  {"type":"attack","x":N,"y":N}                        equip + go fight enemies at (x,y) (omit x,y = nearest)
 Presets (validated shortcuts — use when they fit):
   {"type":"build_mine","resource":"...","x":N,"y":N,"count":N}   automated drills+chests on ore there
   {"type":"build_smelt","x":N,"y":N,"resource":"..."}            fueled furnace columns by ore chests there
@@ -211,13 +236,16 @@ No power yet -> use BURNER inserters (electric ones sit dead). CRAFT/PLACE real 
 
 def decide(client, state: dict, fresh_chat: list, ping_is_new: bool, mission: str) -> dict:
     ctx = {
-        "companion": {"pos": [state.get("x"), state.get("y")], "inventory": state.get("inventory", {})},
+        "companion": {"pos": [state.get("x"), state.get("y")], "health": state.get("health"),
+                      "inventory": state.get("inventory", {}),
+                      "have_weapon": state.get("have_weapon"), "weapon_equipped": state.get("weapon_equipped")},
         "jj": state.get("jj"),
         "jj_new_builds": state.get("_new_builds", []),
         "owner_ping": _LAST_PING if ping_is_new else None,
         "recent_chat": list(_CHAT_RECENT),
         "new_chat_this_turn": fresh_chat,
         "nearest_resource": state.get("nearest_resource", {}),
+        "threat": state.get("threat"),
         "standing_mission": mission,
     }
     try:
@@ -244,15 +272,21 @@ _LAST_SAY = {"t": 0.0, "msg": ""}
 
 
 def say(message: str) -> None:
-    """Talk to JJ. Light throttle only (dedupe + 4s) — this is conversation, not spam-guard."""
+    """Talk to JJ, but never spam. Suppress near-duplicates (same opening) for 25s, and
+    keep a light 3s global throttle so it can converse without machine-gunning."""
     if not message:
         return
     now = time.time()
-    if message.strip() == _LAST_SAY["msg"] or now - _LAST_SAY["t"] < 4:
+    m = message.strip()
+    prev = _LAST_SAY["msg"]
+    # same opening phrase recently -> it's repeating itself; stay quiet
+    if prev and m[:18].lower() == prev[:18].lower() and now - _LAST_SAY["t"] < 25:
+        return
+    if now - _LAST_SAY["t"] < 3:
         return
     _LAST_SAY["t"] = now
-    _LAST_SAY["msg"] = message.strip()
-    esc = message.replace("\\", "\\\\").replace("'", "\\'")
+    _LAST_SAY["msg"] = m
+    esc = m.replace("\\", "\\\\").replace("'", "\\'")
     _rc(f"game.print('[Companion] {esc}',{{color={{r=0.35,g=0.7,b=1}}}})")
 
 
@@ -327,9 +361,11 @@ def act(action: dict, _depth: int = 0) -> None:
             _rc(f"remote.call('claude','walk_to',{_UNUM},{int(action['x'])},{int(action['y'])})")
         elif t == "mine":
             res = action.get("resource", "iron-ore")
-            _rc(f"local u={_UNUM}; local c=game.get_entity_by_unit_number(u); local s=c.surface; "
-                f"local es=s.find_entities_filtered{{name='{res}',position=c.position,radius=60}}; "
-                "local best,bd=nil,1e18; for _,e in ipairs(es) do local dx=e.position.x-c.position.x;local dy=e.position.y-c.position.y;local d=dx*dx+dy*dy;if d<bd then bd=d;best=e end end; "
+            _rc(f"local u={_UNUM}; local c=game.get_entity_by_unit_number(u); local s=c.surface; local res='{res}'; "
+                "local best,bd=nil,1e18; "
+                "for _,e in ipairs(s.find_entities_filtered{name=res,position=c.position,radius=250}) do local dx=e.position.x-c.position.x;local dy=e.position.y-c.position.y;local d=dx*dx+dy*dy;if d<bd then bd=d;best=e end end; "
+                # coal/stone also come from rocks (simple-entity) — smack the nearest rock if no ore patch is near
+                "if (not best or bd>60*60) and (res=='coal' or res=='stone') then for _,e in ipairs(s.find_entities_filtered{type='simple-entity',position=c.position,radius=90}) do local dx=e.position.x-c.position.x;local dy=e.position.y-c.position.y;local d=dx*dx+dy*dy;if d<bd then bd=d;best=e end end end; "
                 "if best then local r=remote.call('claude','start_mining',u,best.position.x,best.position.y); if not(r and r.ok) then remote.call('claude','walk_to',u,best.position.x,best.position.y) end end")
         elif t == "place":
             _prim_place(action["item"], action["x"], action["y"], action.get("dir", 0))
@@ -344,6 +380,30 @@ def act(action: dict, _depth: int = 0) -> None:
             rec = action.get("recipe"); cnt = int(action.get("count", 1))
             _rc(f"local u={_UNUM}; local c=game.get_entity_by_unit_number(u); local fr=c.force.recipes['{rec}']; "
                 f"if fr and fr.enabled then remote.call('claude','craft',u,'{rec}',{cnt}) end")
+        elif t == "fetch":
+            # courier: top up `item` from nearby base chests, walk to JJ, deliver into his inventory
+            item = action.get("item", ""); want = int(action.get("count", 10))
+            _rc(f"local u={_UNUM}; local c=game.get_entity_by_unit_number(u); local s=c.surface; local ci=c.get_main_inventory(); "
+                f"local item='{item}'; local want={want}; local have=ci.get_item_count(item); "
+                "if have<want then for _,ch in ipairs(s.find_entities_filtered{type={'container','logistic-container'},position=c.position,radius=40}) do "
+                "  local cin=ch.get_inventory(defines.inventory.chest); if cin then local av=cin.get_item_count(item); local tk=math.min(want-have,av); if tk>0 then local mv=ci.insert{name=item,count=tk}; if mv>0 then cin.remove{name=item,count=mv}; have=have+mv end end end; if have>=want then break end end end; "
+                "local jj=game.players['Factoriobrine']; local jp=jj and ((jj.character and jj.character.position) or jj.position); "
+                "if jp then remote.call('claude','walk_to',u,jp.x,jp.y); if jj.character and ((jp.x-c.position.x)^2+(jp.y-c.position.y)^2)<100 then local give=math.min(ci.get_item_count(item),want); if give>0 then local mv=jj.character.get_main_inventory().insert{name=item,count=give}; if mv>0 then ci.remove{name=item,count=mv} end end end end")
+        elif t == "equip":
+            _rc(f"local u={_UNUM}; local c=game.get_entity_by_unit_number(u); local ci=c.get_main_inventory(); "
+                "local function eq(it) local h=ci.get_item_count(it); if h<=0 then return end; local p=prototypes.item[it]; local ty=p and p.type; local inv; "
+                "if ty=='armor' then inv=c.get_inventory(defines.inventory.character_armor) elseif ty=='gun' then inv=c.get_inventory(defines.inventory.character_guns) elseif ty=='ammo' then inv=c.get_inventory(defines.inventory.character_ammo) else return end; "
+                "if inv then local mv=inv.insert{name=it,count=h}; if mv>0 then ci.remove{name=it,count=mv} end end end; "
+                "for _,it in ipairs({'power-armor','modular-armor','heavy-armor','light-armor','submachine-gun','pistol','piercing-rounds-magazine','firearm-magazine'}) do eq(it) end")
+        elif t == "attack":
+            # equip whatever we have, then approach the nearest enemy (character auto-fires if armed)
+            act({"type": "equip"}, _depth + 1)
+            tx = action.get("x"); ty = action.get("y")
+            if tx is not None and ty is not None:
+                _rc(f"remote.call('claude','walk_to',{_UNUM},{int(tx)},{int(ty)})")
+            else:
+                _rc(f"local u={_UNUM}; local c=game.get_entity_by_unit_number(u); local en=c.surface.find_nearest_enemy{{position=c.position,max_distance=50,force=c.force}}; "
+                    "if en and en.valid then remote.call('claude','walk_to',u,en.position.x,en.position.y) end")
         elif t == "build_mine":
             bm.build_burner_mine(action.get("resource", "iron-ore"), int(action.get("count", 3)),
                                  float(action["x"]), float(action["y"]))
