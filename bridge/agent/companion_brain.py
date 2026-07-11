@@ -178,17 +178,34 @@ ask ONE short question — otherwise just pick and go.
 RULES: CRAFT/PLACE real items only (never spawn). Only build unlocked recipes. No power yet
 means burner machines + burner inserters. Don't die to biters (retreat if low/threatened).
 
+YOU CAN DESIGN YOUR OWN ACTIONS. You are NOT limited to the presets — compose the PRIMITIVES
+below into a `plan` (an ordered list of steps) to build or do anything JJ asks. If you invent
+a useful multi-step action, `remember` it with a name so you can `recall` it later — that's
+how you get smarter over time. Think for yourself; the presets are a starting kit, not a cage.
+
 OUTPUT: reply with ONLY a JSON object, no prose:
 {"reply": "<one short line to JJ, or null>", "action": {"type": "...", ...}}
-action types:
-  {"type":"goto","x":N,"y":N}                      walk to a spot (a ping, or to JJ)
-  {"type":"mine","resource":"iron-ore|copper-ore|coal|stone"}   mine nearest of a resource
-  {"type":"build_mine","resource":"...","x":N,"y":N,"count":N}  automated drills on ore there
-  {"type":"build_smelt","x":N,"y":N,"resource":"..."}           furnace columns by ore chests there
+
+Composition:
+  {"type":"plan","steps":[<action>, <action>, ...]}   run steps in order (design a custom action)
+  {"type":"remember","name":"wall_segment","steps":[...]}   save a named custom action for reuse
+  {"type":"recall","name":"wall_segment"}             run a previously-remembered action
+
+Primitives (compose these freely):
+  {"type":"goto","x":N,"y":N}                         walk to a spot
+  {"type":"mine","resource":"iron-ore|copper-ore|coal|stone"}
+  {"type":"place","item":"...","x":N,"y":N,"dir":0|4|8|12}   place an item from inventory (dir = for
+                                                       inserters the side it PICKS FROM; N=0 E=4 S=8 W=12)
+  {"type":"insert","x":N,"y":N,"item":"...","count":N,"slot":"fuel|input|chest"}   into a machine there
+  {"type":"take","x":N,"y":N,"item":"...","count":N,"slot":"output|fuel|chest"}     out of a machine there
   {"type":"craft","recipe":"...","count":N}
-  {"type":"say"}                                   just talk (reply only, no physical action)
-  {"type":"idle"}                                  nothing useful right now
-Pick the SINGLE best action. Prefer acting on JJ's ping/request over anything else.
+  {"type":"research","tech":"..."}
+Presets (validated shortcuts — use when they fit):
+  {"type":"build_mine","resource":"...","x":N,"y":N,"count":N}   automated drills+chests on ore there
+  {"type":"build_smelt","x":N,"y":N,"resource":"..."}            fueled furnace columns by ore chests there
+  {"type":"say"} / {"type":"idle"}
+Pick the SINGLE best action (a `plan` counts as one). Prefer JJ's ping/request over anything else.
+No power yet -> use BURNER inserters (electric ones sit dead). CRAFT/PLACE real items, never spawn.
 """
 
 
@@ -239,10 +256,74 @@ def say(message: str) -> None:
     _rc(f"game.print('[Companion] {esc}',{{color={{r=0.35,g=0.7,b=1}}}})")
 
 
-def act(action: dict) -> None:
+# --- learned actions: the companion can invent + name custom actions and reuse them ---
+_LEARNED_FILE = _HERE / "learned_actions.json"
+_LEARNED: dict = {}
+
+
+def _load_learned() -> None:
+    global _LEARNED
+    try:
+        if _LEARNED_FILE.exists():
+            _LEARNED = json.loads(_LEARNED_FILE.read_text(encoding="utf-8"))
+    except Exception:  # noqa: BLE001
+        _LEARNED = {}
+
+
+def _save_learned() -> None:
+    try:
+        _LEARNED_FILE.write_text(json.dumps(_LEARNED, indent=1), encoding="utf-8")
+    except Exception:  # noqa: BLE001
+        pass
+
+
+# --- safe primitives (real items only; crafter-inventory + character-exclusion aware) ---
+def _prim_place(item: str, x, y, dir=0) -> None:
+    _rc(f"remote.call('claude','place_entity',{_UNUM},'{item}',{float(x)},{float(y)},{int(dir)})")
+
+
+def _prim_move_inv(x, y, item, count, slot, take: bool) -> None:
+    if take:
+        inv_expr = {"output": "ent.get_output_inventory()", "fuel": "ent.get_fuel_inventory()",
+                    "chest": "ent.get_inventory(defines.inventory.chest)"}.get(slot, "ent.get_output_inventory()")
+    else:
+        inv_expr = {"fuel": "ent.get_fuel_inventory()",
+                    "input": "ent.get_inventory(defines.inventory.crafter_input or defines.inventory.furnace_source or defines.inventory.lab_input or 2)",
+                    "chest": "ent.get_inventory(defines.inventory.chest)"}.get(slot, "ent.get_inventory(defines.inventory.chest)")
+    lua = (
+        f"local u={_UNUM}; local c=game.get_entity_by_unit_number(u); local s=c.surface; local ci=c.get_main_inventory(); "
+        f"local cand=s.find_entities_filtered{{position={{{float(x)},{float(y)}}},radius=0.7}}; local ent=nil; "
+        "for _,e in ipairs(cand) do if e.valid and e.type~='character' and e.get_inventory then ent=e break end end; "
+        "if not ent then return end; "
+        f"local inv={inv_expr}; if not inv then return end; ")
+    if take:
+        lua += (f"local avail=inv.get_item_count('{item}'); local w=math.min({int(count)},avail); if w<=0 then return end; "
+                f"local mv=ci.insert{{name='{item}',count=w}}; if mv>0 then inv.remove{{name='{item}',count=mv}} end")
+    else:
+        lua += (f"local have=ci.get_item_count('{item}'); local w=math.min({int(count)},have); if w<=0 then return end; "
+                f"local mv=inv.insert{{name='{item}',count=w}}; if mv>0 then ci.remove{{name='{item}',count=mv}} end")
+    _rc(lua)
+
+
+def act(action: dict, _depth: int = 0) -> None:
+    if not isinstance(action, dict) or _depth > 3:
+        return
     t = action.get("type", "idle")
     try:
-        if t == "goto":
+        if t == "plan":
+            for step in (action.get("steps") or [])[:24]:
+                act(step, _depth + 1)
+        elif t == "remember":
+            name = str(action.get("name", "")).strip()
+            steps = action.get("steps") or []
+            if name and steps:
+                _LEARNED[name] = steps; _save_learned()
+                print(f"[learned] saved custom action '{name}' ({len(steps)} steps)", flush=True)
+        elif t == "recall":
+            steps = _LEARNED.get(str(action.get("name", "")).strip())
+            if steps:
+                act({"type": "plan", "steps": steps}, _depth + 1)
+        elif t == "goto":
             _rc(f"remote.call('claude','walk_to',{_UNUM},{int(action['x'])},{int(action['y'])})")
         elif t == "mine":
             res = action.get("resource", "iron-ore")
@@ -250,16 +331,25 @@ def act(action: dict) -> None:
                 f"local es=s.find_entities_filtered{{name='{res}',position=c.position,radius=60}}; "
                 "local best,bd=nil,1e18; for _,e in ipairs(es) do local dx=e.position.x-c.position.x;local dy=e.position.y-c.position.y;local d=dx*dx+dy*dy;if d<bd then bd=d;best=e end end; "
                 "if best then local r=remote.call('claude','start_mining',u,best.position.x,best.position.y); if not(r and r.ok) then remote.call('claude','walk_to',u,best.position.x,best.position.y) end end")
+        elif t == "place":
+            _prim_place(action["item"], action["x"], action["y"], action.get("dir", 0))
+        elif t == "insert":
+            _prim_move_inv(action["x"], action["y"], action["item"], action.get("count", 5), action.get("slot", "chest"), take=False)
+        elif t == "take":
+            _prim_move_inv(action["x"], action["y"], action["item"], action.get("count", 50), action.get("slot", "output"), take=True)
+        elif t == "research":
+            tech = action.get("tech", "")
+            _rc(f"local ok=game.forces.player.add_research('{tech}'); rcon.print('research {tech} -> '..tostring(ok))")
+        elif t == "craft":
+            rec = action.get("recipe"); cnt = int(action.get("count", 1))
+            _rc(f"local u={_UNUM}; local c=game.get_entity_by_unit_number(u); local fr=c.force.recipes['{rec}']; "
+                f"if fr and fr.enabled then remote.call('claude','craft',u,'{rec}',{cnt}) end")
         elif t == "build_mine":
             bm.build_burner_mine(action.get("resource", "iron-ore"), int(action.get("count", 3)),
                                  float(action["x"]), float(action["y"]))
         elif t == "build_smelt":
             bm.build_smelt_from_chests(float(action["x"]), float(action["y"]),
                                        action.get("resource", "iron-ore"))
-        elif t == "craft":
-            rec = action.get("recipe"); cnt = int(action.get("count", 1))
-            _rc(f"local u={_UNUM}; local c=game.get_entity_by_unit_number(u); local fr=c.force.recipes['{rec}']; "
-                f"if fr and fr.enabled then remote.call('claude','craft',u,'{rec}',{cnt}) end")
         # 'say' and 'idle' need no physical action
     except Exception as e:  # noqa: BLE001
         print(f"[act] {t} error: {e}", flush=True)
@@ -332,6 +422,7 @@ def main() -> int:
     os.environ["FACTORIO_RCON_PASSWORD"] = _resolve_rcon_password()
     _RCON = RconClient(); _RCON.connect()
     bm._RCON = _RCON  # share the connection so build-macros run on it
+    _load_learned()   # restore any custom actions the companion invented before
     _UNUM = _resolve_unum()
     return run()
 
