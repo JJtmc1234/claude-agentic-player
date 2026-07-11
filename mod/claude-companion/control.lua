@@ -928,6 +928,13 @@ local function craft(character_unum, recipe_name, count)
   if not c or not c.valid then return { ok = false, error = 'no character' } end
   local recipe = prototypes.recipe[recipe_name]
   if not recipe then return { ok = false, error = 'no recipe ' .. recipe_name } end
+  -- Respect research: our custom craft loop (process_craft_jobs) bypasses the engine's
+  -- research gate, so a locked recipe would otherwise craft freely (= cheating). Enforce
+  -- force-level unlock here. force.recipes[name].enabled is true only once researched.
+  local force_recipe = c.force.recipes[recipe_name]
+  if not force_recipe or not force_recipe.enabled then
+    return { ok = false, error = 'recipe ' .. recipe_name .. ' is not unlocked yet (research it first)' }
+  end
   if not is_hand_craftable(recipe) then
     return { ok = false, error = 'recipe categories [' .. table.concat(recipe_categories(recipe), ',') .. '] not hand-craftable (need a machine)' }
   end
