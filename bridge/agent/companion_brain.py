@@ -102,10 +102,14 @@ end
 local threat=nil
 local en=s.find_nearest_enemy{position=c.position,max_distance=70,force=c.force}
 if en and en.valid then threat={name=en.name,x=math.floor(en.position.x),y=math.floor(en.position.y),dist=math.floor(((en.position.x-c.position.x)^2+(en.position.y-c.position.y)^2)^0.5)} end
--- do I have combat gear? (so the brain knows if it can fight or must retreat)
-local armed=(inv.get_item_count('submachine-gun')>0 or inv.get_item_count('pistol')>0) and (inv.get_item_count('firearm-magazine')>0 or inv.get_item_count('piercing-rounds-magazine')>0)
+-- do I have combat gear? scan for ANY gun + ANY ammo (works for flamethrower, SMG, etc.)
+local hasgun,hasammo=false,false
+for _,e in pairs(inv.get_contents()) do if type(e)=='table' and e.name then local p=prototypes.item[e.name]; if p then if p.type=='gun' then hasgun=true elseif p.type=='ammo' then hasammo=true end end end end
 local ag=c.get_inventory(defines.inventory.character_guns)
 local equipped_gun = ag and ag[1] and ag[1].valid_for_read or false
+local aa=c.get_inventory(defines.inventory.character_ammo)
+local equipped_ammo = aa and aa[1] and aa[1].valid_for_read or false
+local armed = (hasgun and hasammo) or (equipped_gun and equipped_ammo)
 rcon.print(helpers.table_to_json({
   alive=true, x=math.floor(c.position.x), y=math.floor(c.position.y), health=math.floor(c.health or 0),
   inventory=items,
@@ -401,11 +405,16 @@ def act(action: dict, _depth: int = 0) -> None:
                 "local jj=game.players['Factoriobrine']; local jp=jj and ((jj.character and jj.character.position) or jj.position); "
                 "if jp then remote.call('claude','walk_to',u,jp.x,jp.y); if jj.character and ((jp.x-c.position.x)^2+(jp.y-c.position.y)^2)<100 then local give=math.min(ci.get_item_count(item),want); if give>0 then local mv=jj.character.get_main_inventory().insert{name=item,count=give}; if mv>0 then ci.remove{name=item,count=mv} end end end end")
         elif t == "equip":
+            # auto-wield ANY armor/gun/ammo in inventory (so a flamethrower, SMG, whatever JJ
+            # hands over just works) — decide the slot by the item's prototype type
             _rc(f"local u={_UNUM}; local c=game.get_entity_by_unit_number(u); local ci=c.get_main_inventory(); "
-                "local function eq(it) local h=ci.get_item_count(it); if h<=0 then return end; local p=prototypes.item[it]; local ty=p and p.type; local inv; "
-                "if ty=='armor' then inv=c.get_inventory(defines.inventory.character_armor) elseif ty=='gun' then inv=c.get_inventory(defines.inventory.character_guns) elseif ty=='ammo' then inv=c.get_inventory(defines.inventory.character_ammo) else return end; "
-                "if inv then local mv=inv.insert{name=it,count=h}; if mv>0 then ci.remove{name=it,count=mv} end end end; "
-                "for _,it in ipairs({'power-armor','modular-armor','heavy-armor','light-armor','submachine-gun','pistol','piercing-rounds-magazine','firearm-magazine'}) do eq(it) end")
+                "for _,e in pairs(ci.get_contents()) do if type(e)=='table' and e.name then "
+                "  local p=prototypes.item[e.name]; local ty=p and p.type; local inv=nil; "
+                "  if ty=='armor' then inv=c.get_inventory(defines.inventory.character_armor) "
+                "  elseif ty=='gun' then inv=c.get_inventory(defines.inventory.character_guns) "
+                "  elseif ty=='ammo' then inv=c.get_inventory(defines.inventory.character_ammo) end; "
+                "  if inv then local mv=inv.insert{name=e.name,count=e.count}; if mv>0 then ci.remove{name=e.name,count=mv} end end "
+                "end end")
         elif t == "attack":
             # equip whatever we have, then approach the nearest enemy (character auto-fires if armed)
             act({"type": "equip"}, _depth + 1)
