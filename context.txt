@@ -6,9 +6,39 @@ changed, version bump). Paired with what-im-doing.txt (live state).
 
 ## Project goal
 
-Claude controls a Factorio character via RCON + a custom mod, eventually
-playing as a co-op teammate. Current focus: RL training of factory layouts
-in a fixed 8x8 walled "arena" (see PLAN_RL.txt, PLAN_CURRICULUM.txt).
+Claude controls a Factorio character via RCON + a custom mod, playing as a co-op
+teammate alongside JJ. CURRENT FOCUS (2026-07): **Project BRAIN** — an autonomous
+brain driving the "companion" character. See `summary.txt` (full history) and
+`PROJECT_BRAIN_ROADMAP.md` (plan). Runs on JJ's CLIENT-HOSTED game (localhost RCON),
+Factorio 2.0 + Space Exploration.
+
+Architecture (BRAIN v2): Opus 4.8 planner (strategy/intent) + deterministic scripted
+build-macros (`bridge/agent/build_macros.py`) for reliable construction + Haiku 4.5 for
+fast reactions. This REPLACED the earlier flaky reactive per-action loop (which built
+non-functional spaghetti) and, before that, the RL-arena-training era below.
+
+NOTE: the RL pipeline (bridge/rl/, arena training) and the multi-agent "team" era are
+DORMANT/superseded. Much of the RL detail below is historical reference only.
+
+## Project BRAIN — key files & hard-won gotchas (current)
+
+- `bridge/agent/brain.py` — the planner/executor brain (perceive→plan→act loop).
+- `bridge/agent/build_macros.py` — deterministic build macros (build_burner_mine +
+  build_smelt_from_chests VALIDATED; steam_power/connect_belt/lab/mall still to finish live).
+- `bridge/agent/goal.txt` — standing mission, injected into the executor every cycle.
+- `bridge/_exec.py "<lua>"` — quick one-off RCON Lua probe (opens its own connection).
+
+GOTCHAS (verified live, easy to forget):
+- This modpack has NO `furnace_source`/`furnace_result` inventory defines — crafters are
+  unified: input=`crafter_input`(2), output=`crafter_output`(3). Use `get_output_inventory()`
+  / `get_fuel_inventory()` helpers. `get_inventory(nil)` THROWS.
+- The mod's custom craft loop does NOT fire `craft-item` research triggers (smelting DOES).
+  Complete genuinely-earned trigger techs via RCON as a workaround; real fix needs mod reload.
+- No electricity yet → use BURNER inserters; electric `inserter` sits `no_power`.
+- FIRST RCON command after the game (re)starts is swallowed by Factorio — send a warmup
+  command first, then the real one.
+- Runtime mod check: `remote.interfaces['claude']~=nil` and `script.active_mods['claude-companion']`
+  (NOT `game.active_mods`). Mods load only at game startup — can't enable via RCON.
 
 ## Layout
 
