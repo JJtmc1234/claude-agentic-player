@@ -505,8 +505,8 @@ def run() -> int:
         except Exception as e:  # noqa: BLE001
             msg = str(e).lower()
             print(f"[loop] error: {e}", flush=True)
-            # server restarts drop RCON -> reconnect instead of erroring forever
-            if any(k in msg for k in ("connection", "closed", "refused", "reset", "broken", "timed out", "socket")):
+            # server restarts / dropped sockets -> reconnect instead of erroring forever
+            if any(k in msg for k in ("connect", "closed", "refused", "reset", "broken", "timed out", "socket", "pipe", "eof")):
                 time.sleep(2)
                 _reconnect()
         cyc += 1
