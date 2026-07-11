@@ -38,15 +38,15 @@ from rcon_client import RconClient  # noqa: E402
 # Two-tier for smart AND fast: a low-latency model drives moment-to-moment
 # actions on a tight loop; an occasional Opus planner sets strategy (stub below,
 # wired up when we go live). JJ wanted it faster -> Haiku 4.5 for the executor.
-# Executor: for unattended OVERNIGHT base-building, coherent multi-step reasoning matters
-# more than millisecond reactions, so use Sonnet 5 (follows the priority list + composes
-# the build tools far better than Haiku, which just wandered). Revert to claude-haiku-4-5
-# for fast real-time co-op sessions.
-FAST_MODEL = "claude-sonnet-5"     # coherent executor for autonomous building
+# Executor: Haiku 4.5 executes these tools reliably (Sonnet 5 emitted malformed/partial
+# tool-call JSON here -- truncated/incomplete args failing validation). Haiku is proven,
+# cheap, and terse. The capability boost comes from the TOOLS (place_miner, tech_status),
+# not the model. Keep max_tokens generous so tool-call JSON is never truncated.
+FAST_MODEL = "claude-haiku-4-5"    # reliable, terse executor
 PLANNER_MODEL = "claude-opus-4-8"  # smart periodic strategy (see run_planner note)
 CHAR_NAME = "companion"            # the brain's OWN teammate character (NOT JJ's)
 OWNER_PLAYER = "Factoriobrine"     # JJ -- spawn the teammate next to him + help him
-CYCLE_SECONDS = 2.5                # give each action time to land (and cut token burn)
+CYCLE_SECONDS = 2.0                # give each action time to land
 PLAN_EVERY = 20                    # executor cycles between Opus planner re-strategizing (~50s)
 
 
@@ -678,8 +678,12 @@ def run() -> int:
             _update_marker()        # keep the map marker following companion
         if cyc % PLAN_EVERY == 0:
             _replan(client, state)  # smart tier: refresh strategy periodically
+        # Inject the raw goal.txt mission EVERY cycle (not just via the periodic planner),
+        # so JJ's live steering reaches the executor within one cycle regardless of planner
+        # cadence. The planner's _current_goal is the tactical refinement on top.
         user = (
-            "Current goal: " + _current_goal +
+            "STANDING MISSION from JJ (authoritative -- follow this):\n" + _mission() +
+            "\n\nCurrent tactical goal: " + _current_goal +
             "\nGame state (JSON):\n" + json.dumps(state) +
             "\n\nBuild AT your base anchor; use your existing `structures` (fuel/feed them) "
             "before placing new ones; NEVER ask JJ anything. Pick the single best next "
@@ -689,7 +693,7 @@ def run() -> int:
             # Fast executor: Haiku, no extended thinking, small max_tokens = low latency.
             runner = client.beta.messages.tool_runner(
                 model=FAST_MODEL,
-                max_tokens=800,
+                max_tokens=2048,  # generous so tool-call JSON is never truncated mid-args
                 system=system,
                 tools=TOOLS,
                 messages=[{"role": "user", "content": user}],

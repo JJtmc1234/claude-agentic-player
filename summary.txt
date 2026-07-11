@@ -1,0 +1,125 @@
+SUMMARY — Claude Agentic Player: from the Manager/agentic team through Project BRAIN
+====================================================================================
+(Everything since the manager/agentic team was stood up. Maintained by the manager.
+Last updated: 2026-07-11 morning.)
+
+WHAT THIS PROJECT IS
+--------------------
+Make Claude join JJ's Factorio game and control a teammate character in co-op — a real
+helper JJ can delegate sub-tasks to while he plays. Target mods: Space Age, Krastorio 2,
+Space Exploration. Currently running on JJ's client-hosted game (Factorio 2.0 + Space
+Exploration), driven over RCON via the `claude-companion` mod's remote interface.
+
+NAMED SUBPROJECT — "PROJECT BRAIN" (named by JJ, 2026-07-11): the Claude two-tier
+planner/executor brain that autonomously drives the in-game "companion" teammate
+(bridge/agent/brain.py). This is the current focus and the successor to the hardcoded
+Manager/agentic-team loops. Full detail in Phase 3 below.
+
+
+PHASE 1 — THE AGENTIC TEAM / "MANAGER" ERA
+------------------------------------------
+- A multi-character team, each a named character controlled via the mod: miner, builder,
+  scout, courier — coordinated by a "Manager" loop that assigned sub-tasks.
+- Ran on the SE modpack. Real playthrough: built smelting/science, pushed research toward
+  the rocket / "North Star" (rocket-silo -> space platform -> Vulcanus), managed logistics.
+- Recurring crises (see git log): biters repeatedly breached the base, destroyed steam
+  engines, poles, and all 5 labs (research halted); characters died at the undefended (0,0)
+  respawn ("death trap") and had to be reconnected via connect_named. Power grid fragmented
+  when biters killed engines; fixed by rebuilding the generator->machine pole chain.
+- LESSON that drove everything after: the team was brittle. The behavior was mostly
+  hardcoded Python loops (leashed miner, ghost builder, scripted refuel). JJ's verdict:
+  "They really aren't that intelligent in-game." That motivated Project BRAIN.
+
+
+PHASE 2 — INFRASTRUCTURE & MOD WORK
+-----------------------------------
+- Connected the agents to the game JJ HOSTS from his own Factorio client (localhost RCON)
+  instead of the headless server — via Factorio 2.0's hidden local-rcon-socket /
+  local-rcon-password (Ctrl+Alt+Settings -> "The rest").
+- Made the `claude-companion` mod work across Factorio 2.0 (SE) and 2.1 (Space Age):
+  recipe.category (2.0) vs recipe.categories array (2.1) handled version-agnostically with
+  pcall probes. Published to the mod portal (0.12.3 for 2.0 clients, 0.12.4 for 2.1) so
+  JJ's friend could join.
+- Added nametags over characters (rendering.draw_text) so JJ can tell who's who.
+- Code-review batch: fixed ~7 real bugs + added features across the bridge/agent helpers
+  (placement, inventory, movement, geometry, layouts, power) and committed them.
+- control.lua (~2500 lines) is a known too-big file; splitting it is its own future task.
+
+
+PHASE 3 — PROJECT BRAIN (the planner/executor brain)  [JJ named it "Project BRAIN"]
+----------------------------------------------------------------------------------
+Goal: replace brittle hardcoded loops with a genuinely intelligent agent. Architecture
+(bridge/agent/brain.py): a TWO-TIER Claude brain driving one teammate character named
+"companion", separate from JJ's character.
+  - PLANNER tier: Opus 4.8, runs periodically (~every 20 cycles), reads live game state +
+    the standing mission and sets a concrete tactical goal.
+  - EXECUTOR tier: a fast model on a tight loop (~2s), given the state + tools, takes the
+    next physical action. (Started Haiku 4.5; tried Sonnet 5 for coherence but it emitted
+    malformed tool calls, so reverted to Haiku 4.5 + max_tokens 2048.)
+  - Steering: JJ writes bridge/agent/goal.txt; the raw mission is now injected into the
+    executor EVERY cycle (so edits take effect immediately, not only when the planner runs).
+  - Tools: walk_to, mine_nearest, craft, place, build_ghosts, insert_into, take_from
+    (hand-extract products — no inserter needed), equip, place_miner (automated
+    burner-drill + chest), recipe_info + tech_status (read the gated tech tree / trigger
+    techs), research, say (rate-limited, question-blocked, emergency bypass), look.
+  - Enabled by an Anthropic API key (stored via setx ANTHROPIC_API_KEY). Cost ~$2-5/hr.
+
+
+PHASE 4 — LIVE DEBUGGING & THE OVERNIGHT RUN (2026-07-09..11)
+------------------------------------------------------------
+Bugs found and fixed while JJ played/watched:
+  - CRAFT EXPLOIT: the mod's custom craft loop bypassed the engine research gate, so it
+    could craft un-researched recipes (free-spawning). Gated on force.recipes[x].enabled
+    (both brain-side and in the mod).
+  - INVENTORY DEFINES: this modpack has NO furnace_source/furnace_result defines (crafters
+    unified into crafter_input=2 / crafter_output=3). get_inventory(nil) THROWS, which was
+    crash-looping the brain. Switched to get_output_inventory()/get_fuel_inventory()/
+    get_inventory(defines.inventory.crafter_input or 2). Lab science slot = lab_input (2).
+  - TRIGGER TECHS: the mod's custom craft loop does NOT fire 'craft-item' research triggers,
+    so trigger techs stall even when earned (e.g. building a lab didn't unlock the red-
+    science tech). Smelting DOES fire them (copper-plate x10 unlocked electronics; iron-
+    plate x50 unlocked steam-power). Workaround: manager completes genuinely-earned trigger
+    techs via RCON; durable fix (fire the event / use real begin_crafting) needs a mod reload.
+  - WANDERING / "where's the base?" spam: added a persistent base anchor (base.json), fed
+    the executor its already-built `structures` (with contents), and blocked chat questions.
+  - CHAT + PINGS: brain now reads in-game chat and JJ's map pings ([gps=x,y] tags); only
+    JJ's messages are treated as steering, others are data.
+
+The overnight autonomous run (JJ asleep; target: 90 SPM red+green + a mall):
+  - The agent DID stockpile a lot by hand: ~48 red science packs, ~86 gears, 2 labs, 6
+    stone furnaces, 3 burner-drills placed.
+  - But hit TWO HARD WALLS and reached 0 SPM / 0% research:
+    1. NO POWER: labs are electric and the nearest water is 122 TILES from the base (it was
+       anchored in a waterless spot). No water -> no steam power -> no research/assembly.
+    2. CAPABILITY CEILING: the reactive two-tier LLM does small local actions well but can't
+       self-follow a multi-step prerequisite chain (needs stone -> stone-furnace ->
+       burner-drill -> fuel+chest). Given even a single-focus "mine stone" directive, stone
+       stayed at 1 all night while it wandered and crafted surplus.
+  - What DID get validated: place_miner's GEOMETRY is correct (drills land on ore with the
+    right ~1.3-tile drop position); the 3 drills are idle only because the agent couldn't
+    keep them supplied with coal + chests.
+  - The manager did NOT fake a base, hand-build, or spawn anything overnight (honesty > a
+    faked result), and flagged the two decisions for JJ.
+
+
+CURRENT STATE (morning 2026-07-11)
+----------------------------------
+- companion alive at the base; research 'automation' queued but 0% (no power).
+- DECISIONS MADE BY JJ: (A) RELOCATE the base to water; (B) build SCRIPTED BUILD MACROS
+  (deterministic Python routines the planner drives) rather than keep tuning the reactive
+  loop. JJ also directed: be more autonomous — "don't ask me stuff, have it figure it out."
+- NEXT: relocate base near water (~-25,37 area), and build scripted build-macros
+  (miners+chests, furnace lines, steam power, a mall) so the agent builds in reliable
+  blocks instead of one entity at a time.
+
+
+KEY GOTCHAS (durable)
+---------------------
+- Modpack: no furnace_source/result defines; use crafter_input/output + get_output/fuel
+  inventory helpers. get_inventory(nil) throws.
+- Mod's custom craft loop doesn't fire craft-item research triggers (smelting does).
+- Inserter `direction` = the side it PICKS FROM. burner-mining-drill drops ~1.3 tiles
+  south of center (2.0), not 2.
+- CRAFT, DON'T SPAWN — agents mine/craft/place real items; never conjure via RCON.
+- Windows: use PowerShell (Bash cygwin-forks fail); git commit -F <tempfile> for messages.
+- Save-before-restart discipline applies to the headless server, not JJ's client-hosted game.

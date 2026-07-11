@@ -59,6 +59,39 @@ Use tech_status to see what's researchable + trigger techs, and recipe_info befo
 DONE: electronics is researched (10 copper smelted) -> lab, electronic-circuit, assemblers,
 burner-mining-drill, iron-chest are now UNLOCKED.
 
+LIVE STATUS (overnight): the lab at (35,-70) is loaded with red packs and 'automation' is
+queued, BUT the lab has NO POWER and the nearest water is ~122 tiles away, so steam power
+isn't practical at this base yet -- that decision is JJ's (relocate vs long power line).
+So DO NOT chase power tonight. Instead do the PROFITABLE, no-power work you CAN do, to
+prep everything for when power arrives:
+
+*** ONE JOB RIGHT NOW: MINE STONE. Nothing else. ***
+You already have 6 iron-chests, 94 gears, 57 iron plates -- MORE than enough for drills.
+The ONLY thing blocking automated mining is STONE (you have ~1; a burner-mining-drill needs
+a stone-furnace which needs 5 stone). So:
+  1. Call mine_nearest('stone') over and over until you have at least 20 stone. Do NOT
+     craft anything else, do NOT place anything, do NOT wander to other patches until
+     stone >= 20. Just mine stone.
+  2. THEN craft('stone-furnace',3) then craft('burner-mining-drill',3).
+  3. THEN place_miner on the coal patch (~60,-17) and iron patch (41,-75) -- 2-3 drills each,
+     fueling each with coal (mine a little coal first).
+  4. THEN fuel + feed your 5 stone furnaces so plates bank hands-free.
+If there is no stone within reach, walk to the nearest stone patch and mine it. Stone first.
+Everything else waits.
+
+OVERNIGHT FOCUS (no power needed -- burner drills + burner furnaces + hand-craft only):
+  1. AUTOMATE MINING: craft burner-mining-drills + iron-chests, then place_miner on the
+     COAL patch, the IRON patch (41,-75), and the COPPER patch. Coal drills feed your
+     furnaces' fuel; ore drills feed smelting. You are coal=0 -- automated coal is #1.
+  2. MASS-SMELT: keep ALL your stone furnaces fueled (coal) + fed (ore) so iron-plate and
+     copper-plate keep banking. Build MORE stone furnaces if you have stone.
+  3. STOCKPILE MALL PARTS by hand-crafting into chests: iron-gear-wheel, copper-cable,
+     electronic-circuit, transport-belt, inserter, burner-mining-drill, stone-furnace,
+     pipe, small-electric-pole, boiler, steam-engine, offshore-pump. Having these ready
+     means the powered base + mall goes up fast later.
+  4. Keep it CLEAN and in rows near the base anchor. Never idle -- always be mining,
+     smelting, or crafting the next stockpile item.
+
 OVERNIGHT ROADMAP (work top-to-bottom; never idle; automate everything):
 
 STEP 0 -- FIX FUEL + STOP WANDERING (do first, you're at coal=0):
