@@ -259,17 +259,18 @@ def decide(client, state: dict, fresh_chat: list, ping_is_new: bool, mission: st
     try:
         resp = client.messages.create(
             model=INTENT_MODEL,
-            max_tokens=500,
+            max_tokens=1024,      # plenty for {reply, action}; no thinking -> no truncation
             system=INTENT_SYSTEM,
-            thinking={"type": "adaptive"},
             messages=[{"role": "user", "content": "Situation (JSON):\n" + json.dumps(ctx) +
-                       "\nReply with the JSON decision only."}],
+                       "\nReply with ONLY the compact JSON decision, no prose, no code fence."}],
         )
         txt = "".join(b.text for b in resp.content if getattr(b, "type", "") == "text").strip()
-        txt = txt[txt.find("{"): txt.rfind("}") + 1]
-        return json.loads(txt)
+        i, j = txt.find("{"), txt.rfind("}")
+        if i < 0 or j <= i:
+            return {"reply": None, "action": {"type": "idle"}}
+        return json.loads(txt[i:j + 1])
     except Exception as e:  # noqa: BLE001
-        print(f"[intent] error: {e}", flush=True)
+        print(f"[intent] parse/api error: {e} | raw={txt[:120] if 'txt' in dir() else '?'}", flush=True)
         return {"reply": None, "action": {"type": "idle"}}
 
 
