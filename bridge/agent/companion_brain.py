@@ -449,6 +449,20 @@ def _resolve_unum() -> int:
     return int(out)
 
 
+def _reconnect() -> bool:
+    """Re-open RCON (after a server restart) and re-resolve/spawn the companion."""
+    global _RCON, _UNUM
+    try:
+        _RCON = RconClient(); _RCON.connect(); bm._RCON = _RCON
+        _RCON.command("/silent-command rcon.print('warmup')")  # absorb Factorio's first-command quirk
+        _UNUM = _resolve_unum()
+        print("[loop] reconnected + companion re-resolved", flush=True)
+        return True
+    except Exception as e:  # noqa: BLE001
+        print(f"[loop] reconnect failed: {e}", flush=True)
+        return False
+
+
 def run() -> int:
     if Anthropic is None:
         print("anthropic SDK not installed: pip install anthropic", file=sys.stderr)
@@ -489,7 +503,12 @@ def run() -> int:
         except KeyboardInterrupt:
             return 0
         except Exception as e:  # noqa: BLE001
+            msg = str(e).lower()
             print(f"[loop] error: {e}", flush=True)
+            # server restarts drop RCON -> reconnect instead of erroring forever
+            if any(k in msg for k in ("connection", "closed", "refused", "reset", "broken", "timed out", "socket")):
+                time.sleep(2)
+                _reconnect()
         cyc += 1
         time.sleep(CYCLE_SECONDS)
 
