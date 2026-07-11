@@ -173,8 +173,11 @@ brief, a little personality; never robotic, never spammy.
 YOUR #1 JOB EVERY TURN IS JJ. Priority order:
 1. If JJ PINGED a location (owner_ping + a fresh ping this turn) -> that's "do that, there":
    go help at that spot (mine the ore there, build there, or just go to him).
-2. If JJ made a REQUEST in chat ("grab copper", "build X here", "come help", "what are you
-   doing?") -> understand it and reply + act on it.
+2. If JJ made a REQUEST in chat ("grab copper", "build X here", "come help", "bring me 100
+   iron plates", "what are you doing?") -> understand it and act. His NEWEST message
+   (new_chat_this_turn / the last recent_chat line) is the CURRENT order and overrides older
+   ones — if he now wants iron plates, stop hitting rocks and fetch the plates. To mine rocks
+   use resource "coal" (auto-targets huge-rock, which gives coal) or "huge-rock"/"big-rock".
 3. If JJ just BUILT something (near_jj shows new entities) -> complement it (extend the line,
    feed it, belt it) rather than starting something unrelated.
 4. Only if JJ isn't directing -> advance the base yourself (the standing mission).
@@ -364,8 +367,10 @@ def act(action: dict, _depth: int = 0) -> None:
             _rc(f"local u={_UNUM}; local c=game.get_entity_by_unit_number(u); local s=c.surface; local res='{res}'; "
                 "local best,bd=nil,1e18; "
                 "for _,e in ipairs(s.find_entities_filtered{name=res,position=c.position,radius=250}) do local dx=e.position.x-c.position.x;local dy=e.position.y-c.position.y;local d=dx*dx+dy*dy;if d<bd then bd=d;best=e end end; "
-                # coal/stone also come from rocks (simple-entity) — smack the nearest rock if no ore patch is near
-                "if (not best or bd>60*60) and (res=='coal' or res=='stone') then for _,e in ipairs(s.find_entities_filtered{type='simple-entity',position=c.position,radius=90}) do local dx=e.position.x-c.position.x;local dy=e.position.y-c.position.y;local d=dx*dx+dy*dy;if d<bd then bd=d;best=e end end end; "
+                # coal/stone also come from ROCKS — prefer huge-rock (gives coal), then big-rock
+                "if (not best or bd>60*60) and (res=='coal' or res=='stone') then local rb,rbd=nil,1e18; "
+                "for _,rn in ipairs({'huge-rock','big-rock','big-sand-rock'}) do for _,e in ipairs(s.find_entities_filtered{name=rn,position=c.position,radius=150}) do local dx=e.position.x-c.position.x;local dy=e.position.y-c.position.y;local d=dx*dx+dy*dy;if d<rbd then rbd=d;rb=e end end; if rb then break end end; "
+                "if rb then best=rb;bd=rbd end end; "
                 "if best then local r=remote.call('claude','start_mining',u,best.position.x,best.position.y); if not(r and r.ok) then remote.call('claude','walk_to',u,best.position.x,best.position.y) end end")
         elif t == "place":
             _prim_place(action["item"], action["x"], action["y"], action.get("dir", 0))
@@ -446,6 +451,7 @@ def run() -> int:
     print(f"[companion_brain] JJ-centric loop live; intent={INTENT_MODEL}. Ctrl-C to stop.")
     seen_ids: set = set()
     last_ping_seq = _PING_SEQ
+    had_threat = False
     cyc = 0
     while True:
         try:
@@ -459,14 +465,19 @@ def run() -> int:
             seen_ids = set(cur_ids.keys())
             state["_new_builds"] = new_builds
             ping_is_new = _PING_SEQ != last_ping_seq
-            # decide when there's a JJ event, or on the slow autonomous tick
-            jj_event = bool(fresh_chat) or ping_is_new or bool(new_builds)
+            threat_now = bool(state.get("threat"))
+            threat_new = threat_now and not had_threat
+            had_threat = threat_now
+            # ONLY talk when JJ actually interacts (chat/ping) or a threat just appeared.
+            # Never chatter on autonomous ticks -> that was the spam.
+            talk_ok = bool(fresh_chat) or ping_is_new or threat_new
+            jj_event = talk_ok or bool(new_builds)
             if jj_event or cyc % AUTONOMOUS_EVERY == 0:
                 d = decide(client, state, fresh_chat, ping_is_new, _mission())
                 if ping_is_new:
                     last_ping_seq = _PING_SEQ
                 reply = d.get("reply")
-                if reply and str(reply).lower() != "null":
+                if talk_ok and reply and str(reply).lower() != "null":
                     say(str(reply))
                 act(d.get("action") or {"type": "idle"})
         except KeyboardInterrupt:
