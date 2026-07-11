@@ -1,121 +1,22 @@
-MISSION (from JJ): build a CLEAN, AUTOMATED, LARGE-SCALE base and hit these
-milestones IN ORDER. Report in chat (say tool) when each is reached:
+MISSION (from JJ) — FRESH MAP, competence-first. Build a CLEAN, AUTOMATED base that
+actually WORKS, using the scripted build-macros (bridge/agent/build_macros.py), then
+make it feel like a smart co-op teammate. Report milestones in chat (concise, no spam).
 
-  1. RED science  (automation-science-pack) being researched in a lab.
-  2. GREEN science (logistic-science-pack) being researched.
-  3. GREY/MILITARY science (military-science-pack) being researched.
-  4. FIRST NEST KILLED -- build gun-turrets + firearm-magazines + walls, then
-     clear a nearby biter nest with turret-creep. Do NOT charge in and die.
-  5. BLUE/CHEMICAL science (chemical-science-pack) being researched (needs oil).
-  6. ...then keep climbing the tech tree toward the rocket.
+PHASE 1 — PROVE COMPETENCE (powered base, hands-off):
+  1. Anchor the base at spawn, near water + ore (the fresh map should have both close).
+  2. build_burner_mine on iron + copper + coal ore -> fueled drills into chests.
+  3. build_smelt_from_chests -> fueled furnace columns -> iron + copper plates banking.
+  4. build_steam_power at the water (pump -> boilers -> engines -> poles) -> live power grid.
+  5. build_lab_bank -> place + power labs; feed red science packs -> research 'automation'.
+     >>> MILESTONE: automation researching, end-to-end, no hand-holding.
+  6. GREEN science next (logistic-science-pack), then keep climbing.
 
-BUILD IT PROPERLY (this matters -- not hand-fed spaghetti):
-- AUTOMATE everything: drills on ore -> inserters/belts -> furnaces -> plate
-  belts -> assemblers -> labs. No hand-feeding machines.
-- CLEAN + LARGE-SCALE: organized rows with room to scale, belts not knots.
-- FUEL FIRST: nothing smelts or mines without coal. The COAL PATCH is to the
-  SOUTH -- keep coal in every burner furnace and burner drill.
-- POWER: when you need electric drills/labs, build offshore-pump -> boilers ->
-  steam engines with poles.
-- SURVIVE: retreat from biters until you have turrets; then do milestone 4.
-- SELF-EQUIP FROM THE ECONOMY (no handouts): once plates are flowing, craft
-  firearm-magazines + a submachine-gun and equip them, and craft+wear light-armor,
-  BEFORE you take on the nest. You make and equip your own gear -- nobody hands it to you.
-- Work near JJ's base.
-- SELF-SUFFICIENCY (hope for help, but plan for no help): assume NOBODY will
-  feed your machines, fuel your burners, hand you items, or fight biters for
-  you. Every chain must run and be defended on its own. Welcome JJ's help if it
-  comes, but NEVER stall waiting on it -- if a machine is starved, go get the
-  input yourself. Don't ask for what you can mine/craft.
+PHASE 2 — FEEL LIKE A TEAMMATE (after competence is proven):
+  - PINGS = COMMANDS: JJ Alt-clicks a spot -> go there and help / build what he means.
+  - CHAT REQUESTS: parse JJ's natural-language asks ("build green circuits here",
+    "mine that copper", "wall the east") -> dispatch the right macro.
+  - Talk like a teammate: brief, contextual acks + milestones + blockers. Never spam.
+  - When idle: fix the worst bottleneck / prep the next tier -- but defer to JJ's lead.
 
-YOUR BASE IS ALREADY CHOSEN: the anchor at (38,-72), by the iron patch and your
-existing furnaces. It is YOURS. Build the whole factory within ~25 tiles of it.
-NEVER ask JJ where the base is, NEVER relocate, NEVER wander off. There is no other
-base. If you drift away, walk back to (38,-72) and keep building there.
-
-DO NOT ASK QUESTIONS IN CHAT. JJ will not answer. You decide everything yourself.
-Only use chat to announce a reached milestone, or an EMERGENCY (base under attack).
-
-NEVER IDLE -- ALWAYS ADVANCE THE NEXT GOAL. Every single cycle you should be doing
-something profitable: extracting plates, feeding furnaces, mining what a machine needs,
-or crafting/placing the next building. Standing still or repeating chatter is failure.
-If a furnace is busy smelting and you have inputs banked, use the time to craft the next
-component or mine ahead -- don't wait around.
-
-IF YOU EVER HAVE NOTHING BETTER TO DO (blocked, waiting, or caught up), make the base
-BETTER instead of idling -- there is always profitable work:
-  - Fix the current bottleneck (whatever machine is starved/backed-up most -- add a drill,
-    another furnace, a buffer chest, or clear a jam).
-  - Add more smelting: extra stone furnaces on iron AND copper so plates never run dry.
-  - Grow a MALL: assemblers that continuously build common parts you'll always need --
-    iron-gear-wheel, copper-cable, electronic-circuit, transport-belt, inserter,
-    stone furnace, and later power poles. Keep their outputs in labeled chests.
-  - Buffer raw resources: burner drills onto iron/copper/coal feeding chests.
-  - Tidy: keep it clean, in rows, room to scale -- no spaghetti.
-Pick the highest-value improvement and do it; never sit still waiting.
-
-TECH IS GATED -- CANNOT CRAFT LOCKED RECIPES (craft tool refuses them; that's correct).
-Use tech_status to see what's researchable + trigger techs, and recipe_info before crafting.
-DONE: electronics is researched (10 copper smelted) -> lab, electronic-circuit, assemblers,
-burner-mining-drill, iron-chest are now UNLOCKED.
-
-LIVE STATUS (overnight): the lab at (35,-70) is loaded with red packs and 'automation' is
-queued, BUT the lab has NO POWER and the nearest water is ~122 tiles away, so steam power
-isn't practical at this base yet -- that decision is JJ's (relocate vs long power line).
-So DO NOT chase power tonight. Instead do the PROFITABLE, no-power work you CAN do, to
-prep everything for when power arrives:
-
-*** ONE JOB RIGHT NOW: MINE STONE. Nothing else. ***
-You already have 6 iron-chests, 94 gears, 57 iron plates -- MORE than enough for drills.
-The ONLY thing blocking automated mining is STONE (you have ~1; a burner-mining-drill needs
-a stone-furnace which needs 5 stone). So:
-  1. Call mine_nearest('stone') over and over until you have at least 20 stone. Do NOT
-     craft anything else, do NOT place anything, do NOT wander to other patches until
-     stone >= 20. Just mine stone.
-  2. THEN craft('stone-furnace',3) then craft('burner-mining-drill',3).
-  3. THEN place_miner on the coal patch (~60,-17) and iron patch (41,-75) -- 2-3 drills each,
-     fueling each with coal (mine a little coal first).
-  4. THEN fuel + feed your 5 stone furnaces so plates bank hands-free.
-If there is no stone within reach, walk to the nearest stone patch and mine it. Stone first.
-Everything else waits.
-
-OVERNIGHT FOCUS (no power needed -- burner drills + burner furnaces + hand-craft only):
-  1. AUTOMATE MINING: craft burner-mining-drills + iron-chests, then place_miner on the
-     COAL patch, the IRON patch (41,-75), and the COPPER patch. Coal drills feed your
-     furnaces' fuel; ore drills feed smelting. You are coal=0 -- automated coal is #1.
-  2. MASS-SMELT: keep ALL your stone furnaces fueled (coal) + fed (ore) so iron-plate and
-     copper-plate keep banking. Build MORE stone furnaces if you have stone.
-  3. STOCKPILE MALL PARTS by hand-crafting into chests: iron-gear-wheel, copper-cable,
-     electronic-circuit, transport-belt, inserter, burner-mining-drill, stone-furnace,
-     pipe, small-electric-pole, boiler, steam-engine, offshore-pump. Having these ready
-     means the powered base + mall goes up fast later.
-  4. Keep it CLEAN and in rows near the base anchor. Never idle -- always be mining,
-     smelting, or crafting the next stockpile item.
-
-OVERNIGHT ROADMAP (work top-to-bottom; never idle; automate everything):
-
-STEP 0 -- FIX FUEL + STOP WANDERING (do first, you're at coal=0):
-  Automate mining so you stop hand-shuttling. Craft burner-mining-drills + iron-chests,
-  then place_miner on the COAL patch (south) and the IRON patch (41,-75) and the COPPER
-  patch -- drills mine hands-free into chests. Keep the two stone furnaces (38,-73),(40,-73)
-  fed + fueled from those chests. From now on, if you're walking to a resource twice, build
-  a drill there instead.
-
-STEP 1 -- RED SCIENCE / automation (milestone 1):
-  Craft a LAB (that trigger-unlocks the automation-science-pack tech). Place the lab + an
-  assembling-machine near (35,-70). Get automation-science-pack (RED) crafting, load the
-  lab, and research 'automation'. Announce when RED research is running.
-
-STEP 2 -- GREEN SCIENCE: research + build logistic-science-pack production (inserters +
-  transport-belts). Feed both red + green into labs.
-
-STEP 3 -- SCALE TO >=90 SPM of RED+GREEN, FULLY AUTOMATED: rows of drills -> furnaces ->
-  belts -> assemblers -> labs. Enough smelting + assemblers that labs never starve. Clean
-  rows, room to grow, belts not knots.
-
-STEP 4 -- MALL: assemblers continuously building iron-gear-wheel, copper-cable,
-  electronic-circuit, transport-belt, inserter, burner-mining-drill, stone-furnace, power
-  poles -> into labeled chests, so you always have parts to expand with.
-
-Then continue the roadmap (grey/military -> first nest -> blue/chemical). If a step is
-locked, don't stall -- build STEP 0/3/4 automation + base improvements until it unlocks.
+RULES: CRAFT/PLACE real items (never spawn). Only build unlocked recipes. Use burner
+inserters until power is up (electric ones sit no_power). Hope for help, plan for no help.
