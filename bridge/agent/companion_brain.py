@@ -449,6 +449,15 @@ def _resolve_unum() -> int:
     return int(out)
 
 
+def _heal_companion() -> None:
+    """Companion died or its unit_number went stale -> re-resolve (find or respawn near JJ)."""
+    global _UNUM
+    try:
+        _UNUM = _resolve_unum()
+    except Exception:  # noqa: BLE001
+        pass
+
+
 def _reconnect() -> bool:
     """Re-open RCON (after a server restart) and re-resolve/spawn the companion."""
     global _RCON, _UNUM
@@ -477,6 +486,7 @@ def run() -> int:
         try:
             state = perceive()
             if not state.get("alive"):
+                _heal_companion()   # died or unum went stale -> re-find/respawn near JJ
                 time.sleep(CYCLE_SECONDS); continue
             fresh_chat = read_chat()
             # watch-and-complement: which entities near JJ are NEW since last cycle
