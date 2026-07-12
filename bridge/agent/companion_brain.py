@@ -551,10 +551,20 @@ def run() -> int:
 def main() -> int:
     global _RCON, _UNUM
     os.environ["FACTORIO_RCON_PASSWORD"] = _resolve_rcon_password()
-    _RCON = RconClient(); _RCON.connect()
-    bm._RCON = _RCON  # share the connection so build-macros run on it
     _load_learned()   # restore any custom actions the companion invented before
-    _UNUM = _resolve_unum()
+    # Wait for the game/RCON to be up before starting (so it can be launched while the
+    # game is down and just connect when JJ hosts) instead of crashing on startup.
+    while True:
+        try:
+            _RCON = RconClient(); _RCON.connect(); bm._RCON = _RCON
+            _RCON.command("/silent-command rcon.print('warmup')")
+            _UNUM = _resolve_unum()
+            break
+        except KeyboardInterrupt:
+            return 0
+        except Exception as e:  # noqa: BLE001
+            print(f"[startup] waiting for game/RCON: {e}", flush=True)
+            time.sleep(5)
     return run()
 
 
