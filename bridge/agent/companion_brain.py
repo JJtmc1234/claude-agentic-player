@@ -493,6 +493,7 @@ def run() -> int:
     last_ping_seq = _PING_SEQ
     had_threat = False
     cyc = 0
+    dead = 0  # consecutive disconnected cycles -> back off + suppress log spam
     while True:
         try:
             state = perceive()
@@ -529,15 +530,20 @@ def run() -> int:
                 if talk_ok and reply and str(reply).lower() != "null":
                     say(str(reply))
                 act(d.get("action") or {"type": "idle"})
+            dead = 0  # a full cycle succeeded -> reset the disconnect backoff
         except KeyboardInterrupt:
             return 0
         except Exception as e:  # noqa: BLE001
             msg = str(e).lower()
-            print(f"[loop] error: {e}", flush=True)
-            # server restarts / dropped sockets -> reconnect instead of erroring forever
-            if any(k in msg for k in ("connect", "closed", "refused", "reset", "broken", "timed out", "socket", "pipe", "eof")):
-                time.sleep(2)
-                _reconnect()
+            conn = any(k in msg for k in ("connect", "closed", "refused", "reset", "broken", "timed out", "socket", "pipe", "eof"))
+            if conn:
+                dead += 1
+                if dead == 1 or dead % 20 == 0:  # log once, then rarely (no spam when game is off)
+                    print(f"[loop] disconnected: {e} -- retrying (game down?)", flush=True)
+                if not _reconnect():
+                    time.sleep(min(3 + dead, 20))  # back off up to 20s while the game is down
+            else:
+                print(f"[loop] error: {e}", flush=True)
         cyc += 1
         time.sleep(CYCLE_SECONDS)
 
