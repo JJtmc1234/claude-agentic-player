@@ -4,6 +4,21 @@ Running record of major milestones. Newest at top.
 
 ---
 
+## 2026-07-12 — Project BRAIN: JJ-centric intent core (feels-like-a-teammate)
+
+- Built bridge/agent/companion_brain.py — the loop is now JJ-FIRST: obeys pings ("do that,
+  there"), understands + replies to chat, complements what JJ builds, autonomous only when
+  JJ isn't directing. Opus intent tier -> {reply, action}; deterministic tools + macros execute.
+- Features added (JJ's picks): explain-reasoning, fetch/courier (honest — won't fake-deliver
+  items that don't exist), combat (equip + attack). Custom actions: compose PLANs of primitives
+  + remember/recall learned actions. North star = Solar System Edge (needs all 5 planets).
+- Combat fix: a script character doesn't auto-fire -> set shooting_state each cycle when armed
+  (flamethrower now works). Needs a gun + AMMO in inventory.
+- Robustness: killed the say-spam (only talks on JJ chat/ping/threat), self-heal on death,
+  auto-reconnect + backoff, startup waits for game/mod instead of crashing.
+- Fresh map (trees + water). Ongoing: companion dies unarmed near biters; mod must be enabled
+  in the client for the brain to connect.
+
 ## 2026-07-11 — Project BRAIN v2: pivot to deterministic build-macros
 
 - The reactive Haiku per-action loop hit its ceiling (built non-functional spaghetti

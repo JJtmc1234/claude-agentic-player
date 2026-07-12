@@ -1,36 +1,36 @@
 # what-im-doing.txt — live status (READ THIS AT EVERY SESSION START / AFTER COMPACT)
-# Updated: 2026-07-11. Paired with context.txt (stable), summary.txt (full history), CLAUDE.md.
+# Updated: 2026-07-12. Paired with context.txt (stable), summary.txt (full history), CLAUDE.md.
 
-CURRENT PHASE: Project BRAIN v2 — replacing the reactive Haiku executor (which produced
-non-functional spaghetti) with DETERMINISTIC SCRIPTED BUILD MACROS driven by a planner.
-JJ's chosen direction (2026-07-11): relocate to water + scripted macros. Be autonomous,
-don't ask (feedback-be-autonomous).
+CURRENT PHASE: Project BRAIN — the JJ-CENTRIC intent loop. The companion's #1 job is JJ:
+obey pings, understand + reply to chat, complement what JJ builds, and only advance the
+base autonomously when JJ isn't directing. North star = reach the SOLAR SYSTEM EDGE (which
+per JJ needs ALL 5 PLANETS COLONIZED first).
 
-MACRO LIBRARY: bridge/agent/build_macros.py
-  VALIDATED LIVE (worked on the iron square this session):
-    - build_burner_mine(ore,count,cx,cy): burner drills on ore, fuels each, chest at each
-      drill's real drop_position. Verified: 3 drills placed, all WORKING + mining into chests.
-    - build_smelt_from_chests(cx,cy,ore): furnace column below each ore chest
-      (chest->inserter->fueled furnace->inserter->output chest). Geometry VERIFIED EXACT.
-      IMPORTANT: must use BURNER-inserters, not electric 'inserter' (no power -> electric
-      sit no_power). Macro now uses burner-inserter + fuels them.
-  WRITTEN BUT UNTESTED (verify next session):
-    - connect_belt(x1,y1,x2,y2): L-path belt router.
-    - build_steam_power(wx,wy): STUB — only places the offshore-pump; boiler->engine->pipe
-      ->pole layout still to build+verify live (pump orientation is finicky).
+ACTIVE DRIVER: bridge/agent/companion_brain.py  (launch: `$env:ANTHROPIC_API_KEY =
+[Environment]::GetEnvironmentVariable('ANTHROPIC_API_KEY','User'); python bridge/agent/companion_brain.py`)
+  - Opus 4.8 "intent" tier decides {reply, action} each cycle (1s loop, no thinking -> fast
+    + parseable). Executes via deterministic tools + build-macros.
+  - Actions: goto, mine (rocks too: huge-rock gives coal), place/insert/take, craft, research,
+    fetch (courier to JJ), equip + attack (combat), build_mine/build_smelt, plus PLAN
+    (compose primitives) and remember/recall (learned_actions.json — invents+reuses actions).
+  - Behaviors: talks only on JJ chat/ping/threat (no autonomous spam); explains reasoning;
+    honest fetch (won't fake-deliver items that don't exist); newest chat message wins.
+  - Robustness: self-heal (respawn on death), auto-reconnect + backoff, startup waits for
+    the game/mod instead of crashing.
+  - COMBAT: a script character does NOT auto-fire -> brain sets shooting_state=shooting_enemies
+    every cycle when armed, so it torches biters in range (flamethrower works). Needs gun+AMMO.
 
-KEY BLOCKERS:
-  - MASTER BLOCKER = POWER, which needs WATER (nearest water ~90-122 tiles from the ore).
-    Electric inserters/assemblers/labs all dead without it. Until then only BURNER
-    mining+smelting works (drills, furnaces, burner-inserters).
-  - JJ built HUGE ore squares ~200 tiles apart: iron@(130,-164) copper@(-125,-164)
-    coal@(141,67) stone@(-183,47). Base = mining outposts + belt/rail haul to a core near water.
-  - Companion low on drills + burner-inserters after this session; craft more (CRAFT DON'T SPAWN).
+BUILD MACROS: bridge/agent/build_macros.py — build_burner_mine + build_smelt_from_chests
+  VALIDATED live; connect_belt + build_steam_power written but UNTESTED (finish live).
 
-GAME CURRENTLY OFFLINE (JJ stopped; RCON refused). In-game work resumes when he hosts.
+CURRENT STATE (2026-07-12): game up but claude-companion MOD NOT LOADED ("Unknown interface:
+claude") -> brain (task) is WAITING; it auto-starts when JJ enables the mod. Fresh map has
+trees + water at ~102 tiles; companion keeps dying when unarmed near biters (arm it).
 
-NEXT (when game is back):
-  1. Finish build_steam_power (boiler/engine/pipe/pole) at water -> powered pole net.
-  2. Pick base-core near water; compose macros: outposts -> belts -> smelt -> bus -> mall -> labs.
-  3. Build the planner driver: Opus picks what/where -> calls deterministic macros (retire Haiku loop).
-  4. Load 55 red packs into a POWERED lab -> 'automation' completes.
+GOTCHAS (see context.txt too): no furnace_source/result defines (crafter_input/output +
+get_output_inventory/get_fuel_inventory); mod craft loop doesn't fire craft-item triggers;
+burner inserters until power; first RCON command after game start is swallowed (warmup first);
+mods load only at game start (can't enable via RCON).
+
+NEXT: when the mod's on + JJ playing — tune the teammate feel live; finish steam-power macro;
+climb toward power -> red science; keep arming/defending. Honesty > overclaim; commit on major.
