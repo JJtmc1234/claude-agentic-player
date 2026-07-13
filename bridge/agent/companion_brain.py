@@ -47,6 +47,9 @@ CHAR_NAME = "companion"
 ROLE = ""                           # the employee's specialty (biases autonomous work)
 OWNER = "Factoriobrine"             # JJ's in-game handle
 OWNERS = (OWNER, "IdBaj98")
+# The employee sandbox: a bounding box (x1,y1,x2,y2) inside which employees may build
+# ANYTHING, but must NOT modify anything outside. Set via --district. None = unbounded.
+DISTRICT = None
 CYCLE_SECONDS = 1.0                 # read chat + react EVERY SECOND (JJ wants snappy responses)
 AUTONOMOUS_EVERY = 15               # cycles between autonomous ticks when JJ is quiet (~15s)
 
@@ -83,6 +86,17 @@ def _safe(name) -> str:
     """Constrain an LLM-provided item/recipe/entity/tech name to Factorio's charset
     (lowercase, digits, - and _) so it can't break or inject into the Lua we build."""
     return _ID_RE.sub("", str(name).lower())
+
+
+def _in_district(x, y) -> bool:
+    """True if (x,y) is inside the employee sandbox (or no district set)."""
+    if DISTRICT is None:
+        return True
+    try:
+        x1, y1, x2, y2 = DISTRICT
+        return x1 <= float(x) <= x2 and y1 <= float(y) <= y2
+    except Exception:  # noqa: BLE001
+        return True
 
 
 def _write_team_status(state: dict, action_type: str) -> None:

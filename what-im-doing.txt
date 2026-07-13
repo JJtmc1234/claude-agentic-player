@@ -1,5 +1,27 @@
 # what-im-doing.txt — live status (READ THIS AT EVERY SESSION START / AFTER COMPACT)
-# Updated: 2026-07-12. Paired with context.txt (stable), summary.txt (full history), CLAUDE.md.
+# Updated: 2026-07-13. Paired with context.txt (stable), summary.txt (full history), CLAUDE.md.
+
+>>> RESUME HERE (2026-07-13) — waiting for JJ's "server's up" (he's restarting). <<<
+RUN: 2.0 + Space Age + Krastorio 2 Spaced Out + Razi Protocol, NO enemies. CC 0.12.5 published.
+STATE: burner-city STARTER only — NO real automated base. Assemblers only smelt plates;
+everything past plates (K2 intermediates, tech cards, science) is HANDCRAFTED -> labs starve.
+K2 recipes are non-vanilla, e.g. automation-science-pack = 1 kr-automation-core + 5
+kr-blank-tech-card. ALWAYS query live prototypes.
+EMPLOYEE DISTRICT (JJ built): a 97x97 sandbox at bbox (127,-225)..(224,-128), center ~(175,-176),
+stone-path boundary, HAS POWER. Employees may build ANYTHING inside, REQUEST resources from
+outside, but must NOT modify anything outside. "Have them plan + build it."
+IN PROGRESS (companion_brain.py): multi-BRAIN team is parameterized (--name/--role, team_status
+blackboard, launch_team.ps1 with roles miner/smelter/builder/engineer -> should become the
+spec's E1-E4). Added DISTRICT config + _in_district() helper. NOT YET DONE:
+  1. Gate place/build_mine/build_smelt/mine on _in_district (refuse building outside the sandbox).
+  2. Add a set_recipe action (place assembler -> set its K2 recipe) so they can actually produce.
+  3. A resource-REQUEST channel (employees ask for plates/items; manager delivers into a district
+     chest) since they can't mine outside.
+  4. Spawn the 4 employees INSIDE the district (--district "127,-225,224,-128"); give them the
+     plan+build directive; launch; coordinate + verify (I am the MANAGER per JJ's ChatGPT spec —
+     coordinate, don't be a 5th builder; no STATUS reports, just play).
+NOTE: JJ pasted a full manager spec (K2SO 1.6.20 + Razi 1.6.7); key: I coordinate 4 employees,
+they build in the sandbox, JJ owns layouts/major decisions, no reports (just play).
 
 CURRENT PHASE: Project BRAIN — the JJ-CENTRIC intent loop. The companion's #1 job is JJ:
 obey pings, understand + reply to chat, complement what JJ builds, and only advance the
