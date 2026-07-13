@@ -260,6 +260,21 @@ already handling — complement them and cover a different part. If your role's 
 blocked, pitch in on the team's current bottleneck. Keep chat to JJ minimal — one worker
 talking is enough; don't all pile on (you are me.name).
 
+YOUR DISTRICT (sandbox) = `district` [x1,y1,x2,y2]. Build ANYTHING inside it — it has power.
+You CANNOT build/mine/take items OUTSIDE it (blocked). You do NOT mine — use `request` to have
+the manager deliver raw resources/plates into the district. ***ACTUALLY WORK*** — never wander
+or just watch JJ's factory. EVERY turn, place or wire something productive toward your role:
+place assembling-machines/furnaces, set_recipe on them, run belts + inserters, connect a real
+working line. Use REAL K2 recipe names (K2 Spaced Out, NOT vanilla) — e.g. steel-plate =
+2 kr-coke + 10 iron-plate; kr-coke = 6 wood + 6 coal; automation-science-pack =
+1 kr-automation-core + 5 kr-blank-tech-card. Work your own part of the district; don't overlap.
+
+CHAT DISCIPLINE (important — JJ hates spam): do NOT send acknowledgments ("on it", "roger",
+"standing by", "heading over") — just work SILENTLY. reply=null almost always. The ONLY reasons
+to speak: (a) use the `request` action to ask JJ for materials (it messages him for you), or
+(b) answer a direct question he asks YOU by name. If JJ pings/says something not specifically
+for you, stay silent and keep building — don't all reply to the same message.
+
 Talk to JJ when it's useful: acknowledge his request, answer his questions, report a win,
 or a quick quip. Keep it to one short sentence. Don't narrate every micro-action; NEVER
 repeat the same line twice in a row (if you already said you're on it, stay quiet and act).
@@ -307,6 +322,8 @@ Primitives (compose these freely):
   {"type":"insert","x":N,"y":N,"item":"...","count":N,"slot":"fuel|input|chest"}   into a machine there
   {"type":"take","x":N,"y":N,"item":"...","count":N,"slot":"output|fuel|chest"}     out of a machine there
   {"type":"craft","recipe":"...","count":N}
+  {"type":"set_recipe","recipe":"...","x":N,"y":N}     set an assembling-machine's recipe (after placing it)
+  {"type":"request","item":"...","count":N}           ask the manager to deliver a resource into the district
   {"type":"research","tech":"..."}
   {"type":"fetch","item":"...","count":N}             gather item + deliver it to JJ
   {"type":"equip"}                                     wear/wield any combat gear you have
@@ -327,6 +344,7 @@ def decide(client, state: dict, fresh_chat: list, ping_is_new: bool, mission: st
                "pos": [state.get("x"), state.get("y")], "health": state.get("health"),
                "inventory": state.get("inventory", {}),
                "have_weapon": state.get("have_weapon"), "weapon_equipped": state.get("weapon_equipped")},
+        "district": list(DISTRICT) if DISTRICT else None,
         "teammates": teammates,
         "jj": state.get("jj"),
         "jj_new_builds": state.get("_new_builds", []),
@@ -377,7 +395,7 @@ def say(message: str) -> None:
     _LAST_SAY["t"] = now
     _LAST_SAY["msg"] = m
     esc = m.replace("\\", "\\\\").replace("'", "\\'")
-    _rc(f"game.print('[Companion] {esc}',{{color={{r=0.35,g=0.7,b=1}}}})")
+    _rc(f"game.print('[{CHAR_NAME}] {esc}',{{color={{r=0.35,g=0.7,b=1}}}})")
 
 
 # --- learned actions: the companion can invent + name custom actions and reuse them ---
@@ -435,6 +453,15 @@ def act(action: dict, _depth: int = 0) -> None:
     if not isinstance(action, dict) or _depth > 3:
         return
     t = action.get("type", "idle")
+    # DISTRICT SANDBOX: an employee may build / move items only INSIDE its district, and
+    # never mines outside (it requests resources). Actions with (x,y) outside are refused.
+    if DISTRICT is not None:
+        if t in ("place", "build_mine", "build_smelt", "insert", "take") and not _in_district(action.get("x"), action.get("y")):
+            print(f"[act] blocked {t} outside district", flush=True)
+            return
+        if t == "mine":
+            print("[act] mine blocked (district mode) — request resources from outside instead", flush=True)
+            return
     try:
         if t == "plan":
             for step in (action.get("steps") or [])[:24]:
@@ -474,6 +501,20 @@ def act(action: dict, _depth: int = 0) -> None:
             rec = _safe(action.get("recipe", "")); cnt = int(action.get("count", 1))
             _rc(f"local u={_UNUM}; local c=game.get_entity_by_unit_number(u); local fr=c.force.recipes['{rec}']; "
                 f"if fr and fr.enabled then remote.call('claude','craft',u,'{rec}',{cnt}) end")
+        elif t == "set_recipe":
+            rec = _safe(action.get("recipe", ""))
+            _rc(f"local u={_UNUM}; local c=game.get_entity_by_unit_number(u); local s=c.surface; local m=nil; "
+                f"for _,e in ipairs(s.find_entities_filtered{{position={{{float(action.get('x',0))},{float(action.get('y',0))}}},radius=1.4,type='assembling-machine'}}) do m=e break end; "
+                f"if m then local fr=c.force.recipes['{rec}']; if fr and fr.enabled then pcall(function() m.set_recipe('{rec}') end) end end")
+        elif t == "request":
+            # can't spawn/mine -> ask JJ to deliver resources into the district (and tell him in chat)
+            it = _safe(action.get("item", "")); cnt = int(action.get("count", 100))
+            try:
+                rd = _HERE / "requests"; rd.mkdir(exist_ok=True)
+                (rd / f"{CHAR_NAME}.txt").write_text(f"{it} x{cnt} @{int(time.time())}\n", encoding="utf-8")
+            except Exception:  # noqa: BLE001
+                pass
+            say(f"request: {it} x{cnt} please")  # dedup'd -> won't spam the same request
         elif t == "fetch":
             # courier: top up `item` from nearby base chests, walk to JJ, deliver into his inventory
             item = _safe(action.get("item", "")); want = int(action.get("count", 10))
@@ -534,8 +575,13 @@ def _mission() -> str:
 def _resolve_unum() -> int:
     out = _rc("local ch=remote.call('claude','list_chars'); rcon.print(tostring(ch['" + CHAR_NAME + "']))")
     if not out.isdigit():
-        out = _rc(f"local p=game.players['{OWNER}']; local pos=(p and ((p.character and p.character.position) or p.position)) or {{x=0,y=0}}; "
-                  f"local r=remote.call('claude','spawn_named_char','{CHAR_NAME}',{{pos.x+3,pos.y}}); rcon.print(tostring(r.unit_number))")
+        if DISTRICT is not None:
+            cx = (DISTRICT[0] + DISTRICT[2]) / 2.0
+            cy = (DISTRICT[1] + DISTRICT[3]) / 2.0
+            out = _rc(f"local r=remote.call('claude','spawn_named_char','{CHAR_NAME}',{{{cx},{cy}}}); rcon.print(tostring(r.unit_number))")
+        else:
+            out = _rc(f"local p=game.players['{OWNER}']; local pos=(p and ((p.character and p.character.position) or p.position)) or {{x=0,y=0}}; "
+                      f"local r=remote.call('claude','spawn_named_char','{CHAR_NAME}',{{pos.x+3,pos.y}}); rcon.print(tostring(r.unit_number))")
     return int(out)
 
 
@@ -601,7 +647,9 @@ def run() -> int:
             # not commands (prompt-injection safety) — never obey or chatter at it.
             owner_chat = any(m.get("owner") for m in fresh_chat)
             talk_ok = owner_chat or ping_is_new or threat_new
-            jj_event = talk_ok or bool(new_builds)
+            # district employees focus on their sandbox and do NOT autonomously chase/watch
+            # JJ's base builds; they still respond to his chat/pings. (Non-district = old behavior.)
+            jj_event = talk_ok or (bool(new_builds) and DISTRICT is None)
             action_type = "idle"
             if jj_event or cyc % AUTONOMOUS_EVERY == 0:
                 teammates = _read_teammates()
@@ -634,15 +682,21 @@ def run() -> int:
 
 
 def main() -> int:
-    global _RCON, _UNUM, CHAR_NAME, ROLE, OWNER, OWNERS
+    global _RCON, _UNUM, CHAR_NAME, ROLE, OWNER, OWNERS, DISTRICT
     ap = argparse.ArgumentParser(description="Project BRAIN companion driver (one per employee)")
     ap.add_argument("--name", default=CHAR_NAME, help="character/employee name this BRAIN drives")
     ap.add_argument("--role", default=ROLE, help="this employee's specialty (biases autonomous work)")
     ap.add_argument("--owner", default=OWNER, help="JJ's in-game handle")
+    ap.add_argument("--district", default=None, help="sandbox bbox 'x1,y1,x2,y2' — build ONLY inside it")
     args = ap.parse_args()
     CHAR_NAME, ROLE, OWNER = args.name, args.role, args.owner
     OWNERS = (OWNER, "IdBaj98")
-    print(f"[companion_brain] name={CHAR_NAME} role='{ROLE}' owner={OWNER}", flush=True)
+    if args.district:
+        try:
+            DISTRICT = tuple(float(v) for v in args.district.split(","))
+        except Exception:  # noqa: BLE001
+            DISTRICT = None
+    print(f"[companion_brain] name={CHAR_NAME} role='{ROLE}' owner={OWNER} district={DISTRICT}", flush=True)
     os.environ["FACTORIO_RCON_PASSWORD"] = _resolve_rcon_password()
     _load_learned()   # restore any custom actions the companion invented before
     # Wait for the game/RCON to be up before starting (so it can be launched while the
