@@ -275,11 +275,14 @@ to speak: (a) use the `request` action to ask JJ for materials (it messages him 
 (b) answer a direct question he asks YOU by name. If JJ pings/says something not specifically
 for you, stay silent and keep building — don't all reply to the same message.
 
-REQUEST DISCIPLINE (critical — JJ delivers BY HAND, he can't keep up): make ONE consolidated
-`request` listing EVERYTHING your line needs at once (multi-item), in MODEST amounts, then WAIT
-and build with what arrives. Do NOT re-request — asking again for the same item does nothing and
-just spams him. Only request something genuinely NEW. Between deliveries, keep placing/wiring
-what you already have; be patient with materials.
+REQUEST DISCIPLINE (critical — JJ delivers BY HAND, so FEW requests, each with MANY items):
+Think through your WHOLE line, then send ONE request listing ALL the machines AND materials it
+needs, together, with generous amounts. Example for a steel line:
+  {"type":"request","items":{"electric-furnace":8,"wood":200,"coal":100,"iron-plate":400,"transport-belt":40,"inserter":20,"iron-chest":6}}
+That is ONE request, not seven. After it, WAIT and build with what arrives — do NOT re-request
+the same items (it does nothing and spams JJ), and don't dribble out one item at a time. Only
+send another request much later for something genuinely new. Between deliveries, keep placing
+and wiring what you already have.
 
 Talk to JJ when it's useful: acknowledge his request, answer his questions, report a win,
 or a quick quip. Keep it to one short sentence. Don't narrate every micro-action; NEVER
@@ -426,6 +429,30 @@ def _save_learned() -> None:
         pass
 
 
+def _requested_file() -> Path:
+    return _HERE / "requests" / f"{CHAR_NAME}.requested.json"
+
+
+def _load_requested() -> None:
+    """Persist the 'already requested' set across BRAIN restarts so an employee never
+    re-asks JJ for the same item just because its process restarted."""
+    global _REQUESTED
+    try:
+        f = _requested_file()
+        if f.exists():
+            _REQUESTED = json.loads(f.read_text(encoding="utf-8"))
+    except Exception:  # noqa: BLE001
+        _REQUESTED = {}
+
+
+def _save_requested() -> None:
+    try:
+        (_HERE / "requests").mkdir(exist_ok=True)
+        _requested_file().write_text(json.dumps(_REQUESTED), encoding="utf-8")
+    except Exception:  # noqa: BLE001
+        pass
+
+
 # --- safe primitives (real items only; crafter-inventory + character-exclusion aware) ---
 def _prim_place(item: str, x, y, dir=0) -> None:
     item = _safe(item)
@@ -536,6 +563,7 @@ def act(action: dict, _depth: int = 0) -> None:
             new = {k: v for k, v in reqd.items() if k not in _REQUESTED}  # ONE-TIME: only new items
             if new:
                 _REQUESTED.update(new)
+                _save_requested()   # persist so a restart doesn't re-request
                 try:
                     rd = _HERE / "requests"; rd.mkdir(exist_ok=True)
                     (rd / f"{CHAR_NAME}.txt").write_text(
@@ -726,7 +754,8 @@ def main() -> int:
             DISTRICT = None
     print(f"[companion_brain] name={CHAR_NAME} role='{ROLE}' owner={OWNER} district={DISTRICT}", flush=True)
     os.environ["FACTORIO_RCON_PASSWORD"] = _resolve_rcon_password()
-    _load_learned()   # restore any custom actions the companion invented before
+    _load_learned()     # restore any custom actions the companion invented before
+    _load_requested()   # restore what this employee already asked JJ for (no re-requesting)
     # Wait for the game/RCON to be up before starting (so it can be launched while the
     # game is down and just connect when JJ hosts) instead of crashing on startup.
     while True:

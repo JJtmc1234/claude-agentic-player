@@ -35,6 +35,7 @@ thoughts.txt
 
 # Project BRAIN runtime state (regenerated at run time)
 bridge/agent/team_status/
+bridge/agent/requests/
 bridge/agent/learned_actions.json
 bridge/agent/base.json
 
