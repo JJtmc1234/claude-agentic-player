@@ -1,9 +1,9 @@
 {
   "name": "claude-companion",
-  "version": "0.12.4",
+  "version": "0.12.5",
   "title": "Claude Companion",
   "author": "Claude + JJ",
-  "factorio_version": "2.1",
+  "factorio_version": "2.0",
   "description": "Server-side helpers for the Claude Agentic Player project. Buffers chat, drives free-standing characters (no player_index) with an on_tick action loop that implements walking-along-paths and mining, since the engine only ticks those for player-controlled characters.",
-  "dependencies": ["base >= 2.1"]
+  "dependencies": ["base >= 2.0", "? Krastorio2", "? space-exploration"]
 }

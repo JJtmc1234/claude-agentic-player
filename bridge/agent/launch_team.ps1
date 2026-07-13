@@ -10,11 +10,12 @@ $env:ANTHROPIC_API_KEY = [Environment]::GetEnvironmentVariable('ANTHROPIC_API_KE
 $dir = "C:\Users\pmarc\OneDrive\Desktop\Projects\Claude Agentic Player"
 Set-Location $dir
 
+# K2SE, NO enemies -> no defender role. Use the modpack's real recipes/entities (query live).
 $team = @(
-  @{ name = 'miner';   role = 'Mine and haul raw resources (iron, copper, coal, stone / rocks) and keep supply chests stocked for the team.' },
-  @{ name = 'smelter'; role = 'Smelt ore into iron/copper plates: build and feed burner furnaces, keep them fueled, bank plates.' },
-  @{ name = 'builder'; role = 'Build and expand the base: power (pump/boilers/engines/poles), assemblers, labs, belts, and a mall.' },
-  @{ name = 'gunner';  role = 'Defense: stay armed and equipped, kill biters, wall the base, and protect JJ and the other workers.' }
+  @{ name = 'miner';    role = 'Mine and haul raw resources and keep supply chests stocked for the team (use the modpack''s actual ores/drills).' },
+  @{ name = 'smelter';  role = 'Smelt ore into plates: build + fuel + feed the modpack''s furnaces, keep the plate supply full.' },
+  @{ name = 'builder';  role = 'Build and expand the base: power, assemblers, labs, belts, and a mall (clean + organized).' },
+  @{ name = 'engineer'; role = 'Advanced production + science: circuits, K2 mid-game chains, science packs, and driving research up the tech tree.' }
 )
 
 foreach ($e in $team) {
