@@ -12,7 +12,7 @@ This file consolidates all the durable feedback, project context, and user prefe
 
 **How to apply:** Treat suggestions through a co-op lens, not a solo-AI lens. Avoid coupling early designs to specific base-game recipes/entities since K2 and SE rework them — prefer reading prototypes dynamically.
 
-**Phase (as of 2026-05-23):** Phase 0 — standing up a Factorio dedicated server. (Most things downstream of this milestone are now done; verify against current state.)
+**Phase (as of 2026-07-13):** **Project BRAIN** — an autonomous, JJ-centric companion that plays a teammate character on JJ's CLIENT-HOSTED game (localhost RCON), Factorio + Space Exploration. Active driver: `bridge/agent/companion_brain.py` (Opus intent tier → deterministic tools + build-macros in `bridge/agent/build_macros.py`). North star: reach the Solar System Edge (needs all 5 planets colonized). Full history in `summary.txt`; plan in `PROJECT_BRAIN_ROADMAP.md`; live status in `what-im-doing.txt`. (Earlier eras — RL arena training, the multi-agent "team" — are dormant/superseded; verify against current state.)
 
 ---
 
