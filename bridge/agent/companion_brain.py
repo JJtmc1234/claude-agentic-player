@@ -275,6 +275,12 @@ to speak: (a) use the `request` action to ask JJ for materials (it messages him 
 (b) answer a direct question he asks YOU by name. If JJ pings/says something not specifically
 for you, stay silent and keep building — don't all reply to the same message.
 
+REQUEST DISCIPLINE (critical — JJ delivers BY HAND, he can't keep up): make ONE consolidated
+`request` listing EVERYTHING your line needs at once (multi-item), in MODEST amounts, then WAIT
+and build with what arrives. Do NOT re-request — asking again for the same item does nothing and
+just spams him. Only request something genuinely NEW. Between deliveries, keep placing/wiring
+what you already have; be patient with materials.
+
 Talk to JJ when it's useful: acknowledge his request, answer his questions, report a win,
 or a quick quip. Keep it to one short sentence. Don't narrate every micro-action; NEVER
 repeat the same line twice in a row (if you already said you're on it, stay quiet and act).
@@ -323,7 +329,7 @@ Primitives (compose these freely):
   {"type":"take","x":N,"y":N,"item":"...","count":N,"slot":"output|fuel|chest"}     out of a machine there
   {"type":"craft","recipe":"...","count":N}
   {"type":"set_recipe","recipe":"...","x":N,"y":N}     set an assembling-machine's recipe (after placing it)
-  {"type":"request","item":"...","count":N}           ask the manager to deliver a resource into the district
+  {"type":"request","items":{"iron-plate":200,"wood":100}}  ask JJ ONCE for materials (multi-item, one message)
   {"type":"research","tech":"..."}
   {"type":"fetch","item":"...","count":N}             gather item + deliver it to JJ
   {"type":"equip"}                                     wear/wield any combat gear you have
@@ -377,6 +383,7 @@ def decide(client, state: dict, fresh_chat: list, ping_is_new: bool, mission: st
 # EXECUTE — carry out the decided action with tools + macros
 # ---------------------------------------------------------------------------
 _LAST_SAY = {"t": 0.0, "msg": ""}
+_REQUESTED: dict = {}   # item -> count already requested (so a request is made ONCE, no spam)
 
 
 def say(message: str) -> None:
@@ -507,14 +514,35 @@ def act(action: dict, _depth: int = 0) -> None:
                 f"for _,e in ipairs(s.find_entities_filtered{{position={{{float(action.get('x',0))},{float(action.get('y',0))}}},radius=1.4,type='assembling-machine'}}) do m=e break end; "
                 f"if m then local fr=c.force.recipes['{rec}']; if fr and fr.enabled then pcall(function() m.set_recipe('{rec}') end) end end")
         elif t == "request":
-            # can't spawn/mine -> ask JJ to deliver resources into the district (and tell him in chat)
-            it = _safe(action.get("item", "")); cnt = int(action.get("count", 100))
-            try:
-                rd = _HERE / "requests"; rd.mkdir(exist_ok=True)
-                (rd / f"{CHAR_NAME}.txt").write_text(f"{it} x{cnt} @{int(time.time())}\n", encoding="utf-8")
-            except Exception:  # noqa: BLE001
-                pass
-            say(f"request: {it} x{cnt} please")  # dedup'd -> won't spam the same request
+            # ask JJ to deliver resources (he delivers by HAND -> request each thing ONCE, in
+            # one consolidated message, then wait). Accepts a dict/list of items or a single one.
+            items = action.get("items")
+            reqd = {}
+            if isinstance(items, dict):
+                for k, v in items.items():
+                    k2 = _safe(k)
+                    if k2:
+                        reqd[k2] = int(v)
+            elif isinstance(items, list):
+                for it in items:
+                    if isinstance(it, dict):
+                        k2 = _safe(it.get("item", ""))
+                        if k2:
+                            reqd[k2] = int(it.get("count", 100))
+            else:
+                k2 = _safe(action.get("item", ""))
+                if k2:
+                    reqd[k2] = int(action.get("count", 100))
+            new = {k: v for k, v in reqd.items() if k not in _REQUESTED}  # ONE-TIME: only new items
+            if new:
+                _REQUESTED.update(new)
+                try:
+                    rd = _HERE / "requests"; rd.mkdir(exist_ok=True)
+                    (rd / f"{CHAR_NAME}.txt").write_text(
+                        "\n".join(f"{k} x{v}" for k, v in _REQUESTED.items()) + "\n", encoding="utf-8")
+                except Exception:  # noqa: BLE001
+                    pass
+                say("request: " + ", ".join(f"{k} x{v}" for k, v in new.items()))
         elif t == "fetch":
             # courier: top up `item` from nearby base chests, walk to JJ, deliver into his inventory
             item = _safe(action.get("item", "")); want = int(action.get("count", 10))
