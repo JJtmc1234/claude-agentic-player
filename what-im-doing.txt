@@ -1,7 +1,47 @@
 # what-im-doing.txt — live status (READ THIS AT EVERY SESSION START / AFTER COMPACT)
 # Updated: 2026-07-13. Paired with context.txt (stable), summary.txt (full history), CLAUDE.md.
 
->>> RESUME HERE (2026-07-13) — waiting for JJ's "server's up" (he's restarting). <<<
+>>> RESUME HERE (2026-07-13) — TEAM IS OFF. Killed a runaway; DO NOT relaunch until spawn-dedup fixed. <<<
+FIREFIGHT (2026-07-13): the district went to "madness" — ~30 brain processes were alive as
+python3.13.exe (NOT python.exe/pythonw.exe -> my process filters missed them all) plus a
+background "relaunch brain" task, all autonomously spawning chars + carpeting belts. KILLED all
+of them (match python* CommandLine ~ companion_brain|bridge.agent|launch_team, EXCLUDE $PID or the
+kill cmd self-terminates -> exit 255). Verified STABLE: 1 char (JJ un=8), 225 belts, no growth.
+CLEANUP DONE (JJ approved): destroyed only 0-item no-player chars (never any char with items);
+consolidated ALL employee-char inventory into an IRON-CHEST at (177,-161) via direct inventory
+move (chest cost 8 real iron-plate from a char, economy-honest). Belts KEPT per JJ. Chest holds:
+coal120 copper-cable116 electronic-circuit40 iron-gear-wheel187 iron-plate170 iron-stick36
+kr-automation-core12 wood48 +misc. Helper scripts: bridge/_district_scan.py, _destroy_empty_chars.py,
+_consolidate.py, _growth.py, _who_builds.py (all read/one-shot; _flatten() strips Lua -- comments
+before joining to one line — REQUIRED or the whole script gets commented out).
+JJ (2026-07-13, done playing for the night): "just have the one" + "just fixing/coding for the
+rest of the night" + "use your best judgment" (no more questions). So: single-companion mode,
+4-employee team PARKED, and I spent the night hardening the code below. Game is DOWN now (RCON
+refused) -> everything below is code-only, NOT tested in-game yet (verify when JJ next hosts).
+
+FIXES DONE TONIGHT (all compile-clean; singleton mutex verified across 2 procs):
+ 1. Process scripts now match python3.13.exe: stop_team.ps1 + cleanup_python.ps1 use Name -like
+    'python*' (was 'python.exe' only -> missed EVERY brain; that's why the runaway was unkillable).
+    Both exclude $PID (a self-match self-terminates -> exit 255).
+ 2. Spawn-dedup (companion_brain.py): _char_valid() helper; _resolve_unum step1+step2 now VALIDATE
+    the unum before reuse (list_chars hands back dead unums); _heal_companion no-ops if current
+    _UNUM is still a valid character (don't respawn on a transient perceive glitch); hard per-proc
+    spawn cap _SPAWN_COUNT/_MAX_SPAWNS=3.
+ 3. Singleton guard: _ensure_singleton() Windows named mutex (Global\claude_brain_<name>) in main()
+    -> a 2nd BRAIN of the same name exits immediately. Structural cap of one-per-name. VERIFIED.
+ 4. "just have the one": bridge/agent/launch_one.ps1 (cleanup -All then launch ONE 'companion',
+    no district). launch_team.ps1 PARKED (prints a notice + exit 0; 4-employee mode disabled).
+ 5. Anti-spam-building rule added to INTENT_SYSTEM: every placement needs a named purpose; belts
+    only as short real source->dest runs, never a carpet; check-before-place; prefer idle over filler.
+STILL TODO (durable, needs deploy+restart -> ASK JJ): make the mod's spawn_named_char idempotent
+and have list_chars drop invalid unums (belt-and-suspenders for #2). Also: re-verify no belt-spam
+with the live single companion; consider clearing the 225 district belts when the game is back
+(JJ waffled keep->annoyed; my judgment = clear them next time in-game).
+NOTE: game.get_entity_by_unit_number EXISTS (2.0.77); inv.get_contents() returns a LIST of
+{name,count,quality} NOT a map -> sum st.count. RCON pw in C:\FactorioServer\start-server.bat.
+Employee items are safe in an IRON-CHEST at (177,-161).
+
+>>> (older resume note) waiting for JJ's "server's up" (he's restarting). <<<
 RUN: 2.0 + Space Age + Krastorio 2 Spaced Out + Razi Protocol, NO enemies. CC 0.12.5 published.
 STATE: burner-city STARTER only — NO real automated base. Assemblers only smelt plates;
 everything past plates (K2 intermediates, tech cards, science) is HANDCRAFTED -> labs starve.

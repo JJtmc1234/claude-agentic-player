@@ -72,6 +72,26 @@ def _resolve_rcon_password() -> str:
 
 _RCON: RconClient | None = None
 _UNUM: int | None = None
+_SPAWN_COUNT = 0        # per-process spawns; hard-capped so a broken loop can't pile up chars
+_MAX_SPAWNS = 3
+_SINGLETON_HANDLE = None  # kept alive for the process lifetime so the named mutex is held
+
+
+def _ensure_singleton() -> None:
+    """Refuse to start if another BRAIN with this --name is already running. A Windows
+    named mutex is the canonical singleton: the OS releases it automatically when the
+    process dies, so there are no stale lockfiles. This STRUCTURALLY prevents the
+    process-pile runaway (2026-07-13: ~30 brains alive at once) no matter what a launcher
+    script does wrong. No-op off Windows."""
+    global _SINGLETON_HANDLE
+    if os.name != "nt":
+        return
+    import ctypes
+    k32 = ctypes.windll.kernel32
+    _SINGLETON_HANDLE = k32.CreateMutexW(None, False, f"Global\\claude_brain_{CHAR_NAME}")
+    if k32.GetLastError() == 183:  # ERROR_ALREADY_EXISTS
+        print(f"[singleton] a BRAIN named '{CHAR_NAME}' is already running -> exiting.", flush=True)
+        sys.exit(0)
 
 
 def _rc(lua: str) -> str:
@@ -308,6 +328,13 @@ retreat toward JJ / the base — don't die. Build turret defenses when asked.
 
 RULES: CRAFT/PLACE real items only (never spawn). Only build unlocked recipes. No power yet
 means burner machines + burner inserters.
+
+NO SPAM-BUILDING (important — this ruined the base once). Every placement needs a concrete
+purpose you can name (this belt carries X from A to B; this machine makes Y). Do NOT lay belts
+or drop machines just to look busy or "expand". Belts only make sense as a SHORT run connecting
+a real source to a real destination that both already exist — never a sprawling carpet. Before
+placing anything, check it isn't already there. If you have no purposeful build and JJ isn't
+directing you, prefer `idle` or a small useful chore over inventing filler construction.
 
 YOU CAN DESIGN YOUR OWN ACTIONS. You are NOT limited to the presets — compose the PRIMITIVES
 below into a `plan` (an ordered list of steps) to build or do anything JJ asks. If you invent
@@ -650,28 +677,45 @@ def _save_unum(u) -> None:
         pass
 
 
+def _char_valid(u) -> bool:
+    """True iff unit_number u is a currently-valid character entity. The mod's list_chars
+    can hand back DEAD unums (it never drops chars from its name->unum map on death), so
+    EVERY reuse path must validate before trusting a unum — skipping this is what let the
+    2026-07-13 char-pile snowball (dead unum -> perceive fails -> heal respawns -> repeat)."""
+    try:
+        return _rc(f"local c=game.get_entity_by_unit_number({int(u)}); "
+                   "rcon.print((c and c.valid and c.type=='character') and 'y' or 'n')") == "y"
+    except Exception:  # noqa: BLE001
+        return False
+
+
 def _resolve_unum() -> int:
     """Idempotent: reuse this employee's saved character if it's still alive (keeps its
-    items, never spawns a duplicate). Only spawn if there is genuinely no char yet."""
+    items, never spawns a duplicate). Only spawn if there is genuinely no VALID char yet."""
+    global _SPAWN_COUNT
     # 1. saved unit_number still a valid character? reuse it.
     try:
         f = _unum_state_file()
         if f.exists():
             su = f.read_text(encoding="utf-8").strip()
-            if su.isdigit():
-                v = _rc(f"local c=game.get_entity_by_unit_number({su}); "
-                        "rcon.print((c and c.valid and c.type=='character') and 'y' or 'n')")
-                if v == "y":
-                    return int(su)
+            if su.isdigit() and _char_valid(su):
+                return int(su)
     except Exception:  # noqa: BLE001
         pass
-    # 2. mod already tracks a char of this name? reuse + save.
+    # 2. mod tracks a char of this name AND it's still valid? reuse + save.
+    #    (validate! list_chars returns dead unums -> reusing one loops perceive->heal->spawn.)
     out = _rc("local ch=remote.call('claude','list_chars'); rcon.print(tostring(ch['" + CHAR_NAME + "']))")
-    if out.isdigit():
+    if out.isdigit() and _char_valid(out):
         _save_unum(out)
         return int(out)
-    # 3. no character exists -> spawn ONCE (in the district if set), then save its unum.
-    print("[resolve] no existing char found -> SPAWNING new one", flush=True)
+    # 3. no valid character exists -> spawn ONCE (in the district if set), then save its unum.
+    #    Hard cap: a wedged loop must never pile up characters again.
+    if _SPAWN_COUNT >= _MAX_SPAWNS:
+        raise RuntimeError(
+            f"spawn cap reached ({_MAX_SPAWNS}) for {CHAR_NAME}; refusing to spawn more "
+            "(check the mod / list_chars instead of respawning)")
+    _SPAWN_COUNT += 1
+    print(f"[resolve] no valid char found -> SPAWNING (#{_SPAWN_COUNT}/{_MAX_SPAWNS})", flush=True)
     if DISTRICT is not None:
         cx = (DISTRICT[0] + DISTRICT[2]) / 2.0
         cy = (DISTRICT[1] + DISTRICT[3]) / 2.0
@@ -685,12 +729,17 @@ def _resolve_unum() -> int:
 
 
 def _heal_companion() -> None:
-    """Companion died or its unit_number went stale -> re-resolve (find or respawn near JJ)."""
+    """Companion died or its unit_number went stale -> re-resolve (find or respawn).
+    GUARD: if the current _UNUM is STILL a valid character, perceive just glitched (a
+    transient RCON hiccup) -> do NOT respawn. Respawning on every glitch is exactly how
+    the char-pile snowballed on 2026-07-13."""
     global _UNUM
+    if _UNUM is not None and _char_valid(_UNUM):
+        return
     try:
         _UNUM = _resolve_unum()
-    except Exception:  # noqa: BLE001
-        pass
+    except Exception as e:  # noqa: BLE001
+        print(f"[heal] resolve failed: {e}", flush=True)
 
 
 def _reconnect() -> bool:
@@ -797,6 +846,7 @@ def main() -> int:
         except Exception:  # noqa: BLE001
             DISTRICT = None
     print(f"[companion_brain] name={CHAR_NAME} role='{ROLE}' owner={OWNER} district={DISTRICT}", flush=True)
+    _ensure_singleton()   # one BRAIN per name — hard stop against the process-pile runaway
     os.environ["FACTORIO_RCON_PASSWORD"] = _resolve_rcon_password()
     _load_learned()     # restore any custom actions the companion invented before
     _load_requested()   # restore what this employee already asked JJ for (no re-requesting)

@@ -1254,6 +1254,20 @@ local function spawn_named_char(name, position)
     return { ok = false, error = 'name must be a non-empty string' }
   end
   init_claude_chars()
+  -- IDEMPOTENT: if a VALID character is already tracked under this name, return it instead
+  -- of spawning a duplicate. Without this, a caller that retries (reconnect, heal loop) piles
+  -- up characters — that caused the 2026-07-13 char-pile. A stale (dead) unum falls through
+  -- to a real spawn below, overwriting the mapping.
+  local existing = storage.claude_chars[name]
+  if existing then
+    local e = game.get_entity_by_unit_number(existing)
+    if e and e.valid and e.type == 'character' then
+      return {
+        ok = true, name = name, reused = true, unit_number = e.unit_number,
+        position = { x = e.position.x, y = e.position.y },
+      }
+    end
+  end
   local s = game.surfaces['nauvis'] or game.surfaces[1]
   if not s then return { ok = false, error = 'no surface' } end
   local force = game.forces.player
@@ -1277,11 +1291,22 @@ local function spawn_named_char(name, position)
   }
 end
 
--- Return the name -> unit_number map (a fresh copy).
+-- Return the name -> unit_number map (a fresh copy), pruning DEAD unums as we go.
+-- The old version returned stale unums forever (chars are never dropped on death), so a
+-- caller reused a corpse's unum -> perceive failed -> respawn storm (2026-07-13). Now a dead
+-- entry is deleted from storage and omitted from the result, so callers only ever see LIVE chars.
 local function list_chars()
   init_claude_chars()
   local out = {}
-  for k, v in pairs(storage.claude_chars) do out[k] = v end
+  for k, v in pairs(storage.claude_chars) do
+    local e = game.get_entity_by_unit_number(v)
+    if e and e.valid and e.type == 'character' then
+      out[k] = v
+    else
+      storage.claude_chars[k] = nil
+      destroy_nametag(k)
+    end
+  end
   return out
 end
 
