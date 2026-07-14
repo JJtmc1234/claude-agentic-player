@@ -72,8 +72,10 @@ def _resolve_rcon_password() -> str:
 
 _RCON: RconClient | None = None
 _UNUM: int | None = None
-_SPAWN_COUNT = 0        # per-process spawns; hard-capped so a broken loop can't pile up chars
-_MAX_SPAWNS = 3
+_SPAWN_TIMES: list = []       # timestamps of recent spawns -> sliding-window rate limit
+_SPAWN_WINDOW_S = 60.0        # a runaway spawns many/second; legit respawns are spread out,
+_SPAWN_MAX_IN_WINDOW = 3      # so cap by RATE, not lifetime (a lifetime cap would wedge a
+                              # single companion after 3 real deaths over a long session).
 _SINGLETON_HANDLE = None  # kept alive for the process lifetime so the named mutex is held
 
 
@@ -692,7 +694,6 @@ def _char_valid(u) -> bool:
 def _resolve_unum() -> int:
     """Idempotent: reuse this employee's saved character if it's still alive (keeps its
     items, never spawns a duplicate). Only spawn if there is genuinely no VALID char yet."""
-    global _SPAWN_COUNT
     # 1. saved unit_number still a valid character? reuse it.
     try:
         f = _unum_state_file()
@@ -709,13 +710,17 @@ def _resolve_unum() -> int:
         _save_unum(out)
         return int(out)
     # 3. no valid character exists -> spawn ONCE (in the district if set), then save its unum.
-    #    Hard cap: a wedged loop must never pile up characters again.
-    if _SPAWN_COUNT >= _MAX_SPAWNS:
+    #    Rate limit: a wedged loop must never pile up characters again, but legitimate respawns
+    #    (spread over time) must still work.
+    now = time.time()
+    _SPAWN_TIMES[:] = [t for t in _SPAWN_TIMES if now - t < _SPAWN_WINDOW_S]
+    if len(_SPAWN_TIMES) >= _SPAWN_MAX_IN_WINDOW:
         raise RuntimeError(
-            f"spawn cap reached ({_MAX_SPAWNS}) for {CHAR_NAME}; refusing to spawn more "
-            "(check the mod / list_chars instead of respawning)")
-    _SPAWN_COUNT += 1
-    print(f"[resolve] no valid char found -> SPAWNING (#{_SPAWN_COUNT}/{_MAX_SPAWNS})", flush=True)
+            f"spawn rate limit for {CHAR_NAME}: {_SPAWN_MAX_IN_WINDOW} spawns in "
+            f"{_SPAWN_WINDOW_S:.0f}s — refusing (check the mod / list_chars, not respawning)")
+    _SPAWN_TIMES.append(now)
+    print(f"[resolve] no valid char found -> SPAWNING "
+          f"({len(_SPAWN_TIMES)}/{_SPAWN_MAX_IN_WINDOW} in last {_SPAWN_WINDOW_S:.0f}s)", flush=True)
     if DISTRICT is not None:
         cx = (DISTRICT[0] + DISTRICT[2]) / 2.0
         cy = (DISTRICT[1] + DISTRICT[3]) / 2.0
