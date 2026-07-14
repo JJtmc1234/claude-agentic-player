@@ -275,14 +275,13 @@ to speak: (a) use the `request` action to ask JJ for materials (it messages him 
 (b) answer a direct question he asks YOU by name. If JJ pings/says something not specifically
 for you, stay silent and keep building — don't all reply to the same message.
 
-REQUEST DISCIPLINE (critical — JJ delivers BY HAND, so FEW requests, each with MANY items):
-Think through your WHOLE line, then send ONE request listing ALL the machines AND materials it
-needs, together, with generous amounts. Example for a steel line:
-  {"type":"request","items":{"electric-furnace":8,"wood":200,"coal":100,"iron-plate":400,"transport-belt":40,"inserter":20,"iron-chest":6}}
-That is ONE request, not seven. After it, WAIT and build with what arrives — do NOT re-request
-the same items (it does nothing and spams JJ), and don't dribble out one item at a time. Only
-send another request much later for something genuinely new. Between deliveries, keep placing
-and wiring what you already have.
+GET YOUR OWN MATERIALS (don't wait on JJ — he can't hand-deliver fast enough): FIND and TAKE
+what you need from the EXISTING factory. Use `grab` to pull items off belts and out of chests
+ANYWHERE in the base (taking from belts is fine + expected), and `craft` intermediates from
+ingredients you've gathered. Typical flow: `grab` the item (it walks you to the nearest belt/
+chest that has it) -> once you have enough, come back and place/wire it in your district. Prefer
+grabbing raw feed (plates, wood, coal, gears, circuits) and crafting up from there. Only use
+`request` as a LAST RESORT for something genuinely not present anywhere in the base.
 
 Talk to JJ when it's useful: acknowledge his request, answer his questions, report a win,
 or a quick quip. Keep it to one short sentence. Don't narrate every micro-action; NEVER
@@ -331,8 +330,9 @@ Primitives (compose these freely):
   {"type":"insert","x":N,"y":N,"item":"...","count":N,"slot":"fuel|input|chest"}   into a machine there
   {"type":"take","x":N,"y":N,"item":"...","count":N,"slot":"output|fuel|chest"}     out of a machine there
   {"type":"craft","recipe":"...","count":N}
+  {"type":"grab","item":"...","count":N}              take item off nearby belts/chests (walks to nearest source) — SELF-SERVE
   {"type":"set_recipe","recipe":"...","x":N,"y":N}     set an assembling-machine's recipe (after placing it)
-  {"type":"request","items":{"iron-plate":200,"wood":100}}  ask JJ ONCE for materials (multi-item, one message)
+  {"type":"request","items":{"iron-plate":200}}       LAST-RESORT: ask JJ for something not in the base
   {"type":"research","tech":"..."}
   {"type":"fetch","item":"...","count":N}             gather item + deliver it to JJ
   {"type":"equip"}                                     wear/wield any combat gear you have
@@ -535,6 +535,16 @@ def act(action: dict, _depth: int = 0) -> None:
             rec = _safe(action.get("recipe", "")); cnt = int(action.get("count", 1))
             _rc(f"local u={_UNUM}; local c=game.get_entity_by_unit_number(u); local fr=c.force.recipes['{rec}']; "
                 f"if fr and fr.enabled then remote.call('claude','craft',u,'{rec}',{cnt}) end")
+        elif t == "grab":
+            # self-serve: take `item` off nearby belts + out of nearby chests; if none in reach,
+            # walk toward the nearest belt/chest in the base that has it. (Allowed anywhere.)
+            item = _safe(action.get("item", "")); want = int(action.get("count", 50))
+            _rc(f"local u={_UNUM}; local c=game.get_entity_by_unit_number(u); local s=c.surface; local ci=c.get_main_inventory(); "
+                f"local item='{item}'; local want={want}; local got=0; "
+                "for _,e in ipairs(s.find_entities_filtered{type={'container','logistic-container'},position=c.position,radius=7}) do local inv=e.get_inventory(defines.inventory.chest); if inv then local av=inv.get_item_count(item); local tk=math.min(want-got,av); if tk>0 then local mv=ci.insert{name=item,count=tk}; if mv>0 then inv.remove{name=item,count=mv}; got=got+mv end end end; if got>=want then break end end; "
+                "if got<want then for _,e in ipairs(s.find_entities_filtered{type='transport-belt',position=c.position,radius=7}) do for li=1,2 do local tl=e.get_transport_line(li); local av=tl.get_item_count(item); local tk=math.min(want-got,av); if tk>0 then local rem=tl.remove_item{name=item,count=tk}; if rem and rem>0 then ci.insert{name=item,count=rem}; got=got+rem end end end; if got>=want then break end end end; "
+                "if got<want then local best,bd=nil,1e18; for _,e in ipairs(s.find_entities_filtered{type={'container','logistic-container','transport-belt'},position=c.position,radius=300}) do local has=false; if e.type=='transport-belt' then for li=1,2 do if e.get_transport_line(li).get_item_count(item)>0 then has=true end end else local inv=e.get_inventory(defines.inventory.chest); if inv and inv.get_item_count(item)>0 then has=true end end; if has then local dx=e.position.x-c.position.x;local dy=e.position.y-c.position.y;local d=dx*dx+dy*dy; if d<bd then bd=d;best=e end end end; if best and bd>36 then remote.call('claude','walk_to',u,best.position.x,best.position.y) end end; "
+                "rcon.print('grabbed '..got..' '..item)")
         elif t == "set_recipe":
             rec = _safe(action.get("recipe", ""))
             _rc(f"local u={_UNUM}; local c=game.get_entity_by_unit_number(u); local s=c.surface; local m=nil; "
@@ -628,16 +638,49 @@ def _mission() -> str:
     return "Help JJ and build a clean, automated base."
 
 
+def _unum_state_file() -> Path:
+    return _HERE / "state" / f"{CHAR_NAME}.unum"
+
+
+def _save_unum(u) -> None:
+    try:
+        (_HERE / "state").mkdir(exist_ok=True)
+        _unum_state_file().write_text(str(int(u)), encoding="utf-8")
+    except Exception:  # noqa: BLE001
+        pass
+
+
 def _resolve_unum() -> int:
+    """Idempotent: reuse this employee's saved character if it's still alive (keeps its
+    items, never spawns a duplicate). Only spawn if there is genuinely no char yet."""
+    # 1. saved unit_number still a valid character? reuse it.
+    try:
+        f = _unum_state_file()
+        if f.exists():
+            su = f.read_text(encoding="utf-8").strip()
+            if su.isdigit():
+                v = _rc(f"local c=game.get_entity_by_unit_number({su}); "
+                        "rcon.print((c and c.valid and c.type=='character') and 'y' or 'n')")
+                if v == "y":
+                    return int(su)
+    except Exception:  # noqa: BLE001
+        pass
+    # 2. mod already tracks a char of this name? reuse + save.
     out = _rc("local ch=remote.call('claude','list_chars'); rcon.print(tostring(ch['" + CHAR_NAME + "']))")
-    if not out.isdigit():
-        if DISTRICT is not None:
-            cx = (DISTRICT[0] + DISTRICT[2]) / 2.0
-            cy = (DISTRICT[1] + DISTRICT[3]) / 2.0
-            out = _rc(f"local r=remote.call('claude','spawn_named_char','{CHAR_NAME}',{{{cx},{cy}}}); rcon.print(tostring(r.unit_number))")
-        else:
-            out = _rc(f"local p=game.players['{OWNER}']; local pos=(p and ((p.character and p.character.position) or p.position)) or {{x=0,y=0}}; "
-                      f"local r=remote.call('claude','spawn_named_char','{CHAR_NAME}',{{pos.x+3,pos.y}}); rcon.print(tostring(r.unit_number))")
+    if out.isdigit():
+        _save_unum(out)
+        return int(out)
+    # 3. no character exists -> spawn ONCE (in the district if set), then save its unum.
+    print("[resolve] no existing char found -> SPAWNING new one", flush=True)
+    if DISTRICT is not None:
+        cx = (DISTRICT[0] + DISTRICT[2]) / 2.0
+        cy = (DISTRICT[1] + DISTRICT[3]) / 2.0
+        out = _rc(f"local r=remote.call('claude','spawn_named_char','{CHAR_NAME}',{{{cx},{cy}}}); rcon.print(tostring(r.unit_number))")
+    else:
+        out = _rc(f"local p=game.players['{OWNER}']; local pos=(p and ((p.character and p.character.position) or p.position)) or {{x=0,y=0}}; "
+                  f"local r=remote.call('claude','spawn_named_char','{CHAR_NAME}',{{pos.x+3,pos.y}}); rcon.print(tostring(r.unit_number))")
+    if out.isdigit():
+        _save_unum(out)
     return int(out)
 
 
@@ -679,6 +722,7 @@ def run() -> int:
         try:
             state = perceive()
             if not state.get("alive"):
+                print(f"[loop] perceive not-alive (raw={str(state.get('raw'))[:100]}) -> heal", flush=True)
                 _heal_companion()   # died or unum went stale -> re-find/respawn near JJ
                 time.sleep(CYCLE_SECONDS); continue
             if state.get("weapon_equipped"):
