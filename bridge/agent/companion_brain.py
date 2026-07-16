@@ -519,10 +519,19 @@ def _prim_move_inv(x, y, item, count, slot, take: bool) -> None:
         inv_expr = {"fuel": "ent.get_fuel_inventory()",
                     "input": "ent.get_inventory(defines.inventory.crafter_input or defines.inventory.furnace_source or defines.inventory.lab_input or 2)",
                     "chest": "ent.get_inventory(defines.inventory.chest)"}.get(slot, "ent.get_inventory(defines.inventory.chest)")
+    # chest ops: coords are often imprecise, so snap to the NEAREST chest within a wide radius
+    # (tight 0.7 lookup made inserts silently miss). Machines keep the tight exact-tile lookup.
+    if slot == "chest":
+        find = (f"local cand=s.find_entities_filtered{{position={{{float(x)},{float(y)}}},radius=12,"
+                "type={'container','logistic-container'}}; local ent=nil; local bd=1e18; "
+                f"for _,e in ipairs(cand) do if e.valid then local d=(e.position.x-{float(x)})^2+(e.position.y-{float(y)})^2; "
+                "if d<bd then bd=d; ent=e end end end; ")
+    else:
+        find = (f"local cand=s.find_entities_filtered{{position={{{float(x)},{float(y)}}},radius=0.7}}; local ent=nil; "
+                "for _,e in ipairs(cand) do if e.valid and e.type~='character' and e.get_inventory then ent=e break end end; ")
     lua = (
         f"local u={_UNUM}; local c=game.get_entity_by_unit_number(u); local s=c.surface; local ci=c.get_main_inventory(); "
-        f"local cand=s.find_entities_filtered{{position={{{float(x)},{float(y)}}},radius=0.7}}; local ent=nil; "
-        "for _,e in ipairs(cand) do if e.valid and e.type~='character' and e.get_inventory then ent=e break end end; "
+        + find +
         "if not ent then return end; "
         f"local inv={inv_expr}; if not inv then return end; ")
     if take:
