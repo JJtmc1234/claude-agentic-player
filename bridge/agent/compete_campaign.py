@@ -31,17 +31,13 @@ _SETUP = _HERE / "setup_arena.py"
 # mode 'mine' = deterministic raw gather; mode 'build' = LLM builds a real production line.
 # It climbs from raw materials into a "true factory" (plates -> intermediates), longer + harder.
 LADDER = [
-    ("copper-ore",         60, "copper rush",   "mine",  100),
-    ("coal",               60, "coal rush",     "mine",  100),
-    ("stone",              60, "stone rush",    "mine",  100),
-    ("iron-ore",          100, "iron surge",    "mine",  140),
-    ("iron-plate",         40, "smelt iron",    "build", 300),
-    ("copper-plate",       40, "smelt copper",  "build", 300),
-    ("iron-gear-wheel",    25, "gear works",    "build", 300),
-    ("stone-brick",        30, "brick kiln",    "build", 300),
-    ("electronic-circuit", 15, "circuit board", "build", 360),
+    ("iron-plate",         10, "smelt iron",    "build", 240),
+    ("copper-plate",       10, "smelt copper",  "build", 240),
+    ("stone-brick",        10, "brick kiln",    "build", 240),
+    ("iron-gear-wheel",     8, "gear works",    "build", 260),
+    ("electronic-circuit",  5, "circuit board", "build", 300),
 ]
-GAP_SECS = 8           # breather between rounds
+GAP_SECS = 6           # breather between rounds
 
 
 def main() -> int:

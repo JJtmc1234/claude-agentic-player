@@ -92,7 +92,9 @@ def _produced_lua(item: str) -> str:
         "  if f then n=0;"
         "    for _,e in ipairs(surf.find_entities_filtered{force=fn}) do if e.valid then"
         "      local ok,inv=pcall(function() return e.get_main_inventory() end);"
-        "      if ok and inv then n=n+inv.get_item_count(item) end end end end;"
+        "      if ok and inv then n=n+inv.get_item_count(item) end;"
+        "      local ok2,o=pcall(function() return e.get_output_inventory() end);"
+        "      if ok2 and o then n=n+o.get_item_count(item) end end end end;"
         "  out[fn]=n end;"
         "rcon.print(helpers.table_to_json(out))"
     )
@@ -148,6 +150,7 @@ def _race_directive(item: str, goal: int, round_name: str, mode: str = "mine") -
             "  assembler). Chain whatever the target needs.\n"
             f"- Win = your force holds >= {goal} {item}. WORK relentlessly — mine, place machines,\n"
             "  fuel, feed, craft. Never idle. Build the shortest line that yields the item.\n"
+            "- Keep it CLEAN: tidy rows, machines aligned, short inserter/belt hops, no clutter.\n"
             "- Verify real recipe/item names live (K2 Spaced Out modpack, not vanilla). Only\n"
             "  unlocked recipes; never spawn — build/craft for real. Work in YOUR corner only.\n"
             "- JJ STILL COMES FIRST: if JJ pings/asks, help him, then resume.\n"
