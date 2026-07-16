@@ -195,9 +195,22 @@ local equipped_gun = ag and ag[1] and ag[1].valid_for_read or false
 local aa=c.get_inventory(defines.inventory.character_ammo)
 local equipped_ammo = aa and aa[1] and aa[1].valid_for_read or false
 local armed = (hasgun and hasammo) or (equipped_gun and equipped_ammo)
+-- MY machines near me (so the brain can RETRIEVE their output + keep them fed)
+local mine={}
+for _,e in ipairs(s.find_entities_filtered{force=c.force,position=c.position,radius=40}) do
+  local tp=e.type
+  if tp=='furnace' or tp=='assembling-machine' then
+    local outn,outc='',0
+    local o=e.get_output_inventory()
+    if o then for _,it in pairs(o.get_contents()) do if type(it)=='table' and it.count and it.count>outc then outn=it.name; outc=it.count end end end
+    local coal=-1; local fu=e.get_fuel_inventory(); if fu then coal=fu.get_item_count('coal') end
+    mine[#mine+1]={name=e.name,type=tp,x=math.floor(e.position.x),y=math.floor(e.position.y),out=outn,out_count=outc,coal=coal,status=tostring(e.status)}
+    if #mine>=12 then break end
+  end
+end
 rcon.print(helpers.table_to_json({
   alive=true, x=math.floor(c.position.x), y=math.floor(c.position.y), health=math.floor(c.health or 0),
-  inventory=items,
+  inventory=items, my_machines=mine,
   jj = jp and {x=math.floor(jp.x),y=math.floor(jp.y),holding=jjcursor,mining=jjmining,dist=jjdist} or nil,
   near_jj=nearjj, nearest_resource=res, threat=threat, have_weapon=armed, weapon_equipped=equipped_gun,
 }))
@@ -329,6 +342,13 @@ can fight. If a threat is close: WARN JJ ("biters east, ~30 tiles!"). If you're 
 then `attack` to fight alongside him or defend the base; if NOT armed or health is low,
 retreat toward JJ / the base — don't die. Build turret defenses when asked.
 
+TEND YOUR MACHINES + RETRIEVE OUTPUT (critical — a full machine stalls, and items stuck inside a
+machine do NOT count as yours). `my_machines` lists YOUR furnaces/assemblers near you with
+{out, out_count, coal, status}. Each turn: if out_count>0, TAKE that item from its output
+({"type":"take","x":..,"y":..,"item":"<out>","slot":"output"}) into your inventory. If coal is
+0/low on a burner machine, insert coal. If it's idle for lack of input, feed it ore/ingredients.
+Keep the loop cycling: mine -> feed -> fuel -> TAKE output. Never place a machine and walk away.
+
 RULES: CRAFT/PLACE real items only (never spawn). Only build unlocked recipes. No power yet
 means burner machines + burner inserters.
 
@@ -383,6 +403,7 @@ def decide(client, state: dict, fresh_chat: list, ping_is_new: bool, mission: st
                "pos": [state.get("x"), state.get("y")], "health": state.get("health"),
                "inventory": state.get("inventory", {}),
                "have_weapon": state.get("have_weapon"), "weapon_equipped": state.get("weapon_equipped")},
+        "my_machines": state.get("my_machines", []),
         "district": list(DISTRICT) if DISTRICT else None,
         "teammates": teammates,
         "jj": state.get("jj"),
