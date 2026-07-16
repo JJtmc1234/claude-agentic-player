@@ -830,14 +830,18 @@ def run() -> int:
                         "c.shooting_state={state=defines.shooting.shooting_enemies,position=c.position} end")
                 except Exception:  # noqa: BLE001
                     pass
-            # competition race mode overrides everything: gather the target item, LLM-free
+            # competition race mode. mine = deterministic LLM-free gather; build = LLM-driven
+            # (decide every cycle below) so it constructs a real factory for the item.
             race = _read_race()
+            build_race = False
             if race and race.get("active") and race.get("item"):
-                _run_race_step(_safe(race["item"]))
-                _write_team_status(state, "race:" + str(race["item"]))
-                dead = 0
-                time.sleep(CYCLE_SECONDS)
-                continue
+                if race.get("mode", "mine") == "mine":
+                    _run_race_step(_safe(race["item"]))
+                    _write_team_status(state, "race:" + str(race["item"]))
+                    dead = 0
+                    time.sleep(CYCLE_SECONDS)
+                    continue
+                build_race = True
             fresh_chat = read_chat()
             # watch-and-complement: which entities near JJ are NEW since last cycle
             cur_ids = {e["id"]: e for e in state.get("near_jj", [])}
@@ -861,7 +865,7 @@ def run() -> int:
             goal_changed = mission != last_mission
             last_mission = mission
             action_type = "idle"
-            if jj_event or goal_changed or cyc % AUTONOMOUS_EVERY == 0:
+            if jj_event or goal_changed or build_race or cyc % AUTONOMOUS_EVERY == 0:
                 teammates = _read_teammates()
                 d = decide(client, state, fresh_chat, ping_is_new, mission, teammates)
                 if ping_is_new:

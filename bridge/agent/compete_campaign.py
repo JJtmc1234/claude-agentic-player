@@ -27,42 +27,44 @@ _HERE = Path(__file__).resolve().parent
 _COMPETE = _HERE / "compete.py"
 _SETUP = _HERE / "setup_arena.py"
 
-# (item, goal, round_name) — escalating raw-material ladder toward a rocket's material base.
+# Road-to-Rocket ladder: (item, goal, round_name, mode, secs).
+# mode 'mine' = deterministic raw gather; mode 'build' = LLM builds a real production line.
+# It climbs from raw materials into a "true factory" (plates -> intermediates), longer + harder.
 LADDER = [
-    ("copper-ore", 20, "copper start"),
-    ("coal",       20, "fuel run"),
-    ("stone",      20, "stone start"),
-    ("iron-ore",   40, "iron ramp"),
-    ("copper-ore", 60, "copper ramp"),
-    ("coal",       60, "fuel ramp"),
-    ("stone",      60, "brick stock"),
-    ("iron-ore",  120, "iron surge"),
-    ("wood",       40, "lumber run"),
+    ("copper-ore",         60, "copper rush",   "mine",  100),
+    ("coal",               60, "coal rush",     "mine",  100),
+    ("stone",              60, "stone rush",    "mine",  100),
+    ("iron-ore",          100, "iron surge",    "mine",  140),
+    ("iron-plate",         40, "smelt iron",    "build", 300),
+    ("copper-plate",       40, "smelt copper",  "build", 300),
+    ("iron-gear-wheel",    25, "gear works",    "build", 300),
+    ("stone-brick",        30, "brick kiln",    "build", 300),
+    ("electronic-circuit", 15, "circuit board", "build", 360),
 ]
-ROUND_SECS = 90        # per-round time cap
 GAP_SECS = 8           # breather between rounds
 
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="auto-advancing Road-to-Rocket race campaign")
     ap.add_argument("--once", action="store_true", help="one pass through the ladder then stop")
-    ap.add_argument("--secs", type=int, default=ROUND_SECS, help="per-round time cap")
+    ap.add_argument("--secs", type=int, default=0, help="override per-round time cap (0 = use ladder)")
     args = ap.parse_args()
 
     stage = 0
     try:
         while True:
-            for item, goal, name in LADDER:
+            for item, goal, name, mode, secs in LADDER:
                 stage += 1
+                cap = args.secs or secs
                 label = f"Road to Rocket #{stage}: {name}"
-                print(f"\n=== {label} — first to {goal} {item} ===", flush=True)
+                print(f"\n=== {label} — first to {goal} {item} ({mode}) ===", flush=True)
                 # FAIR STARTING LINE: reposition everyone to their identical corner centers so
                 # between-round drift doesn't hand a camper an advantage.
                 subprocess.run([sys.executable, str(_SETUP)], cwd=str(_HERE.parent.parent))
                 subprocess.run(
                     [sys.executable, str(_COMPETE),
                      "--item", item, "--goal", str(goal), "--round", label,
-                     "--secs", str(args.secs)],
+                     "--mode", mode, "--secs", str(cap)],
                     cwd=str(_HERE.parent.parent),
                 )
                 subprocess.run([sys.executable, str(_COMPETE), "--standings"],

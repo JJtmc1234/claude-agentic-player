@@ -134,8 +134,25 @@ def standings_str(st: dict) -> str:
 # ---------------------------------------------------------------------------
 # goal.txt swap (the race directive the brains read each cycle)
 # ---------------------------------------------------------------------------
-def _race_directive(item: str, goal: int, round_name: str) -> str:
+def _race_directive(item: str, goal: int, round_name: str, mode: str = "mine") -> str:
     label = round_name or f"first to {item}"
+    if mode == "build":
+        return (
+            "*** AGENT COMPETITION — FACTORY RACE (overrides your normal role) ***\n"
+            f"ROUND: {label}\n"
+            f"CHALLENGE: be the FIRST to have {goal} x {item} for your force. This needs a REAL\n"
+            "little factory — BUILD it in YOUR corner as fast as you can:\n"
+            "- Your corner has raw iron/copper/coal/stone/water/oil/trees. To make PLATES: mine\n"
+            "  ore, place stone-furnaces, fuel them with coal, feed ore in, take plates out. To\n"
+            "  make intermediates (gears, cable, circuits): craft from plates (hand-craft or an\n"
+            "  assembler). Chain whatever the target needs.\n"
+            f"- Win = your force holds >= {goal} {item}. WORK relentlessly — mine, place machines,\n"
+            "  fuel, feed, craft. Never idle. Build the shortest line that yields the item.\n"
+            "- Verify real recipe/item names live (K2 Spaced Out modpack, not vanilla). Only\n"
+            "  unlocked recipes; never spawn — build/craft for real. Work in YOUR corner only.\n"
+            "- JJ STILL COMES FIRST: if JJ pings/asks, help him, then resume.\n"
+            f"GO — first to {goal} {item} wins!\n"
+        )
     return (
         "*** AGENT COMPETITION — LIVE RACE (overrides your normal role) ***\n"
         f"ROUND: {label}\n"
@@ -156,19 +173,19 @@ def _race_directive(item: str, goal: int, round_name: str) -> str:
     )
 
 
-def _set_race(item: str, goal: int, active: bool) -> None:
-    _RACE_FILE.write_text(json.dumps({"item": item, "goal": goal, "active": active}),
+def _set_race(item: str, goal: int, active: bool, mode: str = "mine") -> None:
+    _RACE_FILE.write_text(json.dumps({"item": item, "goal": goal, "active": active, "mode": mode}),
                           encoding="utf-8")
 
 
-def start_round(item: str, goal: int, round_name: str) -> None:
+def start_round(item: str, goal: int, round_name: str, mode: str = "mine") -> None:
     if not _BACKUP_FILE.exists():        # preserve the REAL goal only once (repeat starts are safe)
         try:
             _BACKUP_FILE.write_text(_GOAL_FILE.read_text(encoding="utf-8"), encoding="utf-8")
         except FileNotFoundError:
             _BACKUP_FILE.write_text("", encoding="utf-8")
-    _GOAL_FILE.write_text(_race_directive(item, goal, round_name), encoding="utf-8")
-    _set_race(item, goal, True)          # flip brains into deterministic race mode
+    _GOAL_FILE.write_text(_race_directive(item, goal, round_name, mode), encoding="utf-8")
+    _set_race(item, goal, True, mode)    # flip brains into race mode (mine=deterministic, build=LLM)
 
 
 def restore_goal() -> bool:
@@ -211,8 +228,11 @@ def main() -> int:
     ap.add_argument("--item", default="wood", help="target item for this round")
     ap.add_argument("--round", dest="round_name", default="", help="round label (e.g. 'chop a tree')")
     ap.add_argument("--goal", type=int, default=1, help="count needed to win the round (default 1)")
+    ap.add_argument("--mode", default="mine", choices=["mine", "build"],
+                    help="mine = deterministic gather; build = LLM builds a factory for the item")
     ap.add_argument("--secs", type=int, default=300, help="round time cap; unfinished forces get 0")
-    ap.add_argument("--poll", type=float, default=2.0, help="seconds between score reads")
+    ap.add_argument("--poll", type=float, default=0.5, help="seconds between score reads (fine "
+                    "polling captures real finish order instead of bucketing ties)")
     ap.add_argument("--chat-every", type=float, default=20.0, help="seconds between in-game posts")
     ap.add_argument("--standings", action="store_true", help="print cumulative standings and exit")
     ap.add_argument("--reset", action="store_true", help="clear standings (new tournament) and exit")
@@ -238,8 +258,8 @@ def main() -> int:
     rnd = args.round_name
     is_tty = sys.stdout.isatty()
 
-    start_round(item, goal, rnd)
-    print(f"[compete] round '{rnd or item}' started: first to {goal} x {item}.", flush=True)
+    start_round(item, goal, rnd, args.mode)
+    print(f"[compete] round '{rnd or item}' ({args.mode}) started: first to {goal} x {item}.", flush=True)
 
     baseline: dict = {}
     finished: list = []            # names in the order they crossed the goal
@@ -263,10 +283,14 @@ def main() -> int:
                 scores = {n: (raw[n] - baseline.get(n, 0)) if raw[n] >= 0 else -1 for n in CONTESTANTS}
                 elapsed = time.time() - t0
 
-                for n in CONTESTANTS:                       # record finishers in crossing order
-                    if n not in finished and scores[n] >= goal:
-                        finished.append(n)
-                        _say(rcon, f"{n} finishes #{len(finished)}! (+{POINTS[min(len(finished)-1,3)]})")
+                # record newly-finished contestants; within a single poll, rank by actual score
+                # (more of the item = higher) so a fixed list order can't systematically bias ties
+                # toward the same names (that's what buried builder/scout).
+                newly = [n for n in CONTESTANTS if n not in finished and scores[n] >= goal]
+                newly.sort(key=lambda n: scores[n], reverse=True)
+                for n in newly:
+                    finished.append(n)
+                    _say(rcon, f"{n} finishes #{len(finished)}! (+{POINTS[min(len(finished)-1,3)]})")
 
                 board = render(scores, finished, goal, item, rnd, elapsed)
                 if is_tty:
