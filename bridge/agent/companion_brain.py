@@ -687,7 +687,10 @@ def _read_race() -> dict | None:
 
 
 def _run_race_step(item: str) -> None:
-    """One deterministic race tick: if not already mining, mine/walk to the nearest source."""
+    """One deterministic race tick: STRICT on-patch gathering — if not already mining, mine/walk
+    to the nearest source of EXACTLY `item` (or the nearest tree for wood). No rock fallback and
+    no wandering, so a race stays on the intended patch and is fair across identical corners.
+    `item` is already sanitized by the caller."""
     try:
         ms = _rc(f"local j=remote.call('claude','get_mining_status',{_UNUM}); "
                  "rcon.print(j and j.mining and '1' or '0')").strip()
@@ -695,7 +698,15 @@ def _run_race_step(item: str) -> None:
         ms = "0"
     if ms == "1":
         return  # a mining job is in progress -> let it finish
-    act({"type": "mine", "resource": item})
+    _rc(
+        f"local u={_UNUM}; local c=game.get_entity_by_unit_number(u); if not(c and c.valid) then return end;"
+        f"local s=c.surface; local item='{item}'; local best,bd=nil,1e18; local es;"
+        "if item=='wood' or item=='tree' then es=s.find_entities_filtered{type='tree',position=c.position,radius=250} "
+        "elseif prototypes.entity[item] then es=s.find_entities_filtered{name=item,position=c.position,radius=250} else es={} end;"
+        "for _,e in ipairs(es) do local d=(e.position.x-c.position.x)^2+(e.position.y-c.position.y)^2; if d<bd then bd=d;best=e end end;"
+        "if best then local r=remote.call('claude','start_mining',u,best.position.x,best.position.y); "
+        "if not(r and r.ok) then remote.call('claude','walk_to',u,best.position.x,best.position.y) end end"
+    )
 
 
 def _unum_state_file() -> Path:
