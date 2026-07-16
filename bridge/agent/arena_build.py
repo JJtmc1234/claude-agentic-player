@@ -28,28 +28,31 @@ EXTENT = 640                       # half-length of each cross arm (covers gener
 VOID_SEG = 128                     # tiles per set_tiles batch along the arm
 TREE = "tree-01"
 
-# quadrant centers (name -> corner). resources placed within ~48 tiles of center.
+# quadrant centers (name -> corner). big patches clustered ~45-65 tiles around each center.
 CORNERS = {
     "miner":   (150, 150),         # +x +y
     "courier": (-150, 150),        # -x +y
     "builder": (-150, -150),       # -x -y
     "scout":   (150, -150),        # +x -y
 }
-# resource offsets from a corner center (kept clear of the void; ~40-60 tiles apart)
+# resource offsets from a corner center (kept clear of the void; well-separated big patches)
 LAYOUT = {
-    "iron-ore":  (-30, -30),
-    "copper-ore": (30, -30),
-    "coal":      (-30, 30),
-    "stone":      (30, 30),
-    "water":      (0, -48),        # pond
-    "crude-oil":  (0, 48),
+    "iron-ore":  (-45, -45),
+    "copper-ore": (45, -45),
+    "coal":      (-45, 45),
+    "stone":      (45, 45),
+    "water":      (0, -65),         # pond
+    "crude-oil":  (0, 65),
     "trees":      (0, 0),
 }
-ORE_AMOUNT = 5000
-ORE_HALF = 5                       # ore blob is (2*ORE_HALF)^2 tiles ~ 10x10
-WATER_HALF = 4                     # 8x8 pond
-OIL_WELLS = 4
-OIL_AMOUNT = 400000
+GEN_RADIUS = 7                     # chunks to force-generate around each corner (~224 tiles)
+ORE_AMOUNT = 20000
+ORE_HALF = 16                      # ore blob is (2*ORE_HALF+1)^2 tiles ~ 33x33
+WATER_HALF = 10                    # 21x21 pond
+TREE_COUNT = 90
+TREE_SPREAD = 22                   # trees scattered over ~44x44
+OIL_WELLS = 9                      # 3x3 field
+OIL_AMOUNT = 500000
 
 
 def main() -> int:
@@ -114,12 +117,16 @@ def main() -> int:
 
     # 4) build each quadrant's resource patches
     for name, (cx, cy) in CORNERS.items():
+        # force-generate the corner's chunks so far-out placements land on real terrain
+        cmd(f"local s=game.surfaces['{SURF}']; s.request_to_generate_chunks({{{cx},{cy}}},{GEN_RADIUS});"
+            "s.force_generate_chunk_requests(); rcon.print('gen')", t=120)
         for res, (dx, dy) in LAYOUT.items():
             px, py = cx + dx, cy + dy
             if res == "trees":
                 out = cmd(
                     f"local s=game.surfaces['{SURF}']; local k=0;"
-                    f"for i=1,24 do local x={px}+((i*7)%13)-6; local y={py}+((i*5)%13)-6;"
+                    f"for i=1,{TREE_COUNT} do local x={px}+((i*13)%(2*{TREE_SPREAD}))-{TREE_SPREAD};"
+                    f"  local y={py}+((i*7)%(2*{TREE_SPREAD}))-{TREE_SPREAD};"
                     f"  local p=s.find_non_colliding_position('{TREE}',{{x,y}},4,0.5);"
                     f"  if p then s.create_entity{{name='{TREE}',position=p}}; k=k+1 end end;"
                     "rcon.print(k)")
@@ -134,7 +141,7 @@ def main() -> int:
                 print(f"    {name} water pond @ ({px},{py})")
             elif res == "crude-oil":
                 out = cmd(f"local s=game.surfaces['{SURF}']; local k=0;"
-                          f"for i=0,{OIL_WELLS-1} do local x={px}+(i%2)*3; local y={py}+math.floor(i/2)*3;"
+                          f"for i=0,{OIL_WELLS-1} do local x={px}+(i%3)*4; local y={py}+math.floor(i/3)*4;"
                           f"  for _,e in pairs(s.find_entities_filtered{{area={{{{x-1,y-1}},{{x+1,y+1}}}}}}) do if e.valid and e.type~='character' then e.destroy() end end;"
                           f"  local p=s.find_non_colliding_position('crude-oil',{{x,y}},3,1) or {{x,y}};"
                           f"  s.create_entity{{name='crude-oil',position=p,amount={OIL_AMOUNT}}}; k=k+1 end;"
@@ -154,8 +161,8 @@ def main() -> int:
     for name, (cx, cy) in CORNERS.items():
         out = cmd(f"local s=game.surfaces['{SURF}']; local o={{}};"
                   f"for _,rn in ipairs({{'iron-ore','copper-ore','coal','stone','crude-oil'}}) do"
-                  f"  o[rn]=#s.find_entities_filtered{{name=rn,area={{{{{cx-60},{cy-60}}},{{{cx+60},{cy+60}}}}}}} end;"
-                  f"  o.trees=#s.find_entities_filtered{{type='tree',area={{{{{cx-60},{cy-60}}},{{{cx+60},{cy+60}}}}}}};"
+                  f"  o[rn]=#s.find_entities_filtered{{name=rn,area={{{{{cx-120},{cy-120}}},{{{cx+120},{cy+120}}}}}}} end;"
+                  f"  o.trees=#s.find_entities_filtered{{type='tree',area={{{{{cx-120},{cy-120}}},{{{cx+120},{cy+120}}}}}}};"
                   "rcon.print(helpers.table_to_json(o))")
         print(f"[verify] {name}: {out}")
     print("[verify] void@(0,50):", cmd(f"rcon.print(game.surfaces['{SURF}'].get_tile(0,50).name)"))

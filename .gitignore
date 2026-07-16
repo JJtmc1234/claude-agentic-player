@@ -48,3 +48,5 @@ checkpoints/
 *.zip
 server-settings.json
 start-server.bat
+race.json
+compete_standings.json

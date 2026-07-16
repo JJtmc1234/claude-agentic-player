@@ -47,6 +47,7 @@ POINTS = [100, 50, 10, 0]            # 1st, 2nd, 3rd, 4th+
 _GOAL_FILE = _HERE / "goal.txt"
 _BACKUP_FILE = _HERE / "goal.race-backup.txt"
 _STANDINGS_FILE = _HERE / "compete_standings.json"
+_RACE_FILE = _HERE / "race.json"          # brains read this: {item,goal,active} -> race mode
 _ID_RE = re.compile(r"[^a-z0-9_-]")
 
 
@@ -74,12 +75,13 @@ def _say(rcon: RconClient, msg: str) -> None:
 
 
 # ---------------------------------------------------------------------------
-# scoring — one batched RCON read of each force's production of the target item
+# scoring — one batched RCON read of how much of the target item each force HOLDS
 #
-# JJ's rule: each employee is its OWN force; a round is won when a force has produced >= 1 of
-# the target item (mined or refined). A force's item PRODUCTION STATISTICS input-count is exactly
-# that: total mined+crafted of an item, cumulative and un-gameable (dropping the item doesn't
-# lower it). We score the DELTA since round start so consecutive rounds don't need a stats reset.
+# JJ's rule: each employee is its OWN force; a round is won when "at least one (mined/refined)
+# item exists in their force." The mod mines by inserting items straight into inventory, which
+# does NOT register in force PRODUCTION STATISTICS -> we instead count the item across every
+# inventory owned by the force (its character + any chests it builds). We score the DELTA since
+# round start so a force's pre-round stock doesn't count.
 # ---------------------------------------------------------------------------
 def _produced_lua(item: str) -> str:
     forces = "{" + ",".join("'" + n + "'" for n in CONTESTANTS) + "}"
@@ -87,18 +89,17 @@ def _produced_lua(item: str) -> str:
         "local item='" + item + "'; local names=" + forces + ";"
         "local surf=game.surfaces['nauvis']; local out={};"
         "for _,fn in ipairs(names) do local f=game.forces[fn]; local n=-1;"
-        "  if f then"
-        "    local stats; local ok,s=pcall(function() return f.get_item_production_statistics(surf) end);"
-        "    if ok and s then stats=s else stats=f.item_production_statistics end;"
-        "    if stats then local ok2,cnt=pcall(function() return stats.get_input_count(item) end);"
-        "      n = (ok2 and cnt) or 0 end end;"
+        "  if f then n=0;"
+        "    for _,e in ipairs(surf.find_entities_filtered{force=fn}) do if e.valid then"
+        "      local ok,inv=pcall(function() return e.get_main_inventory() end);"
+        "      if ok and inv then n=n+inv.get_item_count(item) end end end end;"
         "  out[fn]=n end;"
         "rcon.print(helpers.table_to_json(out))"
     )
 
 
 def read_produced(rcon: RconClient, item: str) -> dict:
-    """Return {name: total_produced}; -1 means that force does not exist yet."""
+    """Return {name: item_held_by_force}; -1 means that force does not exist yet."""
     result = {n: -1 for n in CONTESTANTS}
     try:
         out = rcon.command("/silent-command " + _produced_lua(item)).strip()
@@ -155,6 +156,11 @@ def _race_directive(item: str, goal: int, round_name: str) -> str:
     )
 
 
+def _set_race(item: str, goal: int, active: bool) -> None:
+    _RACE_FILE.write_text(json.dumps({"item": item, "goal": goal, "active": active}),
+                          encoding="utf-8")
+
+
 def start_round(item: str, goal: int, round_name: str) -> None:
     if not _BACKUP_FILE.exists():        # preserve the REAL goal only once (repeat starts are safe)
         try:
@@ -162,10 +168,12 @@ def start_round(item: str, goal: int, round_name: str) -> None:
         except FileNotFoundError:
             _BACKUP_FILE.write_text("", encoding="utf-8")
     _GOAL_FILE.write_text(_race_directive(item, goal, round_name), encoding="utf-8")
+    _set_race(item, goal, True)          # flip brains into deterministic race mode
 
 
 def restore_goal() -> bool:
-    """Put the pre-race goal.txt back. Returns True if a backup was restored."""
+    """End race mode + put the pre-race goal.txt back. Returns True if a backup was restored."""
+    _set_race("", 0, False)              # brains leave race mode -> back to normal LLM loop
     if _BACKUP_FILE.exists():
         _GOAL_FILE.write_text(_BACKUP_FILE.read_text(encoding="utf-8"), encoding="utf-8")
         _BACKUP_FILE.unlink()

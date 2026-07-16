@@ -51,7 +51,8 @@ OWNERS = (OWNER, "IdBaj98")
 # ANYTHING, but must NOT modify anything outside. Set via --district. None = unbounded.
 DISTRICT = None
 CYCLE_SECONDS = 1.0                 # read chat + react EVERY SECOND (JJ wants snappy responses)
-AUTONOMOUS_EVERY = 15               # cycles between autonomous ticks when JJ is quiet (~15s)
+AUTONOMOUS_EVERY = 4                # cycles between autonomous ticks when JJ is quiet (~4s) —
+                                    # snappy enough to persistently pursue a competition goal
 
 # shared team blackboard: each BRAIN writes its own status file; all read the others' so
 # they coordinate (don't all mine the same tile / build the same thing).
@@ -545,11 +546,15 @@ def act(action: dict, _depth: int = 0) -> None:
             res = _safe(action.get("resource", "iron-ore"))
             _rc(f"local u={_UNUM}; local c=game.get_entity_by_unit_number(u); local s=c.surface; local res='{res}'; "
                 "local best,bd=nil,1e18; "
-                "for _,e in ipairs(s.find_entities_filtered{name=res,position=c.position,radius=250}) do local dx=e.position.x-c.position.x;local dy=e.position.y-c.position.y;local d=dx*dx+dy*dy;if d<bd then bd=d;best=e end end; "
+                # guard: find_entities_filtered{name=X} ERRORS if X isn't an entity prototype
+                # (e.g. 'wood' is an item, not an entity) -> only search by name when valid
+                "if prototypes.entity[res] then for _,e in ipairs(s.find_entities_filtered{name=res,position=c.position,radius=250}) do local dx=e.position.x-c.position.x;local dy=e.position.y-c.position.y;local d=dx*dx+dy*dy;if d<bd then bd=d;best=e end end end; "
                 # coal/stone also come from ROCKS — prefer huge-rock (gives coal), then big-rock
                 "if (not best or bd>60*60) and (res=='coal' or res=='stone') then local rb,rbd=nil,1e18; "
                 "for _,rn in ipairs({'huge-rock','big-rock','big-sand-rock'}) do for _,e in ipairs(s.find_entities_filtered{name=rn,position=c.position,radius=150}) do local dx=e.position.x-c.position.x;local dy=e.position.y-c.position.y;local d=dx*dx+dy*dy;if d<rbd then rbd=d;rb=e end end; if rb then break end end; "
                 "if rb then best=rb;bd=rbd end end; "
+                # wood -> chop the nearest TREE (trees are type='tree', not 'resource' entities)
+                "if (not best) and (res=='wood' or res=='tree' or res=='tree-01') then for _,e in ipairs(s.find_entities_filtered{type='tree',position=c.position,radius=250}) do local dx=e.position.x-c.position.x;local dy=e.position.y-c.position.y;local d=dx*dx+dy*dy;if d<bd then bd=d;best=e end end end; "
                 "if best then local r=remote.call('claude','start_mining',u,best.position.x,best.position.y); if not(r and r.ok) then remote.call('claude','walk_to',u,best.position.x,best.position.y) end end")
         elif t == "place":
             _prim_place(action["item"], action["x"], action["y"], action.get("dir", 0))
@@ -667,6 +672,32 @@ def _mission() -> str:
     return "Help JJ and build a clean, automated base."
 
 
+# --- competition race mode: deterministic, LLM-free gathering of a target item ---
+# compete.py writes race.json {"item","goal","active"} when a round is live. While active, the
+# brain SKIPS the LLM and just relentlessly gathers the item (walk to nearest source + mine),
+# which the LLM does not do reliably enough for a timed race.
+_RACE_FILE = _HERE / "race.json"
+
+
+def _read_race() -> dict | None:
+    try:
+        return json.loads(_RACE_FILE.read_text(encoding="utf-8"))
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def _run_race_step(item: str) -> None:
+    """One deterministic race tick: if not already mining, mine/walk to the nearest source."""
+    try:
+        ms = _rc(f"local j=remote.call('claude','get_mining_status',{_UNUM}); "
+                 "rcon.print(j and j.mining and '1' or '0')").strip()
+    except Exception:  # noqa: BLE001
+        ms = "0"
+    if ms == "1":
+        return  # a mining job is in progress -> let it finish
+    act({"type": "mine", "resource": item})
+
+
 def _unum_state_file() -> Path:
     return _HERE / "state" / f"{CHAR_NAME}.unum"
 
@@ -772,6 +803,7 @@ def run() -> int:
     had_threat = False
     cyc = 0
     dead = 0  # consecutive disconnected cycles -> back off + suppress log spam
+    last_mission = ""  # goal.txt content last cycle -> a CHANGE triggers an immediate decide
     while True:
         try:
             state = perceive()
@@ -787,6 +819,14 @@ def run() -> int:
                         "c.shooting_state={state=defines.shooting.shooting_enemies,position=c.position} end")
                 except Exception:  # noqa: BLE001
                     pass
+            # competition race mode overrides everything: gather the target item, LLM-free
+            race = _read_race()
+            if race and race.get("active") and race.get("item"):
+                _run_race_step(_safe(race["item"]))
+                _write_team_status(state, "race:" + str(race["item"]))
+                dead = 0
+                time.sleep(CYCLE_SECONDS)
+                continue
             fresh_chat = read_chat()
             # watch-and-complement: which entities near JJ are NEW since last cycle
             cur_ids = {e["id"]: e for e in state.get("near_jj", [])}
@@ -804,10 +844,15 @@ def run() -> int:
             # district employees focus on their sandbox and do NOT autonomously chase/watch
             # JJ's base builds; they still respond to his chat/pings. (Non-district = old behavior.)
             jj_event = talk_ok or (bool(new_builds) and DISTRICT is None)
+            # a CHANGE to goal.txt (e.g. a race starting) is an immediate signal -> decide NOW,
+            # don't wait for the next slow autonomous tick.
+            mission = _mission()
+            goal_changed = mission != last_mission
+            last_mission = mission
             action_type = "idle"
-            if jj_event or cyc % AUTONOMOUS_EVERY == 0:
+            if jj_event or goal_changed or cyc % AUTONOMOUS_EVERY == 0:
                 teammates = _read_teammates()
-                d = decide(client, state, fresh_chat, ping_is_new, _mission(), teammates)
+                d = decide(client, state, fresh_chat, ping_is_new, mission, teammates)
                 if ping_is_new:
                     last_ping_seq = _PING_SEQ
                 reply = d.get("reply")
