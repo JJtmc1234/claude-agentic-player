@@ -40,7 +40,8 @@ import agent.build_macros as bm      # noqa: E402  (share the RCON connection + 
 # ---------------------------------------------------------------------------
 # config
 # ---------------------------------------------------------------------------
-INTENT_MODEL = "claude-opus-4-8"   # the "intelligence" — reasons about JJ's intent
+INTENT_MODEL = "claude-sonnet-5"   # capable + affordable "housekeeper" tier — reasons about JJ's
+                                   # intent; one Sonnet companion is cheap vs 4 Opus brains
 # These are overridden per-instance by CLI args (--name/--role/--owner) so each of the 4
 # "employees" runs its own BRAIN on its own character with its own specialty.
 CHAR_NAME = "companion"
@@ -51,8 +52,9 @@ OWNERS = (OWNER, "IdBaj98")
 # ANYTHING, but must NOT modify anything outside. Set via --district. None = unbounded.
 DISTRICT = None
 CYCLE_SECONDS = 1.0                 # read chat + react EVERY SECOND (JJ wants snappy responses)
-AUTONOMOUS_EVERY = 4                # cycles between autonomous ticks when JJ is quiet (~4s) —
-                                    # snappy enough to persistently pursue a competition goal
+AUTONOMOUS_EVERY = 60               # ~60s between idle ticks: instant on JJ chat/pings, and once
+                                    # a minute it does a base SWEEP (find a bottleneck + fix it /
+                                    # housekeeping) rather than constantly driving = low cost
 
 # shared team blackboard: each BRAIN writes its own status file; all read the others' so
 # they coordinate (don't all mine the same tile / build the same thing).
@@ -208,9 +210,18 @@ for _,e in ipairs(s.find_entities_filtered{force=c.force,position=c.position,rad
     if #mine>=12 then break end
   end
 end
+-- BASE SWEEP: force machines within 250 whose status isn't healthy = bottlenecks to go fix
+local snames={}; for k,v in pairs(defines.entity_status) do snames[v]=k end
+local good={working=true, normal=true, item_ingredient_shortage=false}
+local bott={}
+for _,e in ipairs(s.find_entities_filtered{force=c.force,position=c.position,radius=250,type={'assembling-machine','furnace','mining-drill','lab','boiler','generator'}}) do
+  local nm=snames[e.status] or 'unknown'
+  if not good[nm] then bott[#bott+1]={name=e.name,x=math.floor(e.position.x),y=math.floor(e.position.y),status=nm} end
+  if #bott>=10 then break end
+end
 rcon.print(helpers.table_to_json({
   alive=true, x=math.floor(c.position.x), y=math.floor(c.position.y), health=math.floor(c.health or 0),
-  inventory=items, my_machines=mine,
+  inventory=items, my_machines=mine, bottlenecks=bott,
   jj = jp and {x=math.floor(jp.x),y=math.floor(jp.y),holding=jjcursor,mining=jjmining,dist=jjdist} or nil,
   near_jj=nearjj, nearest_resource=res, threat=threat, have_weapon=armed, weapon_equipped=equipped_gun,
 }))
@@ -342,6 +353,13 @@ can fight. If a threat is close: WARN JJ ("biters east, ~30 tiles!"). If you're 
 then `attack` to fight alongside him or defend the base; if NOT armed or health is low,
 retreat toward JJ / the base — don't die. Build turret defenses when asked.
 
+BASE SWEEP / HOUSEKEEPING (your main autonomous job when JJ isn't directing): `bottlenecks`
+lists nearby machines with an unhealthy status (no_fuel, no_ingredients, full_output, no_power,
+waiting_for_source/space, etc.) and WHERE they are. Each idle turn, pick the most impactful one
+and GO FIX IT: refuel a no_fuel burner, feed a starved furnace/assembler, drain a full_output
+(take its items), clear a jam, or wire/repair power. Walk over (goto its x,y) and fix. Keep the
+whole base flowing. If nothing's broken, do a small useful improvement toward the goal.
+
 TEND YOUR MACHINES + RETRIEVE OUTPUT (critical — a full machine stalls, and items stuck inside a
 machine do NOT count as yours). `my_machines` lists YOUR furnaces/assemblers near you with
 {out, out_count, coal, status}. Each turn: if out_count>0, TAKE that item from its output
@@ -404,6 +422,7 @@ def decide(client, state: dict, fresh_chat: list, ping_is_new: bool, mission: st
                "inventory": state.get("inventory", {}),
                "have_weapon": state.get("have_weapon"), "weapon_equipped": state.get("weapon_equipped")},
         "my_machines": state.get("my_machines", []),
+        "bottlenecks": state.get("bottlenecks", []),
         "district": list(DISTRICT) if DISTRICT else None,
         "teammates": teammates,
         "jj": state.get("jj"),
