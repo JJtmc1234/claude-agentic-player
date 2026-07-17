@@ -14,6 +14,6 @@ Set-Location $dir
 & "$dir\bridge\agent\cleanup_python.ps1" -All | Out-Null
 
 # single general teammate: no --district (works the whole map alongside JJ), name 'companion'
-Start-Process python -ArgumentList "bridge/agent/companion_brain.py --name companion" `
+Start-Process python -ArgumentList "bridge/agent/companion_brain.py --name companion --no-char" `
   -WorkingDirectory $dir -WindowStyle Minimized
-Write-Output "launched ONE companion BRAIN (singleton-guarded). It waits for the game if it's down."
+Write-Output "launched ONE companion BRAIN in ADVISOR mode (--no-char: NEVER spawns/drives a character; chat-only). Waits for the game if it's down."
