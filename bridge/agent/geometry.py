@@ -21,7 +21,7 @@ def _round_half_up(x: float) -> int:
     """Round half AWAY from negative infinity (matches Factorio's snap behavior).
     Python's built-in round() uses banker's rounding (half-to-even), which
     disagrees with the game on integer-and-half target positions."""
-    return int(math.floor(x))
+    return int(math.floor(x + 0.5))
 
 
 # Cardinal direction → unit vector (dx, dy). Matches Factorio defines.direction.
